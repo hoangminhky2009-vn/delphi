@@ -1,0 +1,96 @@
+/*
+ * ORACLE GIÚP 2 — thẻ đề nghị lưu mẫu một chạm (D365). Số đo theo demo đã chốt
+ * `pfm-ngay-dau.html` (§`.nutHang` · `.gon` · `.mo`), chép nguyên (A11.25).
+ */
+
+.khoi { margin: 0 0 11px; }
+
+.nut { display: flex; gap: 6px; margin-top: 9px; }
+
+.nut button {
+  flex: 1;
+  min-height: 44px;
+  border: 1px solid var(--line-2);
+  background: var(--n-1);
+  color: var(--text-bright);
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+/* ⚠ Nút CHÍNH chỉ khác bằng viền + màu chữ, không to hơn: hai lựa chọn đều là câu trả lời
+   hợp lệ (P5/P6 — không thưởng cho lựa chọn app thích hơn). */
+.chinh { border-color: var(--accent) !important; color: var(--accent-bright) !important; }
+
+.nut button:active { transform: translate(1px, 1px); }
+
+.vi { margin: 7px 0 0; font-size: 12px; line-height: 1.45; color: var(--chu-mo); }
+
+/* Dòng thu gọn sau khi đã trả lời — giữ đường ĐỔI để không có ngõ cụt. */
+.gon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 11px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--chu-phu);
+}
+
+.doi {
+  min-height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--accent-bright);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+/*
+ * ── BẢN MỘT HÀNG (D453, màn SỔ) ──────────────────────────────────────────────────────────────────────────────
+ * Một hàng cao 44px: nhãn · chữ (cắt …) · nút. Viền trái lam = giọng Oracle (không mascot — SỔ là mặt ghi nhanh).
+ * ⚠ Nền bắt buộc cho nút (repo không reset `<button>`). Chữ ≥ 12px. Lún `steps` (nhịp máy).
+ */
+.gonHang {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-bottom: 7px;
+  padding: 4px 4px 4px 9px;
+  background: var(--mat-ban);
+  border: 1px solid var(--line);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.gonNhan { flex: none; font-size: 12px; letter-spacing: 1px; color: var(--accent); }
+.gonLoi, .gonChu {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  color: var(--text-bright);
+}
+.gonChu b { color: var(--gold); font-variant-numeric: tabular-nums; }
+.gonNut, .gonLuu, .gonThoi {
+  flex: none;
+  height: 36px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--accent-bright);
+  background: rgba(34, 211, 238, .08);
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  box-shadow: var(--px-bong);
+  cursor: pointer;
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.gonThoi { width: 36px; padding: 0; color: var(--text-muted); background: var(--surface-inset); border-color: var(--line-2); }
+.gonNut:active, .gonLuu:active, .gonThoi:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }

@@ -1,0 +1,478 @@
+/*
+ * DẢI ĐỐI THỦ — R1: render VÔ ĐIỀU KIỆN, không có trạng thái thu gọn.
+ * Cố ý KHÔNG viết CSS cho việc thu gọn: server ghi log "đang thấy bậc Vàng";
+ * nếu UI giấu thì log thành SAI SỰ THẬT, mà events append-only nên hỏng vĩnh viễn.
+ *
+ * Phải thấy được: ai đó là ai · bậc rank · còn bao nhiêu vốn · cầm mấy lá ·
+ * vòng vừa rồi CHECK / RAISE / FOLD và có HIT không. Thiếu mấy cái sau thì
+ * bàn không có sự sống — người chơi ngồi với tường.
+ */
+
+/*
+ * ⚠ CẢ BÀN PHẢI THẤY CÙNG LÚC, KHÔNG CUỘN NGANG.
+ *
+ * Founder 20/07: "chừa lại diện tích để tôi có thể thấy cùng lúc 5 con bot
+ * đang ngồi ở trên bàn cược chứ không phải mấy cái tên phải lướt mới thấy".
+ *
+ * Bản cũ là `flex` + `overflow-x:auto` + `min-width:148px`: 5 ghế = 740px trên
+ * màn 390px, tức luôn luôn phải vuốt. Bàn poker mà phải vuốt mới thấy đối thủ
+ * thì không còn là bàn.
+ *
+ * Số học (bàn 5): 390 − 8 padding = 382. 5 cột, 4 khe × 4px = 16. (382−16)/5 =
+ * 73px mỗi ghế. Nên bố cục xoay DỌC (avatar trên, chữ dưới).
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * 25/07/2026 — D3 MỞ BÀN 4–8 GHẾ, nên lưới thôi cố định 5 cột.
+ *
+ * ⚠ Trước bản này là `repeat(5, 1fr)` gõ cứng. D3 phát hành bàn tới 8 ghế → 3 ghế
+ * cuối TRÀN XUỐNG HÀNG HAI, và vì `.o` có chiều cao riêng thì dải cao gấp đôi, đè
+ * xuống phần dưới. Chính tôi gây ra khi mở lobby biến thiên mà không soát lớp UI —
+ * đúng loại lỗi "đổi tầng dưới, quên tầng trên".
+ *
+ * Nay số cột do TS truyền vào qua biến `--so-ghe` (CSS Modules không đổi tên biến
+ * CSS, chỉ đổi tên class — nên đây là cách hợp pháp duy nhất để TS điều khiển lưới).
+ * Bàn 8 ghế: (382 − 7×3)/8 = 45px mỗi ghế — hẹp, nên khe co lại và cỡ chữ giảm
+ * theo, thà chữ nhỏ còn hơn phải vuốt mới thấy đối thủ (đúng chỉ đạo founder).
+ */
+.dai {
+  display: grid;
+  /* Mặc định 5 để bản cũ/ảnh chụp không lệch nếu biến chưa được truyền. */
+  grid-template-columns: repeat(var(--so-ghe, 5), 1fr);
+  gap: 4px;
+  padding-bottom: 2px;
+}
+
+/* Bàn đông (≥7 ghế) — bóp khe cho vừa 390px. */
+.daiDong {
+  gap: 3px;
+  font-size: var(--fs-micro);
+}
+
+/*
+ * GHẾ = NÚT (13/09). Khử mặc định của `button` để nó vẫn là cái ô như cũ; phần "bấm được"
+ * nói bằng con trỏ + cú lún khi nhấn, KHÔNG bằng màu lam — lam đã là màu riêng của nút
+ * hành động (brief founder: một màu nhấn duy nhất cho thứ tương tác).
+ */
+.o {
+  appearance: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  /* min-width:0 bắt buộc: mặc định grid item không co dưới nội dung, thiếu nó
+     là lưới tự phình ra và cuộn ngang quay lại. */
+  min-width: 0;
+  padding: 5px 3px 4px;
+  /* 13/09 (D321 lượt 3) — ghế TRUNG TÍNH: viền xám, mặt lõm nhẹ, bevel hai hướng. Tím và lam
+     rút khỏi ghế để TÍM còn là khung, LAM còn là thứ đang sống; robot hết lam. */
+  border: 1px solid var(--border-idle);
+  border-radius: 0;
+  background: var(--surface-inset);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.07), inset -1px -1px 0 rgba(0, 0, 0, 0.5);
+  font-size: var(--fs-micro);
+  text-align: center;
+  /* Ghế đổi trạng thái (vừa tăng cam kết / cắt lỗ / cháy) là chuyện NHỊ PHÂN —
+     bật hoặc tắt, không có nửa sáng. Nên nó nhảy theo nấc, và nhảy cùng nhịp
+     120ms với mọi chỗ đổi trạng thái khác trong app (lớp `doiMau`). */
+  transition:
+    border-color 120ms steps(2, end),
+    opacity 120ms steps(2, end),
+    box-shadow 120ms steps(2, end),
+    transform 120ms steps(3, end);
+}
+
+/* Ghế của chính mình — viền sáng để mắt bắt được ngay mình ngồi đâu. */
+.toi {
+  /* Ghế BẠN = VÀNG (vai "của tôi / giá trị"), cùng màu rail khung NAV và tay cầm. */
+  border-color: var(--gold-amber);
+  background: rgba(251, 191, 36, 0.06);
+  box-shadow: inset 0 0 0 1px var(--border-gold);
+}
+/* Vòng này nó vừa TỐ — viền vàng cho thấy ngay ai đang gây áp lực */
+.raise {
+  border-color: var(--gold-amber);
+  box-shadow: inset 0 0 0 1px var(--border-gold);
+}
+.fold { opacity: 0.5; }
+.chet { opacity: 0.28; }
+.chet .ten { text-decoration: line-through; }
+
+/* Tên KHÔNG được cắt bằng "…": R1 bắt hiện tên đối thủ vô điều kiện, cắt chữ
+   là giấu thông tin. Rút gọn phải làm ở SERVER (nhãn ngắn), không phải ở đây. */
+/* ⚠ `.ten` và `.vai` KHÔNG còn được render trên mặt ghế (13/09) — chúng sống trong tấm
+   trượt và trong `aria-label`. Giữ lớp lại vì tấm trượt dùng cỡ chữ tương đương. */
+.ten {
+  width: 100%;
+  overflow-wrap: anywhere;
+  font-weight: 800;
+  font-size: var(--fs-micro);
+  line-height: 1.15;
+}
+.bac { color: var(--gold-amber); font-size: var(--fs-micro); letter-spacing: var(--ls-nut); }
+.von {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+}
+
+.dongThe {
+  display: flex;
+  gap: 1px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+/*
+ * Mỗi lá là một vạch nhỏ — thấy nó cầm mấy lá mà không lộ lá gì.
+ *
+ * ⚠ ĐÂY LÀ VẬT ĐƯỢC LUẬT 5 ĐO ĐÍCH DANH. Bản cũ mang `linear-gradient(160deg,…)`
+ * trên một ô 4×8: cả lá chỉ có 32 điểm ảnh, mà một dải 160° trải qua 32 điểm ảnh
+ * thì sinh ra tới 32 sắc độ khác nhau — đó là NHIỄU, không phải hình. Ở cỡ này
+ * mắt không đọc ra "mặt sau lá bài có ánh sáng hắt", mắt chỉ đọc ra một vệt xám
+ * lem.
+ *
+ * KHÔNG dùng `composes: khoi`: `khoi` composes `khung`, mà `khung` cắt khấc 3px
+ * ở bốn góc — trên một vật rộng 4px thì hai khấc ăn hết 6px, `clip-path` suy
+ * biến và lá biến mất. Luật 5 giải bằng MÀU PHẲNG, và ở 4px thì "phẳng" đúng
+ * nghĩa là hai dải cứng: nửa trên sáng, nửa dưới tối — vừa đủ để đọc ra khối.
+ */
+.laBai {
+  width: 4px;
+  height: 8px;
+  border: 1px solid rgba(139, 92, 246, 0.7);
+  border-radius: 0;
+  background: linear-gradient(
+    180deg, rgba(139, 92, 246, 0.5) 0 50%, rgba(8, 6, 20, 0.9) 50%);
+}
+.soThe { margin-left: 2px; color: var(--text-muted); font-size: var(--fs-micro); }
+
+/* Nhãn hành động — giữ tới vòng sau, KHÔNG chớp rồi mất */
+.nhan {
+  composes: adDap from '../../styles/motion.module.css';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 5px;
+  border-radius: 0;
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  letter-spacing: var(--ls-nhan);
+}
+/* ⭐ 13/09 tối — NHÃN HÀNH ĐỘNG CỦA BOT LÀ THÔNG TIN PHỤ ⇒ XÁM TỐI.
+   Trước đó tám ghế mỗi ghế một huy hiệu lam/vàng/đỏ/xanh, tức tám vệt sáng tranh chú ý
+   với chính cụm quyết định của người chơi (founder: *"quá nhiều vệt sáng tản mạn"*). Nay:
+   lam chỉ còn của thứ BẤM ĐƯỢC · xanh/đỏ chỉ còn của LỜI/LỖ. Chữ vẫn nguyên, chỉ hạ màu —
+   hai nhãn CÒN màu là VÀO/RA vì chúng nói TIỀN CHẠY VÀO hay RA, đúng nghĩa tăng/giảm. */
+.nCheck, .nRaise, .nFold, .nDao, .nDung {
+  border: 1px solid var(--border-idle);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+}
+.nVao { border: 1px solid rgba(74, 222, 128, 0.45); background: rgba(74, 222, 128, 0.12); color: var(--win); }
+.nRa { border: 1px solid rgba(248, 113, 113, 0.45); background: rgba(248, 113, 113, 0.12); color: var(--lose); }
+/*
+ * ⚠ HIT xuống MÉP DƯỚI, không còn ở mép trên.
+ *
+ * Từ khi ghế co còn 73px, badge hành động (CHECK/RAISE/FOLD) căn giữa mép trên
+ * và badge HIT ở `left:6px` ĐÈ LÊN NHAU — trên máy founder nó render thành
+ * "HEBLO", "HOA1SE": hai chuỗi chồng chữ. Không thể sửa bằng cách bỏ bớt một
+ * cái: R1 bắt hiện cả hai vô điều kiện.
+ * Nên đẩy về hai đầu đối diện — cùng căn giữa, không bao giờ chạm nhau.
+ */
+.nHit {
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 6px;
+  border: 1px solid var(--violet);
+  border-radius: 0;
+  background: rgba(139, 92, 246, 0.25);
+  color: #c4b5fd;
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  letter-spacing: var(--ls-nut);
+}
+/*
+ * HẠNG PHONG CÁCH (D312) — đứng đúng chỗ số tiền đối thủ từng đứng, và to hơn
+ * dòng bậc vì founder chốt *"phần này hiển thị rõ"*. Chữ đơn sắc: nó là một
+ * HẠNG, không phải một tín hiệu lãi/lỗ — màu hoá nó là nói hai điều một chỗ,
+ * mà điều thứ hai đã có quầng `fx` trên avatar lo.
+ */
+.hang {
+  margin-top: 1px;
+  font-size: var(--fs-human);
+  font-weight: 800;
+  letter-spacing: var(--ls-nut);
+  line-height: 1.1;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+/* Đã có hạng thật thì sáng hẳn lên; '—' giữ mờ để mắt không đọc nó là một hạng. */
+.hangCo { color: var(--text-bright, #e8f6ff); }
+
+.pnl { margin-top: 2px; font-size: var(--fs-micro); font-weight: 800; font-variant-numeric: tabular-nums; }
+.lai { color: var(--win); }
+.lo { color: var(--lose); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * TRẠNG THÁI CẢM XÚC CỦA GHẾ (D25 — xã hội là stakes engine).
+ *
+ * Trò chơi miễn phí, thứ duy nhất mất được là danh dự. Nên trạng thái phải
+ * HIỆN RA trên ghế người khác, không chỉ nằm trong con số vốn — người chơi phải
+ * THẤY đối thủ đang cháy, và thấy đối thủ thấy mình đang cháy.
+ *
+ * Độ mạnh tăng theo mức, không phẳng: lãi/lỗ đậm là quầng sáng, nguy kịch là
+ * nhịp tim + viền cảnh báo, cháy là xám + tro. Nếu mọi mức đều rực rỡ như nhau
+ * thì thành tiếng ồn nền và người chơi ngừng đọc.
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+/*
+ * BA NHỊP, HAI LOẠI TIMING — đây là chỗ luật 4 phân đôi rõ nhất trong file.
+ *
+ * Cái đang đổi là ĐỘ MẠNH của quầng (thở, âm ỉ) → giữ `ease-in-out`. Đặt
+ * `steps()` lên một nhịp thở 2,6s không ra phong cách, nó ra strobe, và mắt đọc
+ * strobe là lỗi render.
+ * Cái đang đổi là VỊ TRÍ của ghế (rung, giật) → `steps(1, end)`: mỗi chặng giữ
+ * nguyên một vị trí rồi SNAP sang vị trí kế, đúng như sprite dịch ô.
+ */
+/*
+ * ⚠⚠ 24/08 — QUẦNG NAY LÀ MỘT VẬT, KHÔNG PHẢI MỘT `box-shadow` ĐANG ĐỘNG.
+ *
+ * Bản cũ animate CHÍNH `box-shadow` (blur 6px → 22px, `ease-in-out`, vô hạn),
+ * và nó nhân theo SỐ GHẾ — bàn 8 người là 8 lớp cùng bắt trình duyệt làm mờ lại
+ * vùng quanh hộp MỖI KHUNG HÌNH, suốt cả trận. `box-shadow` không nằm trên
+ * luồng hợp thành, nên mỗi nhịp là một lượt vẽ lại cả ô ghế (viền + avatar 32px
+ * + năm dòng chữ).
+ *
+ * ⇒ Đặt bóng MỘT LẦN lên `::after` rồi chỉ animate `opacity` — đúng khuôn D115
+ * đã dựng cho quầng hạng ở `ThanhPhongCach`, và đúng ràng buộc ba runtime
+ * (`filter`/`box-shadow` không map sang RN/Flutter; `opacity` thì map).
+ * ⚠ Đối chứng nằm ngay trong cùng màn trận: `DongHoVong` đặt `box-shadow` tĩnh
+ * rồi chỉ animate `opacity` — nếp ấy có sẵn, chỉ chưa ai áp cho dải ghế.
+ */
+.fxLaiDam::after,
+.fxNguyKich::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  pointer-events: none;
+}
+/* 13/09 tối — quầng hạ từ 22/26px xuống 13/15px và nhạt gần một nửa. Tám ghế cùng phát
+   sáng là tám thứ tranh chú ý với cụm quyết định (founder: *"quá nhiều vệt sáng tản mạn"*).
+   Giữ MÀU (lời/lỗ là đúng vai của xanh/đỏ), bỏ ĐỘ CHÓI. */
+.fxLaiDam::after {
+  box-shadow: 0 0 13px rgba(74, 222, 128, 0.42);
+  animation: fxTho 2.6s ease-in-out infinite;
+}
+.fxNguyKich::after {
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.55);
+  animation: fxTho 1.15s ease-in-out infinite;
+}
+/* Một keyframe cho cả hai nhịp: chúng khác THỜI LƯỢNG và MÀU, không khác đường
+   đi. Hai bản sao của cùng một đường cong là hai bản sẽ trôi (D61). */
+@keyframes fxTho {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+@keyframes fxRungDo {
+  0%, 100% { transform: translateX(0); }
+  22% { transform: translateX(-2px); }
+  64% { transform: translateX(2px); }
+}
+/*
+ * Nhịp nguy kịch tách làm HAI animation chạy song song, vì hai vai cần hai
+ * timing khác nhau và `box-shadow` với `transform` không đi chung một đường cong
+ * được.
+ *
+ * ⚠ Cú giật thay cho `scale(1.045)` cũ. Phóng một ô ghế 73px lên 4,5% ra 76,3px:
+ * số lẻ, nên viền, avatar VÀ CHỮ TÊN bên trong bị lấy mẫu lại và nhoè suốt cả
+ * nhịp — mà đây đúng là ghế người chơi đang nhìn chằm chằm (sắp cháy). Nhảy lên
+ * một đơn vị độ dày rồi rơi xuống nói cùng một chuyện mà không đụng lưới.
+ */
+@keyframes fxNhipGiat {
+  0%, 100% { transform: translateY(0); }
+  38% { transform: translateY(calc(-1 * var(--px-do-day))); }
+}
+
+/* ≥ +25% — đang thắng đậm, cả bàn thấy. */
+.fxLaiDam {
+  border-color: rgba(74, 222, 128, 0.75) !important;
+  /* Quầng đã dời sang `::after` (chỉ opacity) — ô ghế thôi tự thở. */
+}
+
+/* ≤ −25% — đang lỗ đậm: quầng đỏ + rung chậm. */
+.fxLoDam {
+  border-color: rgba(239, 68, 68, 0.6) !important;
+  animation: fxRungDo 3.4s steps(1, end) infinite;
+}
+
+/* ≤ −50% — sắp cháy: nhịp tim, không thể không thấy. */
+.fxNguyKich {
+  border-color: rgba(239, 68, 68, 0.95) !important;
+  /* Quầng ở `::after`; ô ghế chỉ còn cú GIẬT (transform). */
+  animation: fxNhipGiat 1.15s steps(1, end) infinite;
+}
+
+/* Cháy tài khoản / đầu hàng — xám, phẳng, hết chuyện. */
+.fxChay {
+  filter: grayscale(1) brightness(0.6);
+  opacity: 0.75;
+}
+
+.nguyKichCanh {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 5px;
+  border-radius: 0;
+  background: rgba(239, 68, 68, 0.92);
+  color: #fff;
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  letter-spacing: var(--ls-nut);
+  white-space: nowrap;
+}
+
+.tro {
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  letter-spacing: var(--ls-nhan);
+  color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fxLaiDam, .fxLoDam, .fxNguyKich { animation: none; }
+}
+
+/*
+ * v32 — ICON CON ĐƯỜNG KỲ NGỘ, đậu góc dưới-phải avatar.
+ *
+ * §XI: radius 0, không animation. Cỡ 8px là lưới pixel NHỎ NHẤT tồn tại — ô
+ * ghế hẹp tới 45px ở bàn 8 người (xem phép tính cỡ avatar ngay trên), nên mọi
+ * cỡ lớn hơn sẽ đội hàng lên. Nền đặc để icon không lẫn vào mặt avatar.
+ */
+.oAvatar {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+}
+
+.iconDuong {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: block;
+  padding: 1px;
+  border: 1px solid var(--border-idle-pill);
+  border-radius: 0;
+  background: var(--bg, #0b1020);
+  line-height: 0;
+}
+
+/* VAI (22/08) — một chữ nhỏ dưới tên. Đội lái nổi vì đó là vai có giá phải trả. */
+.vai { font-size: var(--fs-micro); letter-spacing: var(--ls-nhan); color: var(--mo, #7b8494); }
+.vaiDoiLai { color: var(--vang, #f0b429); font-weight: 800; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TẤM TRƯỢT "CẢ BÀN" — 13/09, progressive disclosure cho dải ghế.
+   Mặt ghế chỉ còn ba thứ đọc trong một nhịp mắt; mọi chi tiết dồn về đây, gọi
+   ra bằng một cú chạm. Dựng theo đúng nếp tấm trượt của shop: nền tối bấm được
+   để đóng, tấm trượt lên từ đáy bằng steps() (vật, không phải ánh sáng).
+   ══════════════════════════════════════════════════════════════════════════ */
+.bangNen {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(2, 4, 10, 0.72);
+  cursor: pointer;
+}
+.bang {
+  position: fixed;
+  z-index: 61;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  max-height: 72vh;
+  overflow-y: auto;
+  padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface-panel);
+  box-shadow: 0 -3px 0 rgba(10, 6, 24, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  animation: dtsLen 180ms steps(5, end) both;
+}
+@keyframes dtsLen {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bang { animation: none; }
+}
+.bangDau {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-nhan);
+}
+.bangDong {
+  margin-left: auto;
+  padding: 4px 10px;
+  border: 1px solid var(--border-idle);
+  border-radius: 0;
+  background: var(--surface-inset);
+  color: var(--text-dim);
+  font: inherit;
+  font-size: var(--fs-label);
+  cursor: pointer;
+}
+.bangHang {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 2px;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  font-size: var(--fs-label);
+  color: var(--text-muted);
+}
+.bangHang b { color: var(--text-bright); font-size: var(--fs-meta); }
+.bangToi { color: var(--gold-amber); }
+.bangVai { letter-spacing: var(--ls-nut); }
+.bangPhu { margin-left: auto; }
+.bangSo {
+  min-width: 62px;
+  color: var(--text-dim);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+/* Dòng BỊ KHOÁ trong tấm chi tiết: nói RÕ là khoá và khoá bằng cái gì, không im lặng
+   bỏ trống — "không thấy" mà không biết vì sao thì đọc ra là lỗi, không phải là luật. */
+.bangKhoa { color: var(--text-muted); font-weight: 400; letter-spacing: 0; }
+.bangGhiChu {
+  padding: 6px 2px 0;
+  color: var(--text-muted);
+  font-size: var(--fs-micro);
+  line-height: 1.45;
+}
+.bangHang > span:first-child { letter-spacing: var(--ls-nhan); }
+.bangSo { min-width: 96px; }
+
+/* v55 (D409) — ngọn lửa đà đậu góc trái-dưới avatar (icon con đường ở góc phải-dưới). */
+.lua { position: absolute; left: -5px; bottom: -3px; display: block; line-height: 0; pointer-events: none; }

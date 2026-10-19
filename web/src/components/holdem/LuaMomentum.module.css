@@ -1,0 +1,68 @@
+/*
+ * NGỌN LỬA ĐÀ — v55 (D409). Luật easing (A11.18): flicker + khói + nghiêng là VẬT ⇒ `steps()`; nảy quá 110% là CHUYỂN
+ * ĐỘNG VẬT LÝ ⇒ `cubic-bezier`; than thở là ÁNH SÁNG ⇒ `ease-in-out`. Chỉ animate transform/opacity.
+ * ⚠ Mọi @keyframes nằm CÙNG tệp với khai báo `animation` (lint:css-anim) — TÊN KEYFRAME viết TRƯỚC trong shorthand.
+ */
+.lua {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  --lua-px: 1px;
+  image-rendering: pixelated;
+  transform-origin: 50% 100%;
+}
+.khung, .tia, .khoi {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--lua-px);
+  height: var(--lua-px);
+  pointer-events: none;
+}
+/* Ba khung hình luân phiên = flicker 10 FPS (300 ms / 3 khung), nhảy nấc — không trượt. */
+.khung { opacity: 0; }
+.k0 { animation: luaKhung0 300ms steps(1, end) infinite; }
+.k1 { animation: luaKhung1 300ms steps(1, end) infinite; }
+.k2 { animation: luaKhung2 300ms steps(1, end) infinite; }
+@keyframes luaKhung0 { 0%, 33.3% { opacity: 1; } 33.4%, 100% { opacity: 0; } }
+@keyframes luaKhung1 { 0%, 33.3% { opacity: 0; } 33.4%, 66.6% { opacity: 1; } 66.7%, 100% { opacity: 0; } }
+@keyframes luaKhung2 { 0%, 66.6% { opacity: 0; } 66.7%, 100% { opacity: 1; } }
+/* Nấc 3 cháy gấp hơn: 12 FPS. */
+.nac3 .k0, .nac3 .k1, .nac3 .k2 { animation-duration: 250ms; }
+/* Than (nấc 0): một khung đứng yên, thở như ánh sáng. */
+.nac0 .k0 { animation: luaTho 2600ms ease-in-out infinite; }
+.nac0 .k1, .nac0 .k2 { animation: none; opacity: 0; }
+@keyframes luaTho { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+/* Tia lửa bắn lên theo nhịp máy. */
+.tia { animation: luaTia 600ms steps(4, end) infinite; }
+@keyframes luaTia { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(calc(var(--lua-px) * -3)); opacity: 0; } }
+/* LÊN NẤC: nảy quá 110% rồi về — 420 ms (đặc tả 0,35–0,5 s). */
+.nay { animation: luaNay 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes luaNay { 0% { transform: scale(0.8); } 60% { transform: scale(1.1); } 100% { transform: scale(1); } }
+/* BỊ DẬP: nghiêng như bị thổi rồi về than — 520 ms (đặc tả 0,4–0,6 s), nhảy 4 nấc. */
+.dap { animation: luaDap 520ms steps(4, end) both; }
+@keyframes luaDap {
+  0% { transform: rotate(0deg); }
+  35% { transform: rotate(-22deg) translateX(calc(var(--lua-px) * -1)); }
+  70% { transform: rotate(-8deg); }
+  100% { transform: rotate(0deg); }
+}
+.khoi { animation: luaKhoi 600ms steps(6, end) both; }
+@keyframes luaKhoi { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(calc(var(--lua-px) * -8)); opacity: 0; } }
+/* Con số nấc — ChuPixel px = 1: cao 12px, đứng bên phải lưỡi lửa. */
+.so {
+  position: absolute;
+  right: calc(var(--lua-px) * -7);
+  bottom: 0;
+  color: var(--pc-lua-so, #fff1a8);
+  /* D443 — font app; viền tối CỨNG (bốn bóng lệch 1px, không mờ) để số đọc được đè lên hình lửa. */
+  font-size: calc(var(--lua-px) * 12);
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 1px 0 0 #06040f, -1px 0 0 #06040f, 0 1px 0 #06040f, 0 -1px 0 #06040f;
+}
+.dacBiet .so { color: #e040fb; }
+/* Reduced motion: đứng yên đúng nấc, không flicker, không nảy, không khói. */
+.tinh .k0 { animation: none; opacity: 1; }
+.tinh .k1, .tinh .k2, .tinh .tia, .tinh .khoi { animation: none; opacity: 0; }
+.tinh.nay, .tinh.dap { animation: none; }

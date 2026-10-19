@@ -1,0 +1,984 @@
+# ERD — SINH RA, ĐỪNG GÕ TAY
+
+<!-- Sinh bằng `npm run erd:ghi`. Sửa tay là mất ở lần sinh sau. -->
+
+> Nguồn chân lý là **chính migrations**: `scripts/sinh_erd.ts` dựng Postgres nhúng, chạy mọi tệp
+> `migrations/*.sql`, rồi hỏi `pg_catalog`. Thêm bảng/cột/FK mà quên `erd:ghi` ⇒ `tests/erd.test.ts` đỏ.
+> Miền theo tiền tố tên bảng, ngoại lệ ở `config/erd_mien.ts`. Quan hệ vẽ ở miền của bảng giữ FK;
+> bảng cha ở miền khác hiện như ô trống.
+
+**70** bảng · **81** khoá ngoại · **30** trigger · RLS bật **70/70** · **0** policy · migration cuối `0084_xac_nhan_tuoi.sql`.
+
+## Canh
+
+| phép đo | kết quả | bài canh |
+|---|---|---|
+| FK không có chỉ mục bắt đầu bằng cột FK | _không có_ | `tests/khoa_ngoai_co_chi_muc.test.ts` |
+| bảng `public.*` không PK | _không có_ | `tests/khoa_ngoai_co_chi_muc.test.ts` |
+
+## Miền
+
+| miền | bảng | FK trong miền | FK sang miền khác |
+|---|---:|---:|---:|
+| [Đăng nhập (auth)](#auth) | 5 | 3 | 1 |
+| [Người dùng & hồ sơ](#nguoi_dung) | 17 | 23 | 0 |
+| [Đấu trường](#dau_truong) | 14 | 9 | 9 |
+| [Kinh tế — bảy sổ](#kinh_te) | 7 | 0 | 10 |
+| [Chợ dự báo (đóng băng, D86)](#cho) | 6 | 6 | 5 |
+| [PFM — sổ chi tiêu](#pfm) | 6 | 0 | 6 |
+| [Dữ liệu & telemetry](#du_lieu) | 10 | 0 | 6 |
+| [Vận hành / admin](#van_hanh) | 5 | 0 | 3 |
+
+<a id="auth"></a>
+
+## Đăng nhập (auth) — 5 bảng
+
+```mermaid
+erDiagram
+  auth_accounts {
+    uuid account_id PK
+    text email UK
+    text password_hash
+    timestamptz email_verified_at
+    text pending_age_band
+    uuid user_id FK, UK
+    timestamptz created_at
+    timestamptz updated_at
+    text totp_secret
+    timestamptz totp_confirmed_at
+    bigint totp_buoc_cuoi
+  }
+  auth_attempts {
+    bigint id PK
+    text bucket
+    timestamptz at
+  }
+  auth_identities {
+    uuid identity_id PK
+    uuid account_id FK
+    text provider UK
+    text provider_user_id UK
+    timestamptz created_at
+  }
+  auth_sessions {
+    text token_hash PK
+    uuid account_id FK
+    timestamptz created_at
+    timestamptz expires_at
+    timestamptz revoked_at
+    timestamptz last_seen_at
+    timestamptz admin_xac_thuc_luc
+    timestamptz xac_thuc_lai_luc
+  }
+  auth_tokens {
+    text token_hash PK
+    uuid account_id FK
+    text purpose
+    timestamptz expires_at
+    timestamptz used_at
+    timestamptz created_at
+  }
+  users |o--o| auth_accounts : "user_id"
+  auth_accounts ||--o{ auth_identities : "account_id"
+  auth_accounts ||--o{ auth_sessions : "account_id"
+  auth_accounts ||--o{ auth_tokens : "account_id"
+```
+
+| bảng | cột | khoá ngoại → | trigger | RLS |
+|---|---:|---|---|---|
+| `auth_accounts` | 11 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `auth_attempts` | 3 | — | — | bật · 0 policy |
+| `auth_identities` | 5 | `account_id` → `auth_accounts.account_id` | — | bật · 0 policy |
+| `auth_sessions` | 8 | `account_id` → `auth_accounts.account_id` | — | bật · 0 policy |
+| `auth_tokens` | 6 | `account_id` → `auth_accounts.account_id` | — | bật · 0 policy |
+
+<a id="nguoi_dung"></a>
+
+## Người dùng & hồ sơ — 17 bảng
+
+```mermaid
+erDiagram
+  avatar_dan {
+    bigint dan_id PK
+    bigint avatar_id FK, UK
+    uuid user_id FK
+    text sticker_id FK
+    smallint x
+    smallint y
+    boolean lat
+    integer thu_tu UK
+    timestamptz created_at
+  }
+  avatar_so_huu {
+    bigint avatar_id PK
+    uuid user_id FK, UK
+    text nen UK
+    text nguon
+    integer seri UK
+    text khung_id FK
+    text chuoi
+    boolean an
+    timestamptz created_at
+  }
+  cosmetic_items {
+    text cosmetic_id PK
+    text family
+    text kind
+    text label
+    text rarity
+    integer price_q
+    text trang_thai
+    integer gioi_han
+    text phien_ban
+    text nguon_cua
+  }
+  dot_phat_hanh {
+    bigint dot_id PK
+    text mau_id FK
+    integer han_muc
+    text trang_thai
+    timestamptz cong_bo_luc
+    timestamptz dong_luc
+    integer da_phat
+    timestamptz tao_luc
+  }
+  gacha_pity {
+    uuid user_id PK, FK
+    integer tu_epic
+    integer tong_luot
+    timestamptz updated_at
+  }
+  ho_so_goi {
+    uuid user_id PK, FK
+    integer goi_so PK
+    smallint formula_version PK
+    uuid tran_dau
+    uuid tran_cuoi
+    integer n_tran
+    integer n_vong_quyet
+    jsonb chi_so_json
+    text tinh_cach
+    timestamptz computed_at
+  }
+  huy_hieu_cap {
+    uuid user_id PK, FK
+    text season_id PK
+    text bac_id PK
+    text sticker_id FK
+    timestamptz cap_luc
+  }
+  kho_sticker {
+    uuid user_id PK, FK
+    text sticker_id PK, FK
+    integer so_luong
+    integer tong_nhan
+  }
+  lo_trinh_nhan {
+    uuid user_id PK, FK
+    text season_id PK
+    smallint chang_no PK
+    text thuong_id
+    timestamptz nhan_at
+  }
+  nhiem_vu_xong {
+    uuid user_id PK, FK
+    text season_id PK
+    text cua_so_key PK
+    text nv_id PK
+    timestamptz xong_at
+  }
+  qua_beta_nhan {
+    uuid user_id PK, FK
+    text season_id UK
+    integer so_thu_tu UK
+    bigint so_t
+    integer so_q
+    integer so_the
+    timestamptz nhan_luc
+  }
+  season_points {
+    uuid user_id PK, FK
+    text season_id PK
+    integer points
+    integer matches
+    text tier
+    timestamptz updated_at
+  }
+  tu_khai {
+    bigint id PK
+    uuid user_id FK
+    text cau
+    smallint tra_loi
+    timestamptz ts
+  }
+  user_cosmetics {
+    uuid user_id PK, FK
+    text cosmetic_id PK, FK
+    text source
+    timestamptz acquired_at
+  }
+  user_titles {
+    uuid user_id PK, FK
+    text title_id PK
+    text merit_kind
+    text season_id PK
+    timestamptz awarded_at
+    boolean equipped
+  }
+  users {
+    uuid user_id PK
+    text handle UK
+    text age_band
+    text region
+    text occupation_band
+    bigint bankroll
+    bigint quest_points
+    text role
+    boolean research_consent
+    timestamptz created_at
+    text season_id
+    timestamptz deleted_at
+    text dien_mao
+    bigint avatar_dang_mac FK
+    boolean la_khach
+    timestamptz nhan_khau_hoi_luc
+    integer the_tao_phong
+    text giong_ho_so
+    boolean pfm_consent
+    timestamptz pfm_bat_dau
+    bigint pfm_token
+    text mui_gio
+    boolean chu_so_huu
+    boolean la_tester
+    boolean pfm_cua_ket
+    boolean pfm_cua_dac_trung
+    boolean pfm_cua_thuong
+    boolean pfm_cua_noi_game
+    boolean la_dieu_phoi
+    boolean thu_chi_tiet
+    timestamptz thu_chi_tiet_luc
+    text thu_chi_tiet_nhan
+    text ma_buoi_do
+    smallint buoi_do_buoc
+    text research_consent_phien_ban
+    timestamptz tuoi_ok_luc
+  }
+  vat_pham_ban_the {
+    bigint ban_the_id PK
+    bigint dot_id FK, UK
+    integer seri UK
+    uuid chu_so_huu FK
+    text kho
+    text trang_thai
+    text nguon
+    timestamptz tao_luc
+  }
+  avatar_so_huu ||--o{ avatar_dan : "avatar_id"
+  cosmetic_items ||--o{ avatar_dan : "sticker_id"
+  users ||--o{ avatar_dan : "user_id"
+  cosmetic_items |o--o{ avatar_so_huu : "khung_id"
+  users ||--o{ avatar_so_huu : "user_id"
+  cosmetic_items ||--o{ dot_phat_hanh : "mau_id"
+  users ||--o| gacha_pity : "user_id"
+  users ||--o{ ho_so_goi : "user_id"
+  cosmetic_items ||--o{ huy_hieu_cap : "sticker_id"
+  users ||--o{ huy_hieu_cap : "user_id"
+  cosmetic_items ||--o{ kho_sticker : "sticker_id"
+  users ||--o{ kho_sticker : "user_id"
+  users ||--o{ lo_trinh_nhan : "user_id"
+  users ||--o{ nhiem_vu_xong : "user_id"
+  users ||--o| qua_beta_nhan : "user_id"
+  users ||--o{ season_points : "user_id"
+  users ||--o{ tu_khai : "user_id"
+  cosmetic_items ||--o{ user_cosmetics : "cosmetic_id"
+  users ||--o{ user_cosmetics : "user_id"
+  users ||--o{ user_titles : "user_id"
+  avatar_so_huu |o--o{ users : "avatar_dang_mac"
+  users |o--o{ vat_pham_ban_the : "chu_so_huu"
+  dot_phat_hanh ||--o{ vat_pham_ban_the : "dot_id"
+```
+
+| bảng | cột | khoá ngoại → | trigger | RLS |
+|---|---:|---|---|---|
+| `avatar_dan` | 9 | `avatar_id` → `avatar_so_huu.avatar_id`<br>`sticker_id` → `cosmetic_items.cosmetic_id`<br>`user_id` → `users.user_id` | `avatar_dan_append_only`<br>`avatar_dan_no_truncate` | bật · 0 policy |
+| `avatar_so_huu` | 9 | `khung_id` → `cosmetic_items.cosmetic_id`<br>`user_id` → `users.user_id` | `avatar_so_huu_no_transfer` | bật · 0 policy |
+| `cosmetic_items` | 10 | — | — | bật · 0 policy |
+| `dot_phat_hanh` | 8 | `mau_id` → `cosmetic_items.cosmetic_id` | — | bật · 0 policy |
+| `gacha_pity` | 4 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `ho_so_goi` | 10 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `huy_hieu_cap` | 5 | `sticker_id` → `cosmetic_items.cosmetic_id`<br>`user_id` → `users.user_id` | — | bật · 0 policy |
+| `kho_sticker` | 4 | `sticker_id` → `cosmetic_items.cosmetic_id`<br>`user_id` → `users.user_id` | `kho_sticker_no_transfer` | bật · 0 policy |
+| `lo_trinh_nhan` | 5 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `nhiem_vu_xong` | 5 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `qua_beta_nhan` | 7 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `season_points` | 6 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `tu_khai` | 5 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `user_cosmetics` | 4 | `cosmetic_id` → `cosmetic_items.cosmetic_id`<br>`user_id` → `users.user_id` | `user_cosmetics_no_transfer` | bật · 0 policy |
+| `user_titles` | 6 | `user_id` → `users.user_id` | `user_titles_no_transfer` | bật · 0 policy |
+| `users` | 36 | `avatar_dang_mac` → `avatar_so_huu.avatar_id` | `users_pfm_token_khop_so`<br>`users_quest_points_khop_so` | bật · 0 policy |
+| `vat_pham_ban_the` | 8 | `chu_so_huu` → `users.user_id`<br>`dot_id` → `dot_phat_hanh.dot_id` | `ban_the_doi_chu` | bật · 0 policy |
+
+<a id="dau_truong"></a>
+
+## Đấu trường — 14 bảng
+
+```mermaid
+erDiagram
+  bxh_snapshots {
+    text bang_id PK
+    text season_id PK
+    jsonb payload_json
+    timestamptz computed_at
+  }
+  holdem_ban {
+    text ma PK
+    bigint seed
+    integer so_o
+    uuid chu_user_id FK
+    text loai
+    timestamptz created_at
+    timestamptz het_han
+    date ngay
+    text de_id
+    text nhan
+    text balance_version
+  }
+  holdem_matches {
+    uuid match_id PK
+    uuid owner_user_id FK
+    bigint seed
+    text status
+    integer vong_hien_tai
+    jsonb action_log
+    jsonb ghe_json
+    text engine_version
+    text balance_version
+    text season_id
+    timestamptz started_at
+    timestamptz ended_at
+    text che_do
+    timestamptz vong_mo_luc
+    text ly_do_dong
+    integer so_o
+    boolean mien_gio
+    text ban_ma FK
+    boolean co_ep_tham_so
+  }
+  holdem_minigame_man {
+    uuid match_id PK, FK
+    integer vong PK
+    text phien_ban
+    jsonb boi_canh
+    timestamptz bat_dau
+    jsonb lenh
+    timestamptz tao_luc
+  }
+  holdem_results {
+    uuid result_id PK
+    uuid match_id FK, UK
+    uuid user_id FK
+    text ghe_id UK
+    text loai
+    text bot_id
+    text bac_rank
+    integer hang
+    integer von_cuoi
+    integer vong_chay
+    jsonb danh_muc_json
+    timestamptz created_at
+    integer diem_truoc
+    integer diem_sau
+    boolean dau_hang
+  }
+  rank_ban {
+    uuid ban_id PK
+    timestamptz slot_id FK, UK
+    integer chi_so UK
+    text season_id
+    bigint seed
+    integer so_nguoi
+    integer so_may
+    integer so_ghe
+    integer co_ban_boc
+    integer bac_thap
+    jsonb vai_json
+    text balance_version
+    text trang_thai
+    text ly_do_chot
+    timestamptz han_luc
+    timestamptz chot_luc
+    timestamptz created_at
+  }
+  rank_ban_nguoi {
+    uuid ban_id PK, FK
+    uuid user_id PK, FK
+    integer ghe_chi_so
+    text bac_id
+    integer bac_so
+    uuid match_id FK, UK
+    boolean xong
+    boolean dau_hang
+    bigint nav_cuoi
+  }
+  rank_dang_ky {
+    timestamptz slot_id PK, FK
+    uuid user_id PK, FK
+    integer diem_ghep
+    integer bac_so
+    text trang_thai
+    uuid ban_id FK
+    timestamptz created_at
+  }
+  rank_diem {
+    uuid user_id PK, FK
+    text season_id PK
+    integer diem
+    integer diem_dinh
+    integer so_tran
+    integer hang
+    timestamptz updated_at
+  }
+  rank_quy_diem {
+    bigint entry_id PK
+    text season_id
+    integer delta
+    integer so_du_sau
+    text reason
+    timestamptz created_at
+  }
+  rank_suat {
+    timestamptz slot_id PK
+    text season_id
+    text trang_thai
+    integer so_dang_ky
+    integer so_ban
+    timestamptz ghep_luc
+    timestamptz created_at
+  }
+  sandbox_mastery {
+    uuid user_id PK, FK
+    text card_id PK
+    integer scored_matches
+    integer tier
+    timestamptz updated_at
+  }
+  sandbox_matches {
+    uuid match_id PK
+    text scenario_id
+    bigint seed
+    text mode
+    text table_id
+    uuid owner_user_id FK
+    integer owner_seat
+    jsonb seat_plan
+    text status
+    integer current_round
+    text engine_version
+    text season_id
+    timestamptz started_at
+    timestamptz finished_at
+  }
+  sandbox_results {
+    uuid result_id PK
+    uuid match_id FK, UK
+    uuid user_id FK
+    integer seat_index UK
+    text faction_id
+    jsonb action_log
+    integer final_nav
+    integer hold_nav
+    integer vs_hold
+    integer rank
+    integer turnover
+    boolean busted
+    integer season_points
+    integer ticket_q_burned
+    boolean is_replay
+    boolean is_practice
+    boolean is_private
+    timestamptz created_at
+  }
+  users |o--o{ holdem_ban : "chu_user_id"
+  holdem_ban |o--o{ holdem_matches : "ban_ma"
+  users ||--o{ holdem_matches : "owner_user_id"
+  holdem_matches ||--o{ holdem_minigame_man : "match_id"
+  holdem_matches ||--o{ holdem_results : "match_id"
+  users |o--o{ holdem_results : "user_id"
+  rank_suat ||--o{ rank_ban : "slot_id"
+  rank_ban ||--o{ rank_ban_nguoi : "ban_id"
+  holdem_matches |o--o| rank_ban_nguoi : "match_id"
+  users ||--o{ rank_ban_nguoi : "user_id"
+  rank_ban |o--o{ rank_dang_ky : "ban_id"
+  rank_suat ||--o{ rank_dang_ky : "slot_id"
+  users ||--o{ rank_dang_ky : "user_id"
+  users ||--o{ rank_diem : "user_id"
+  users ||--o{ sandbox_mastery : "user_id"
+  users ||--o{ sandbox_matches : "owner_user_id"
+  sandbox_matches ||--o{ sandbox_results : "match_id"
+  users ||--o{ sandbox_results : "user_id"
+```
+
+| bảng | cột | khoá ngoại → | trigger | RLS |
+|---|---:|---|---|---|
+| `bxh_snapshots` | 4 | — | — | bật · 0 policy |
+| `holdem_ban` | 11 | `chu_user_id` → `users.user_id` | — | bật · 0 policy |
+| `holdem_matches` | 19 | `ban_ma` → `holdem_ban.ma`<br>`owner_user_id` → `users.user_id` | — | bật · 0 policy |
+| `holdem_minigame_man` | 7 | `match_id` → `holdem_matches.match_id` | `holdem_minigame_man_chi_noi` | bật · 0 policy |
+| `holdem_results` | 15 | `match_id` → `holdem_matches.match_id`<br>`user_id` → `users.user_id` | — | bật · 0 policy |
+| `rank_ban` | 17 | `slot_id` → `rank_suat.slot_id` | — | bật · 0 policy |
+| `rank_ban_nguoi` | 9 | `ban_id` → `rank_ban.ban_id`<br>`match_id` → `holdem_matches.match_id`<br>`user_id` → `users.user_id` | — | bật · 0 policy |
+| `rank_dang_ky` | 7 | `ban_id` → `rank_ban.ban_id`<br>`slot_id` → `rank_suat.slot_id`<br>`user_id` → `users.user_id` | — | bật · 0 policy |
+| `rank_diem` | 7 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `rank_quy_diem` | 6 | — | `rank_quy_diem_append_only` | bật · 0 policy |
+| `rank_suat` | 7 | — | — | bật · 0 policy |
+| `sandbox_mastery` | 5 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `sandbox_matches` | 14 | `owner_user_id` → `users.user_id` | — | bật · 0 policy |
+| `sandbox_results` | 18 | `match_id` → `sandbox_matches.match_id`<br>`user_id` → `users.user_id` | — | bật · 0 policy |
+
+<a id="kinh_te"></a>
+
+## Kinh tế — bảy sổ — 7 bảng
+
+```mermaid
+erDiagram
+  burn_ledger {
+    bigint entry_id PK
+    bigint amount
+    text reason
+    uuid ref_market_id FK
+    timestamptz created_at
+  }
+  pfm_token_ledger {
+    bigint entry_id PK
+    uuid user_id FK
+    integer delta
+    bigint balance_after
+    text reason
+    text ref
+    timestamptz created_at
+  }
+  quest_ledger {
+    bigint entry_id PK
+    uuid user_id FK
+    integer delta
+    integer balance_after
+    text reason
+    text ref_id
+    text season_id
+    timestamptz created_at
+  }
+  quy_cho_ledger {
+    bigint entry_id PK
+    bigint delta
+    bigint balance_after
+    text reason
+    bigint ref_ban_the_id FK
+    timestamptz created_at
+  }
+  rank_ledger {
+    bigint entry_id PK
+    uuid user_id FK, UK
+    text season_id
+    text che_do
+    uuid match_id FK, UK
+    integer so_ghe
+    integer so_la
+    integer hang
+    integer so_cap_thang
+    text bac_vao_ban
+    integer delta
+    integer diem_sau
+    text formula_version
+    timestamptz created_at
+    uuid ban_id FK
+  }
+  treasury_ledger {
+    bigint entry_id PK
+    bigint delta
+    bigint balance_after
+    text reason
+    uuid ref_market_id FK
+    timestamptz created_at
+  }
+  wallet_ledger {
+    bigint entry_id PK
+    uuid user_id FK
+    bigint delta
+    bigint balance_after
+    text reason
+    uuid ref_market_id FK
+    timestamptz created_at
+  }
+  markets |o--o{ burn_ledger : "ref_market_id"
+  users ||--o{ pfm_token_ledger : "user_id"
+  users ||--o{ quest_ledger : "user_id"
+  vat_pham_ban_the |o--o{ quy_cho_ledger : "ref_ban_the_id"
+  rank_ban |o--o{ rank_ledger : "ban_id"
+  holdem_matches |o--o{ rank_ledger : "match_id"
+  users ||--o{ rank_ledger : "user_id"
+  markets |o--o{ treasury_ledger : "ref_market_id"
+  markets |o--o{ wallet_ledger : "ref_market_id"
+  users ||--o{ wallet_ledger : "user_id"
+```
+
+| bảng | cột | khoá ngoại → | trigger | RLS |
+|---|---:|---|---|---|
+| `burn_ledger` | 5 | `ref_market_id` → `markets.market_id` | `burn_ledger_append_only`<br>`burn_ledger_no_truncate` | bật · 0 policy |
+| `pfm_token_ledger` | 7 | `user_id` → `users.user_id` | `pfm_token_ledger_append_only`<br>`pfm_token_ledger_no_truncate` | bật · 0 policy |
+| `quest_ledger` | 8 | `user_id` → `users.user_id` | `quest_ledger_append_only`<br>`quest_ledger_no_truncate` | bật · 0 policy |
+| `quy_cho_ledger` | 6 | `ref_ban_the_id` → `vat_pham_ban_the.ban_the_id` | `quy_cho_ledger_append_only`<br>`quy_cho_ledger_no_truncate` | bật · 0 policy |
+| `rank_ledger` | 15 | `ban_id` → `rank_ban.ban_id`<br>`match_id` → `holdem_matches.match_id`<br>`user_id` → `users.user_id` | `rank_ledger_append_only`<br>`rank_ledger_no_truncate`<br>`rank_ledger_zero_sum` | bật · 0 policy |
+| `treasury_ledger` | 6 | `ref_market_id` → `markets.market_id` | `treasury_ledger_append_only`<br>`treasury_ledger_no_truncate` | bật · 0 policy |
+| `wallet_ledger` | 7 | `ref_market_id` → `markets.market_id`<br>`user_id` → `users.user_id` | `wallet_ledger_append_only`<br>`wallet_ledger_no_truncate` | bật · 0 policy |
+
+<a id="cho"></a>
+
+## Chợ dự báo (đóng băng, D86) — 6 bảng
+
+```mermaid
+erDiagram
+  bet_intents {
+    text idempotency_key PK
+    uuid user_id FK
+    uuid market_id FK
+    text request_hash
+    jsonb response_json
+    timestamptz created_at
+  }
+  bets {
+    uuid bet_id PK
+    uuid market_id FK
+    uuid option_id FK
+    uuid user_id FK
+    bigint amount
+    boolean is_seed
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  market_options {
+    uuid option_id PK
+    uuid market_id FK, UK
+    text label
+    integer sort_order UK
+    numeric range_low
+    numeric range_high
+  }
+  markets {
+    uuid market_id PK
+    text pool
+    text question_text
+    text resolution_source_name
+    text resolution_source_url
+    text resolution_note
+    timestamptz open_ts
+    timestamptz lock_ts
+    timestamptz resolve_deadline_ts
+    timestamptz resolved_ts
+    uuid outcome_option_id FK
+    text status
+    bigint seed_per_option
+    text season_id
+    uuid created_by FK
+    boolean tu_mo
+  }
+  rank_snapshots {
+    uuid user_id PK, FK
+    text pool PK
+    numeric rank_value
+    integer markets_counted
+    timestamptz computed_at PK
+    text formula_version
+  }
+  scores {
+    uuid user_id PK, FK
+    uuid market_id PK, FK
+    text pool
+    numeric brier
+    timestamptz resolved_at
+  }
+  markets ||--o{ bet_intents : "market_id"
+  users ||--o{ bet_intents : "user_id"
+  markets ||--o{ bets : "market_id"
+  market_options ||--o{ bets : "option_id"
+  users |o--o{ bets : "user_id"
+  markets ||--o{ market_options : "market_id"
+  users ||--o{ markets : "created_by"
+  market_options |o--o{ markets : "outcome_option_id"
+  users ||--o{ rank_snapshots : "user_id"
+  markets ||--o{ scores : "market_id"
+  users ||--o{ scores : "user_id"
+```
+
+| bảng | cột | khoá ngoại → | trigger | RLS |
+|---|---:|---|---|---|
+| `bet_intents` | 6 | `market_id` → `markets.market_id`<br>`user_id` → `users.user_id` | — | bật · 0 policy |
+| `bets` | 8 | `market_id` → `markets.market_id`<br>`option_id` → `market_options.option_id`<br>`user_id` → `users.user_id` | — | bật · 0 policy |
+| `market_options` | 6 | `market_id` → `markets.market_id` | — | bật · 0 policy |
+| `markets` | 16 | `created_by` → `users.user_id`<br>`outcome_option_id` → `market_options.option_id` | — | bật · 0 policy |
+| `rank_snapshots` | 6 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `scores` | 5 | `market_id` → `markets.market_id`<br>`user_id` → `users.user_id` | — | bật · 0 policy |
+
+<a id="pfm"></a>
+
+## PFM — sổ chi tiêu — 6 bảng
+
+```mermaid
+erDiagram
+  pfm_cup {
+    uuid user_id PK, FK
+    text cup_id PK
+    text nguon
+    text season_id
+    timestamptz granted_at
+  }
+  pfm_dac_trung {
+    uuid user_id PK, FK
+    date ky PK
+    text lop PK
+    text ma PK
+    text doi_tuong PK
+    jsonb gia_tri
+    text nguon
+    smallint schema_version
+    timestamptz cap_nhat_luc
+  }
+  pfm_lo_da_nhan {
+    uuid user_id PK, FK
+    text mon_id PK
+    timestamptz nhan_luc
+  }
+  pfm_luu {
+    uuid user_id PK, FK
+    date thang PK
+    smallint the_he PK
+    bytea blob
+    smallint schema_v
+    integer ver
+    timestamptz updated_at
+  }
+  pfm_ngay {
+    uuid user_id PK, FK
+    date ngay PK
+    text trang_thai
+    timestamptz ts
+  }
+  pfm_tuan {
+    uuid user_id PK, FK
+    date tuan PK
+    integer token_thuong
+    jsonb moc_json
+    timestamptz niem_phong_ts
+  }
+  users ||--o{ pfm_cup : "user_id"
+  users ||--o{ pfm_dac_trung : "user_id"
+  users ||--o{ pfm_lo_da_nhan : "user_id"
+  users ||--o{ pfm_luu : "user_id"
+  users ||--o{ pfm_ngay : "user_id"
+  users ||--o{ pfm_tuan : "user_id"
+```
+
+| bảng | cột | khoá ngoại → | trigger | RLS |
+|---|---:|---|---|---|
+| `pfm_cup` | 5 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `pfm_dac_trung` | 9 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `pfm_lo_da_nhan` | 3 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `pfm_luu` | 7 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `pfm_ngay` | 4 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `pfm_tuan` | 5 | `user_id` → `users.user_id` | — | bật · 0 policy |
+
+<a id="du_lieu"></a>
+
+## Dữ liệu & telemetry — 10 bảng
+
+```mermaid
+erDiagram
+  events {
+    bigint event_id PK
+    uuid user_id FK
+    timestamptz ts
+    text context_type
+    text context_id
+    text action_type
+    numeric value_num
+    jsonb value_json
+    jsonb state_snapshot_json
+  }
+  hanh_vi_tieu_dung {
+    uuid user_id FK
+    bigint event_id PK
+    timestamptz ts
+    text loai
+    text action_type
+    integer so_tien
+    text don_vi
+    integer so_du_truoc
+    integer phut_sau_tran
+    boolean tran_truoc_thang
+    integer phut_sau_tro_cap
+    smallint formula_version
+    timestamptz cap_nhat_luc
+  }
+  hanh_vi_tran {
+    uuid match_id PK, FK
+    integer so_dong
+    smallint formula_version
+    timestamptz cap_nhat_luc
+  }
+  hanh_vi_vong {
+    uuid user_id FK
+    uuid match_id PK, FK
+    integer vong PK
+    timestamptz ts
+    jsonb lenh_json
+    integer pnl_bp
+    float8 brier
+    smallint brier_v
+    boolean mo_bang
+    boolean o_su_kien
+    boolean la_tin_gia
+    boolean chuoi_tang
+    boolean tu_dong
+    integer cho_bp
+    integer tien_mat_bp
+    smallint so_ma
+    boolean tran_xong
+    boolean man_tap
+    boolean la_khach
+    boolean nghi_may
+    smallint formula_version
+    timestamptz cap_nhat_luc
+    smallint so_o
+    text vai
+    text thay_o_do
+    integer tiet_kiem_bp
+    integer tk_huy_so
+    smallint so_nhom
+    integer ms_quyet
+    smallint lua_nac
+    text lua_dap
+    integer xu
+    jsonb trait_json
+    text nguon_tin_rieng
+    boolean co_che_cat_lo
+  }
+  khach_da_don_ngay {
+    date ngay PK
+    integer so
+  }
+  telemetry {
+    bigint id PK
+    uuid user_id FK
+    timestamptz ts
+    text loai
+    text man
+    integer ms
+    jsonb chi_tiet
+    uuid phien
+  }
+  telemetry_cuon {
+    date ngay PK
+    timestamptz cuon_luc
+    integer so_dong
+  }
+  telemetry_lo {
+    text lo_key PK
+    timestamptz at
+  }
+  telemetry_ngay {
+    date ngay
+    text loai
+    text man
+    text age_band
+    integer so_luot
+    integer so_nguoi
+    integer ms_p50
+    integer ms_p90
+    bigint ms_tong
+    bigint id PK
+  }
+  telemetry_ngay_nhom {
+    date ngay
+    text loai
+    text age_band
+    text region
+    text occupation_band
+    integer so_luot
+    integer so_nguoi
+    bigint ms_tong
+    integer ms_p50
+    integer ms_p90
+    bigint id PK
+  }
+  users |o--o{ events : "user_id"
+  users ||--o{ hanh_vi_tieu_dung : "user_id"
+  holdem_matches ||--o| hanh_vi_tran : "match_id"
+  holdem_matches ||--o{ hanh_vi_vong : "match_id"
+  users ||--o{ hanh_vi_vong : "user_id"
+  users |o--o{ telemetry : "user_id"
+```
+
+| bảng | cột | khoá ngoại → | trigger | RLS |
+|---|---:|---|---|---|
+| `events` | 9 | `user_id` → `users.user_id` | `events_append_only`<br>`events_no_truncate` | bật · 0 policy |
+| `hanh_vi_tieu_dung` | 13 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `hanh_vi_tran` | 4 | `match_id` → `holdem_matches.match_id` | — | bật · 0 policy |
+| `hanh_vi_vong` | 35 | `match_id` → `holdem_matches.match_id`<br>`user_id` → `users.user_id` | — | bật · 0 policy |
+| `khach_da_don_ngay` | 2 | — | — | bật · 0 policy |
+| `telemetry` | 8 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `telemetry_cuon` | 3 | — | — | bật · 0 policy |
+| `telemetry_lo` | 2 | — | — | bật · 0 policy |
+| `telemetry_ngay` | 10 | — | — | bật · 0 policy |
+| `telemetry_ngay_nhom` | 11 | — | — | bật · 0 policy |
+
+<a id="van_hanh"></a>
+
+## Vận hành / admin — 5 bảng
+
+```mermaid
+erDiagram
+  admin_audit {
+    bigint audit_id PK
+    uuid admin_id FK
+    text action
+    jsonb payload_json
+    timestamptz created_at
+  }
+  admin_phan_khuc {
+    bigint id PK
+    text ten
+    jsonb dieu_kien
+    uuid tao_boi FK
+    timestamptz tao_luc
+    timestamptz xoa_luc
+  }
+  bao_loi {
+    bigint bao_loi_id PK
+    uuid user_id FK
+    timestamptz ts
+    text noi_dung
+    text man
+    text ban
+    text ma_loi
+    text email
+  }
+  scheduler_heartbeat {
+    bigint id PK
+    text source
+    timestamptz beat_at
+  }
+  schema_migrations {
+    text name PK
+    timestamptz applied_at
+  }
+  users ||--o{ admin_audit : "admin_id"
+  users ||--o{ admin_phan_khuc : "tao_boi"
+  users ||--o{ bao_loi : "user_id"
+```
+
+| bảng | cột | khoá ngoại → | trigger | RLS |
+|---|---:|---|---|---|
+| `admin_audit` | 5 | `admin_id` → `users.user_id` | `admin_audit_append_only`<br>`admin_audit_no_truncate` | bật · 0 policy |
+| `admin_phan_khuc` | 6 | `tao_boi` → `users.user_id` | — | bật · 0 policy |
+| `bao_loi` | 8 | `user_id` → `users.user_id` | — | bật · 0 policy |
+| `scheduler_heartbeat` | 3 | — | — | bật · 0 policy |
+| `schema_migrations` | 2 | — | — | bật · 0 policy |

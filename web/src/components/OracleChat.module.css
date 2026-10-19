@@ -1,0 +1,219 @@
+/*
+ * ORACLE CHAT — chat head NỔI, KÉO ĐƯỢC. §XI: không bo góc, vát bằng `clip-path`.
+ *
+ * ⚠⚠ NỀN PHẢI ĐỤC, VÀ ĐỪNG DÙNG BIẾN KHÔNG TỒN TẠI. Bản 22/08 khai
+ * `background: color-mix(in srgb, var(--accent) 14%, var(--surface-2))` — mà
+ * `--surface-2` KHÔNG CÓ trong `tokens.css` (chỉ có `--surface-card/panel/inset/
+ * idle/track`). Biến hỏng ⇒ cả hàm `color-mix` hỏng ⇒ `background` rơi về
+ * `transparent` ⇒ chữ trang dưới xuyên qua bong bóng, chồng lên chữ Oracle.
+ * Founder chụp được trên máy thật 23/08. Đây là lần THỨ HAI repo dính lớp lỗi
+ * này (D74: `--neon`/`--text` không tồn tại ⇒ SVG fill đen) ⇒ nay có
+ * `web/tests/css_bien_ma.test.ts` quét mọi `var(--…)` trong toàn bộ CSS.
+ * ⚠ Và color-mix KHÔNG nhận gradient: `--surface-panel` là `linear-gradient`, đưa
+ * vào color-mix cũng hỏng y hệt. Nền nổi ở repo này dùng rgba đặc — cùng nếp với
+ * `BottomNav` (`rgba(6, 10, 20, 0.96)`), thứ cũng nổi đè lên nội dung cuộn.
+ */
+.dau,
+.khungNoi {
+  position: fixed;
+  z-index: 55;
+  /* Vị trí (left/right/bottom/top) do component đặt inline — nó là DỮ LIỆU. */
+  touch-action: none;
+}
+
+/* Đang kéo: bám ngón tay, nhấc cao hơn, không có hiệu ứng trượt về. */
+.dangKeo {
+  cursor: grabbing;
+  opacity: 0.92;
+}
+
+/* ── THU: chat head ─────────────────────────────────────────────────────
+ * ⚠⚠ KHÔNG `composes: nut` — bẫy #5 ghi ngay trong pixel.module.css: composes
+ * rồi khai lại CÙNG thuộc tính là GHI ĐÈ IM LẶNG. `.nut` có `position: relative`,
+ * và nó THẮNG `position: fixed` ở đây (thứ tự trong stylesheet, không phải thứ tự
+ * class list) ⇒ chat head rơi vào dòng chảy trang, nằm giữa màn. Đo được trên prod
+ * 23/08: computed position = relative, x = 156 thay vì 321. Nên chỉ mượn `khung`
+ * (clip-path + radius 0, KHÔNG có position) rồi tự khai phần nút.
+ */
+.dau {
+  composes: khung from '../styles/pixel.module.css';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font: inherit;
+  color: var(--text-dim);
+  background: rgba(6, 10, 20, 0.96);
+  border: 1px solid var(--border-accent);
+  box-shadow: var(--px-bong);
+  cursor: grab;
+}
+
+/* Chấm "có câu mới" — khối đặc, vát 2px, KHÔNG tròn (luật 5 của §XI). */
+.cham {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  clip-path: polygon(2px 0, 6px 0, 8px 2px, 8px 6px, 6px 8px, 2px 8px, 0 6px, 0 2px);
+}
+
+/* ── MỞ: bong bóng ────────────────────────────────────────────────────── */
+.khungNoi {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  width: min(300px, calc(100vw - 20px));
+}
+
+.hang {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+
+/*
+ * ⚠⚠ LINH VẬT PHẢI Ở ĐÚNG CẠNH ĐANG BÁM. Bản đầu khai `.benTrai .hang{row}` và
+ * `.benTrai .bong::before{left:-5px}` — CHÉP Y HỆT giá trị mặc định, tức HAI LUẬT
+ * KHÔNG LÀM GÌ CẢ mà đọc lên thì như đang xử lý cạnh trái. Hậu quả đo được trên
+ * prod: bám mép PHẢI thì head thu ở x≈321, mở ra linh vật nhảy sang x=65 — thứ
+ * người chơi vừa chạm dịch đi 256px — và đuôi bong bóng quay NGƯỢC hướng linh vật.
+ * ⇒ Mặc định (phải) đảo hàng: linh vật bên PHẢI, đuôi bên PHẢI. `.benTrai` mới là
+ * cái quay về `row`. Test `oracle_chat` khoá HAI CẠNH PHẢI KHÁC NHAU — một luật
+ * ghi đè bằng đúng giá trị cũ là luật không tồn tại.
+ */
+.hang { flex-direction: row-reverse; }
+.bong::before { right: -5px; left: auto; }
+.benTrai .hang { flex-direction: row; }
+.benTrai .bong::before { left: -5px; right: auto; }
+
+.tay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  flex: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.bong {
+  composes: khungNoi from '../styles/pixel.module.css';
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 9px 11px;
+  text-align: left;
+  font: inherit;
+  color: var(--text-body);
+  /* ĐỤC — xem ghi chú đầu file. Không color-mix, không biến ma. */
+  background: rgba(8, 14, 26, 0.97);
+  border: 1px solid var(--border-accent);
+  cursor: pointer;
+}
+
+/* Đuôi bong bóng — MỘT ô vuông ở mép trái dưới, kiểu bậc thang pixel. */
+.bong::before {
+  content: '';
+  position: absolute;
+  /* Phía đuôi do `.hang`/`.benTrai` quyết — xem ghi chú ở trên. */
+  bottom: 9px;
+  width: 5px;
+  height: 5px;
+  background: rgba(8, 14, 26, 0.97);
+}
+
+.chu {
+  font-size: 12px;
+  line-height: 1.55;
+  min-height: 1.55em;
+}
+
+.conTro {
+  display: inline-block;
+  margin-left: 1px;
+  animation: oracleNhay 0.8s steps(2, start) infinite;
+}
+
+@keyframes oracleNhay {
+  to { opacity: 0; }
+}
+
+.goiY {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .conTro { animation: none; }
+}
+
+/*
+ * MỜ NGOÀI HUB (chỉ thị founder 06/09) — Oracle nhường chỗ cho hành động chính của màn.
+ *
+ * ⚠ CHỈ HẠ `opacity`. Không `pointer-events: none`, không bỏ `aria-label`: người chơi
+ * vẫn phải gọi được nó, và bàn phím / trình đọc màn hình thấy y như cũ. Mờ là để MẮT
+ * biết nó đang nhường, không phải để TẮT nó đi.
+ * ⚠ Rõ hẳn khi focus bàn phím — người không dùng chuột phải thấy mình đang đứng ở đâu.
+ */
+.mo {
+  opacity: .3;
+  transition: opacity 140ms steps(2, end);
+}
+.mo:hover,
+.mo:focus-visible {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mo { transition: none; }
+}
+
+/*
+ * ĐANG THAO TÁC ⇒ BIẾN MẤT HẲN (chỉ thị founder 06/09).
+ *
+ * ⚠ `display: none` chứ không phải `opacity: 0`: lúc người dùng đang giữa chừng một thao
+ * tác, lớp phủ không được ăn cú chạm, không được nằm trong thứ tự Tab, và không được
+ * trình đọc màn hình đọc. `opacity: 0` giữ nguyên cả ba — tức nó vô hình mà vẫn cản.
+ * ⚠ Cờ ở `body`, đặt bởi màn qua `useDangThaoTac`. Oracle KHÔNG biết màn nào đang bận và
+ *   không cần biết — đó là cả điểm của việc đi qua một cờ chung.
+ */
+:global(body[data-dang-thao-tac='co']) .dau,
+:global(body[data-dang-thao-tac='co']) .khungNoi {
+  display: none;
+}
+
+/*
+ * CHẾ ĐỘ NEO CHỖ GIỮ SẴN (màn bento không-cuộn: Hub · sảnh Alpha Draft). Avatar nhỏ NẰM ĐÚNG ô `[data-oracle-cho]` mà màn dành
+ * sẵn ở hàng đầu — vị trí/cỡ do component đặt inline từ `getBoundingClientRect` của ô ấy. Không kéo được ⇒ bỏ `touch-action: none`
+ * (ngón tay đặt trên avatar vẫn cuộn/vuốt bình thường) và con trỏ `grab`. Bong bóng bung XUỐNG từ ô, mép phải khớp mép phải ô.
+ * ⚠ Không `.mo` (mờ): ở đây nó không nhường chỗ cho ai — nó đứng trong chỗ riêng, không che nút nào.
+ */
+.dauNeo {
+  touch-action: manipulation;
+  cursor: pointer;
+}
+.noiNeo {
+  /* Chỉ còn bong bóng (avatar đã là `.dauNeo`): đuôi chỉ lên phía avatar. */
+  align-items: flex-end;
+}
+.noiNeo .bong::before {
+  top: -3px;
+  right: 14px;
+  bottom: auto;
+  left: auto;
+}

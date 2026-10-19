@@ -1,0 +1,438 @@
+/*
+ * THANH PHONG CÁCH — E→SSS. Xem đầu `ThanhPhongCach.tsx` cho lý lẽ thiết kế,
+ * và `mau_hang.ts` cho thang màu (kèm phần tra cứu DMC + khai độ tin).
+ *
+ * ⚠ CHỈ animate `transform` và `opacity`. Đó là TẬP GIAO của ba mặt app sẽ chạy:
+ * web/PWA (khung hình + pin), Discord Activity (iframe, có màn ngang), và bản
+ * native sau này (RN/Flutter map gần 1-1 hai thuộc tính đó, không map `filter`
+ * hay `background-position`).
+ * ⚠ §XI pixel: KHÔNG bo góc, KHÔNG blur — kể cả cho quầng sáng. Hào quang ở đây
+ * là một VẬT (`.quang`), không phải `box-shadow` mờ; xem lý do ngay trên nó.
+ */
+
+.khoi {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  border: 2px solid var(--vien, #2b3242);
+  background: var(--nen-2, #12161f);
+  /* Màu do `mauTheoDiem` bơm qua style inline; đây chỉ là lưới an toàn. */
+  --pc-mau: var(--mo, #7b8494);
+}
+
+.gon { padding: 2px 4px; gap: 4px; }
+
+/*
+ * Ô HẠNG — GLYPH PIXEL, không phải chữ font (founder 23/08).
+ * `color` vẫn là cần gạt duy nhất: glyph vẽ bằng `currentColor` nên đổi màu là
+ * đổi đúng biến `--pc-mau`, không phải sửa gì trong lưới chữ.
+ * `min-width` giữ để thanh không co giật khi hạng đổi từ `SSS` (3 glyph) về `E`
+ * (1 glyph) — bề ngang ô cố định thì cái thước bên cạnh đứng yên.
+ */
+.hang {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  color: var(--pc-mau);
+}
+
+/* D443 — chữ hạng đi bằng font app, cỡ `--fs-title`, nét đậm nhất; mỗi ký tự một ô (animation lệch nhịp theo `--i`). */
+.hangChu {
+  display: inline-block;
+  font-size: var(--fs-title);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.rang {
+  position: relative;
+  flex: 1;
+  height: 8px;
+  min-width: 48px;
+  border: 1px solid var(--vien, #2b3242);
+  background: var(--nen-3, #0b0e14);
+  overflow: hidden;
+}
+
+/*
+ * MỰC THANH — nay mang TRỌN DẢI MÀU của thang, không phải một màu phẳng.
+ *
+ * ⚠⚠ 24/08 — ĐỔI TỪ `scaleX` SANG `clip-path`, và lý do là bắt buộc chứ không
+ * phải sở thích: `scaleX` KÉO GIÃN cả nền của phần tử. Với một màu phẳng thì
+ * không ai thấy; với một dải bảy chặng thì ở mực 40% cả bảy màu bị nén vào 40%
+ * bề ngang — tức người chơi 400 điểm nhìn thấy vàng SSS trên thanh của mình.
+ * `clip-path: inset()` CẮT chứ không kéo, nên dải luôn neo đúng thang 0→1000 và
+ * mép dẫn đầu luôn là màu của bậc đang đứng.
+ *
+ * ⚠ `clip-path` ở đây do React đặt INLINE mỗi khấc điểm (30 khấc), không phải
+ * một CSS animation — cùng vai với `transform` inline trước đó, nên luật "chỉ
+ * animate transform/opacity" không bị đụng. Và `clip-path` vốn đã là nếp của
+ * repo: khung pixel (`pixel.module.css`) cắt khấc bốn góc bằng chính nó.
+ * ⚠ KHÔNG `transition`: chuyển động mượt do `useDiemChay` tạo ra bằng 30 khấc
+ * React. Chồng thêm transition 260ms lên một chuỗi 30ms/khấc thì hai bộ đệm
+ * đánh nhau, và thanh trôi trễ hơn cả con số nó đang tả.
+ */
+.day {
+  position: absolute;
+  inset: 0;
+  background: var(--pc-dai);
+}
+
+/*
+ * LỚP HIỆU ỨNG — phủ ĐÚNG phần mực đã lấp, nên lửa/cầu vồng liếm theo thanh chứ
+ * không tràn ra khay rỗng.
+ * ⚠ Dùng `width` chứ không `transform`: phần tử này phải để dành `transform`
+ * cho hoạt ảnh CHẠY bên trong nó. `width` ở đây đổi một lần mỗi khấc điểm,
+ * không phải mỗi khung hình, và nó là con `absolute` trong một hộp 8px — cú
+ * tính lại bố cục dừng ngay tại `.rang`.
+ */
+.fx {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ── BẬC MÀU: chỉ còn trang trí KHỐI, không còn quyết định màu thân thanh ─────
+   Màu thân nay liên tục (`mauTheoDiem`). Hai lớp này giữ lại vì chúng tả thứ
+   RỜI RẠC thật sự: từ S thì cả khối bắt sáng, và đó là một ngưỡng chứ không
+   phải một dải. */
+.sieu { border-color: var(--pc-mau); }
+.toi_thuong { border-color: var(--pc-mau); }
+
+/* ── KIM LOẠI (B → A+) ───────────────────────────────────────────────────────
+   Founder: *"từ B trở lên thì cho nó hoạt ảnh lóe sáng nhẹ của kim loại"*.
+   Một vệt sáng nghiêng quét ngang, chu kỳ CHẬM (2,6s) và nghỉ dài giữa hai
+   lượt — loé nhẹ thì phải hiếm; quét liên tục thành đèn quay, và đèn quay ở bậc
+   B sẽ không còn chỗ cho lửa ở bậc S. */
+.fx_kim_loai .fx::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 300%;
+  background: linear-gradient(
+    105deg,
+    transparent 0 42%,
+    rgba(255, 255, 255, 0.72) 48% 52%,
+    transparent 58% 100%
+  );
+  animation: pcQuet 2600ms steps(12, end) infinite;
+}
+
+@keyframes pcQuet {
+  0%   { transform: translateX(-66%); }
+  35%  { transform: translateX(0); }
+  100% { transform: translateX(0); }
+}
+
+/* ── CHÁY (S → S+) ──────────────────────────────────────────────────────────
+   Ở 8px cao thì không vẽ được ngọn lửa; thứ đọc ra "cháy" là NHIỆT ĐỘ CHẠY —
+   vệt nóng trôi dọc thanh + quầng quanh khối. Cả hai bám `--pc-mau` nên khi
+   điểm bò lên, lửa tự chuyển hổ phách → cam mà không cần lớp thứ hai. */
+.fx_chay .fx::before,
+.fx_chay_manh .fx::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 200%;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0 10px,
+    rgba(255, 255, 255, 0.55) 10px 16px,
+    rgba(255, 255, 255, 0) 16px 26px
+  );
+  animation: pcLua 820ms steps(8, end) infinite;
+}
+
+/*
+ * ⚠ QUẦNG LÀM BẰNG VẬT, KHÔNG BẰNG `box-shadow` BLUR — và test canh đúng chỗ này.
+ * Bản đầu tôi viết `box-shadow: 0 0 8px` cho quầng lửa; bài "ràng buộc BA MẶT"
+ * đỏ ngay: native (RN/Flutter) không map được blur, nên thứ web thấy là lửa thì
+ * bản app sau này thấy là… không gì cả. Thay bằng một VẬT thật: lớp `.quang` nở
+ * ra ngoài khay, nền đúng màu hạng, chỉ chỉnh `opacity`. Vừa map được sang mọi
+ * mặt, vừa hợp §XI hơn hẳn — game pixel làm hào quang bằng viền màu, không bằng
+ * bóng mờ.
+ */
+/*
+ * ⚠⚠ KHÔNG DÙNG `z-index: -1`. Bản đầu làm thế và quầng VÔ HÌNH ở màn kết: theo
+ * thứ tự vẽ của CSS, con z-index ÂM nằm dưới nền của mọi block tổ tiên trong
+ * cùng ngữ cảnh xếp lớp — mà khối màn kết có nền đục. Trong trận thì nó chỉ
+ * "may mà thấy" nhờ phần thò ra khỏi mép. Nay quầng vẽ TRÊN nền và nội dung
+ * được nâng lên trên nó — cùng kết quả về thị giác, không phụ thuộc nền của cha.
+ */
+.quang {
+  position: absolute;
+  inset: -3px;
+  background: var(--pc-mau);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Nội dung đứng TRÊN quầng — nếu không thì hào quang phủ lên chính chữ hạng. */
+.hang, .rang { position: relative; z-index: 1; }
+
+/*
+ * ⚠ CƯỜNG ĐỘ ĐI BẰNG BIẾN, KHÔNG BẰNG `opacity` TĨNH — bẫy tự dính, đo trên
+ * trình duyệt thật mới lộ. Bản đầu tôi viết `opacity` riêng cho từng bậc rồi
+ * cho cả ba dùng chung `pcTho`; nhưng keyframe CÓ đụng `opacity` nên nó ĐÈ giá
+ * trị tĩnh, và cả ba bậc thở y hệt nhau ở 0,18↔0,5. Tức "tăng cường độ cháy"
+ * chạy nhưng không tồn tại — đúng lớp "cơ chế trang trí" repo đã dính nhiều
+ * lần, lần này ở dạng khó thấy nhất vì mã CSS đọc lên thì rất hợp lý.
+ */
+.fx_chay .quang {
+  --pc-quang-min: 0.14;
+  --pc-quang-max: 0.3;
+  animation: pcTho 1400ms steps(6, end) infinite;
+}
+
+/* SS — "tăng cường độ cháy": vệt chạy NHANH GẤP ĐÔI, quầng nở gấp đôi, và chữ
+   bắt đầu rung. Ba cần gạt cùng chiều nên chênh lệch với S đọc được ngay ở
+   375px, không phải nhìn kỹ mới thấy. */
+.fx_chay_manh .quang {
+  inset: -5px;
+  --pc-quang-min: 0.26;
+  --pc-quang-max: 0.52;
+  animation: pcTho 700ms steps(6, end) infinite;
+}
+.fx_chay_manh .fx::before { animation-duration: 410ms; }
+.fx_chay_manh .hangChu { animation: pcRung 700ms steps(4, end) infinite; }
+
+@keyframes pcLua {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-26px); }
+}
+
+/* ── CẦU VỒNG (SSS) ─────────────────────────────────────────────────────────
+   Founder: *"SSS thì hóa thành cầu vồng lấp lánh và chạy liên tục"*.
+   Dải màu chạy bằng `transform` trên một lớp rộng gấp đôi — KHÔNG animate
+   `background-position` (thuộc tính đó bắt vẽ lại mỗi khung hình và không có
+   bản tương đương trên native). "LẤP LÁNH" là lớp thứ hai: vệt trắng quét
+   nhanh chồng lên dải màu, hai chu kỳ lệch nhau (640 và 900ms) nên mắt không
+   bắt được nhịp lặp — đó là thứ phân biệt "lấp lánh" với "chạy". */
+.fx_cau_vong .fx::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 200%;
+  background: repeating-linear-gradient(
+    90deg,
+    #ff5d8f 0 8px, #ffb020 8px 16px, var(--win) 16px 24px, #3fa9f5 24px 32px
+  );
+  animation: pcChay 640ms steps(8, end) infinite;
+}
+
+.fx_cau_vong .fx::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 240%;
+  background: repeating-linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 0 22px,
+    rgba(255, 255, 255, 0.85) 22px 26px,
+    rgba(255, 255, 255, 0) 26px 48px
+  );
+  animation: pcLapLanh 900ms steps(10, end) infinite;
+}
+
+.fx_cau_vong .quang {
+  inset: -6px;
+  background: #ffe066;
+  --pc-quang-min: 0.38;
+  --pc-quang-max: 0.72;
+  animation: pcTho 520ms steps(6, end) infinite;
+}
+.fx_cau_vong .hangChu {
+  animation: pcRung 700ms steps(4, end) infinite;
+  animation-delay: calc(var(--i) * 90ms);
+}
+
+@keyframes pcChay {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-32px); }
+}
+
+@keyframes pcLapLanh {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-48px); }
+}
+
+/* Ba bậc cháy dùng CHUNG nhịp thở này; chênh lệch nằm ở hai biến + chu kỳ. */
+@keyframes pcTho {
+  0%, 100% { opacity: var(--pc-quang-min, 0.18); }
+  50%      { opacity: var(--pc-quang-max, 0.5); }
+}
+
+@keyframes pcRung {
+  0%, 100% { transform: translate(0, 0); }
+  25%      { transform: translate(-1px, 1px); }
+  50%      { transform: translate(1px, -1px); }
+  75%      { transform: translate(1px, 1px); }
+}
+
+/* ── LÊN HẠNG — HAI CƯỜNG ĐỘ ────────────────────────────────────────────────
+   Founder: *"từ E>B thì sẽ chỉ có những bước nhảy nhẹ nhưng từ A > SSS phải là
+   hiệu ứng rung và thay thế mạnh và rõ ràng hơn"*.
+   ⚠ Đóng dấu gắn lên TỪNG GLYPH (`.hangChu`), không lên cả ô: lệch pha theo
+   `--i` nên `SSS` đóng ba nhịp thay vì một khối phình ra — cùng ngôn ngữ với cú
+   công bố toàn màn, chỉ nhỏ hơn. */
+.lenNhe .hangChu {
+  animation: pcDongNhe 420ms steps(5, end) 1;
+  animation-delay: calc(var(--i) * 60ms);
+}
+
+.lenManh .hangChu {
+  animation: pcDongManh 620ms steps(7, end) 1;
+  animation-delay: calc(var(--i) * 70ms);
+}
+
+/* Cả THANH cũng nảy ở cú mạnh — "thay thế mạnh và rõ ràng hơn" phải đọc được cả
+   khi mắt đang nhìn cái thước chứ không nhìn chữ. */
+.lenManh .rang { animation: pcNay 620ms steps(6, end) 1; }
+
+@keyframes pcDongNhe {
+  0%   { transform: scale(1.5); opacity: 0.5; }
+  45%  { transform: scale(1); opacity: 1; }
+  60%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pcDongManh {
+  0%   { transform: scale(2.4) translateY(-2px); opacity: 0.15; }
+  35%  { transform: scale(1) translateY(0); opacity: 1; }
+  50%  { transform: scale(1.3) translateX(-2px); }
+  65%  { transform: scale(1.15) translateX(2px); }
+  80%  { transform: scale(1.05) translateX(-1px); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pcNay {
+  0%, 100% { transform: scaleY(1); }
+  25%      { transform: scaleY(1.9); }
+  60%      { transform: scaleY(1.25); }
+}
+
+/* ── TỤT HẠNG ───────────────────────────────────────────────────────────────
+   ⚠ Phải TRÔNG KHÁC cú lên, không chỉ nhẹ hơn. Tra cứu DMC: trong game có hai
+   chuyển động khác hẳn nhau — trôi mượt (do hết thời gian) và giật (do ăn đòn);
+   gộp chúng vào một hình thức thì người chơi không phân biệt được "tôi chậm"
+   với "tôi vừa bị phạt". Ở ta: lên = đóng dấu NỞ RA, tụt = giật ngang + xỉu
+   opacity. Cố ý không dùng `scale` ở đây. */
+.tut .hangChu { animation: pcTut 380ms steps(5, end) 1; }
+
+@keyframes pcTut {
+  0%   { transform: translateX(0); opacity: 1; }
+  30%  { transform: translateX(3px); opacity: 0.35; }
+  60%  { transform: translateX(-2px); opacity: 0.8; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+/* ── CHƯA XẾP HẠNG — mấy vòng đầu (D343) ────────────────────────────────────
+   Founder 16/09: *"hiện ngay từ đầu nhưng màu xám vì chưa quyết định điểm, thanh vẫn
+   chạy/ được chấm bình thường nhưng màu nhạt và điểm là dấu '?'"*.
+   · Xám CÔNG NĂNG `--text-muted`, không phải xám thép đầu dải `MOC` — xám thép là MÀU
+     CỦA HẠNG E, nên dùng nó thì thanh chưa chấm đọc ra "đang hạng E".
+   · Mực PHẲNG và NHẠT: bỏ dải màu, vì dải là con đường lên SSS — chưa có hạng thì chưa
+     có đường. Mức lấp vẫn theo điểm tạm tính (`clip-path` inline không đổi).
+   · Dấu `?` giữ ĐỦ SÁNG (~8:1 trên nền trận): nó chở cái tin "chưa đủ vòng"; làm nhạt
+     nó là mất tin chứ không phải bớt ồn. Chuỗi `×N` ăn cùng `--pc-mau` nên xám theo. */
+.chuaXep { --pc-mau: var(--text-muted); }
+.chuaXep .day {
+  background: var(--pc-mau);
+  opacity: 0.38;
+}
+
+/* ── BẬT ĐÈN — khoảnh khắc đủ vòng (D343) ───────────────────────────────────
+   Thanh xám bò tới điểm thật RỒI mới sáng: dải màu hiện lại, bập bùng như bóng neon
+   trước khi cháy hẳn. Là ÁNH SÁNG (bỏ lớp này thì vật không đổi hình), nhưng chập chờn
+   vốn RỜI RẠC nên `steps(1)`: mỗi khoảng giữ nguyên mức của mốc mở đầu nó. Từ 58% đã
+   sáng hẳn — phần dài nhất của nhịp là "đã sáng", không phải "đang nháy".
+   ⚠ Chữ hạng KHÔNG đi nhịp này: nó có cú ĐÓNG DẤU riêng (`.lenNhe`/`.lenManh`), và
+   `.rang` đã có chủ `animation` ở `.lenManh .rang` — một phần tử, một chủ (D122). Nên
+   đèn gắn lên `.day`, phần tử duy nhất trong thanh chưa có chủ nào. */
+.batDen .day {
+  animation: pcBatDen var(--nhip-bat-den-phong-cach, 600ms) steps(1, end) 1;
+}
+
+@keyframes pcBatDen {
+  0%   { opacity: 0.38; }
+  14%  { opacity: 1; }
+  26%  { opacity: 0.3; }
+  38%  { opacity: 1; }
+  50%  { opacity: 0.6; }
+  58%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+/* ⚠ Tắt CHUYỂN ĐỘNG, KHÔNG tắt THÔNG TIN: hạng, màu và mức lấp vẫn đọc được
+   nguyên vẹn — thứ bị bỏ là cái nháy, không phải cái tin. Riêng cầu vồng giữ
+   nguyên DẢI MÀU (đứng yên): nó là dấu hiệu SSS, bỏ đi thì bậc cao nhất trông y
+   hệt bậc thường với người bật tiết kiệm chuyển động. */
+@media (prefers-reduced-motion: reduce) {
+  .fx_kim_loai .fx::before,
+  /*
+   * ⚠⚠ HAI LỖ ĐÃ VÁ 23/08 — cả hai để lọt hoạt ảnh VÔ HẠN qua đúng khối sinh ra
+   * để tắt chúng, và cả hai im lặng.
+   *
+   * (1) ĐỘ ƯU TIÊN. Quầng được bật ở `.fx_chay .quang` / `.fx_chay_manh .quang`
+   *     / `.fx_cau_vong .quang` — selector HAI lớp (0,2,0). Dòng tắt cũ chỉ là
+   *     `.quang` (0,1,0) nên nó THUA, và quầng vẫn thở vô hạn ở cả ba bậc cháy.
+   *     Kéo theo: ba dòng `opacity: .14/.26/.38` ngay dưới cũng vô hiệu, vì
+   *     keyframe `pcTho` có đụng `opacity` nên nó đè giá trị tĩnh.
+   * (2) THIẾU HẲN MỘT MỤC: `.fx_cau_vong .fx::before` (dải cầu vồng `pcChay`)
+   *     chưa từng có tên ở đây — chỉ `::after` được tắt. Bậc SSS là bậc chạy
+   *     nhiều hoạt ảnh nhất, và nó lọt đúng cái to nhất.
+   * ⇒ Từ nay: thêm một `animation` mới ở trên thì PHẢI thêm đúng selector ấy
+   *   vào đây, không được rút gọn về lớp đơn. Có bài test quét chéo hai danh sách.
+   */
+  .fx_chay .fx::before,
+  .fx_chay_manh .fx::before,
+  .fx_cau_vong .fx::before,
+  .fx_cau_vong .fx::after,
+  .fx_chay_manh .hangChu,
+  .fx_cau_vong .hangChu,
+  .lenNhe .hangChu,
+  .lenManh .hangChu,
+  .lenManh .rang,
+  .tut .hangChu,
+  .batDen .day,
+  .fx_chay .quang,
+  .fx_chay_manh .quang,
+  .fx_cau_vong .quang,
+  .quang { animation: none; }
+  /*
+   * ⚠ Tắt `pcTho` là quầng rơi về `opacity: 0` của lớp gốc — tức người bật tiết
+   * kiệm chuyển động MẤT LUÔN dấu hiệu "đang cháy", chứ không phải chỉ mất cái
+   * thở. Trả lại một mức tĩnh, lấy đúng cận dưới của từng bậc.
+   */
+  .fx_chay .quang { opacity: 0.14; }
+  .fx_chay_manh .quang { opacity: 0.26; }
+  .fx_cau_vong .quang { opacity: 0.38; }
+  /*
+   * ⚠ KHÔNG `display: none` — vệt lửa đứng yên vẫn phải nói "thanh này đang
+   * nóng", chỉ thôi chạy. Sọc trắng bất động thì trông như lỗi, nên đổi hẳn
+   * sang một lớp sáng ĐỀU: bỏ CHUYỂN ĐỘNG, giữ NHIỆT.
+   */
+  .fx_chay .fx::before,
+  .fx_chay_manh .fx::before {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.18);
+  }
+  /* Vệt kim loại là cú LOÉ thuần, không chở tin nào — đứng yên thì gỡ nền. */
+  .fx_kim_loai .fx::before { background: none; }
+  .fx_cau_vong .fx::after { background: none; }
+  .fx_cau_vong .fx::before { width: 100%; }
+}
+
+/* v55 (D409) — khe NGỌN LỬA ĐÀ bên phải thanh (chỗ dấu ×N cũ). Lửa tự animate; khe chỉ giữ chỗ và không đội chiều cao. */
+.lua { flex: none; display: inline-flex; align-items: flex-end; line-height: 0; margin-left: 2px; }
+/* D422 — MÙ LỬA: lá 24×24 thu về đúng ô lửa 16px (pixel không nhoè — crispEdges trong svg). */
+.muLua svg { width: 16px; height: 16px; display: block; }
+.chuaXep .lua { opacity: 0.45; }

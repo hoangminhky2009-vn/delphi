@@ -1,0 +1,133 @@
+/* XƯỞNG DÁN — lớp phủ toàn màn, hộp giữa, Terminal×Neon. */
+
+.phu {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(5, 3, 12, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+.hop {
+  width: min(420px, 100%);
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  background: #0a0618;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dau {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.dong { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 14px; }
+
+.khung {
+  position: relative;
+  align-self: center;
+  padding: 0;
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  background: none;
+  cursor: crosshair;
+  image-rendering: pixelated;
+}
+.oDanhDau {
+  position: absolute;
+  border: 2px solid var(--gold-amber);
+  box-shadow: 0 0 6px rgba(251, 191, 36, 0.8);
+  pointer-events: none;
+}
+
+.ghiChu { color: var(--text-dim); font-size: 11px; margin: 0; }
+.loi { color: var(--lose-tag); font-size: 11px; margin: 0; }
+
+.khoNhan { display: flex; flex-wrap: wrap; gap: 6px; }
+.nhan,
+.nhanChon {
+  font: inherit;
+  font-size: 11px;
+  padding: 4px 8px;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.nhanChon { border-color: var(--accent-bright); box-shadow: 0 0 6px rgba(139, 92, 246, 0.6); }
+
+.xacNhan {
+  border: 1px solid var(--gold-amber);
+  padding: 10px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.xacNhan p { margin: 0; line-height: 1.5; }
+.xacNhanNut { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.huy { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; }
+
+/* ─── XEM TRƯỚC THẬT (12/08) ────────────────────────────────────────────── */
+
+/* Ô kho nhãn nay chở MỘT BẢN GHÉP, không phải một dòng chữ — nên nó phải xếp
+   dọc và đủ chỗ cho khung 64px. */
+.nhan, .nhanChon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.tenNhan {
+  font-size: 10px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.lat {
+  align-self: center;
+  padding: 4px 10px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--text-body);      /* button KHÔNG kế thừa màu chữ — bài học D74 */
+  font: inherit;
+  font-size: 11px;
+  border-radius: 0;             /* §XI */
+  cursor: pointer;
+}
+
+/* TRƯỚC → SAU trong hộp xác nhận. */
+.doiChieu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 10px 0;
+}
+
+.doiChieu figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+
+.doiChieu figcaption {
+  font-size: 10px;
+  color: var(--text-body);
+  letter-spacing: 0.08em;
+}
+
+.muiTen {
+  color: var(--accent);
+  font-size: 18px;
+}

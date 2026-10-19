@@ -1,0 +1,45 @@
+/*
+ * Dải tab khu Tài chính.
+ *
+ * ⚠ KHÔNG `cubic-bezier` trong tệp này: nó `composes` từ `pixel.module.css`, và ranh
+ * D182 nói rõ `steps()` cho VẬT & nhịp máy, `cubic-bezier` nảy chỉ ở `motion.module.css`.
+ * Nút lún "cạch cạch" đã nằm sẵn trong `.nut:active` bên đó — ở đây chỉ lo bố cục và
+ * trạng thái ĐANG XEM.
+ */
+
+.dai {
+  display: flex;
+  gap: 4px;
+  padding: 8px 0 6px;
+}
+
+/*
+ * ⚠ CHÉP TỪ DEMO (A11.25). Bản trước tôi tô nền accent ĐẶC và đảo màu chữ — demo dùng
+ * viền + chữ accent trên nền `rgba(...,.10)`. Khác nhau thật sự: nền đặc kéo mắt mạnh
+ * hơn cả nội dung màn, mà tab chỉ là chỗ đứng chứ không phải chỗ nhìn.
+ */
+.tab {
+  flex: 1;
+  padding: 6px 0 6px 1px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  /*
+   * ⚠ 13/09 (D323) — tab thứ năm "NĂNG LỰC" xuống hai dòng ở 375px (đo: ô 59,6px,
+   * chữ cần 62px) và kéo CẢ dải cao từ 32 lên 50px. Giữ nguyên cỡ chữ + giãn chữ
+   * của demo đã chốt; chỉ cấm xuống dòng — ô ấy rộng thêm ~2px, bốn ô kia co lại.
+   */
+  white-space: nowrap;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid var(--line);
+  color: var(--chu-phu);
+  transition: color 120ms steps(2, end), border-color 120ms steps(2, end),
+    background-color 120ms steps(2, end);
+}
+
+.dangXem {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(34, 211, 238, .10);
+}
+

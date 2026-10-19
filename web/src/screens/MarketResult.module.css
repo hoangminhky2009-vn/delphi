@@ -1,0 +1,428 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.topRow {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Header trong thẻ (đúng mẫu E: logo chip + DELPHI://KẾT-QUẢ + pill VÍ) ── */
+.cardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/*
+ * Chip logo 12×12 — VẬT NHỎ ĐẶC. `--grad-logo` là dải cyan→lục 135deg: trên 12
+ * điểm ảnh chéo, dải đó không đủ chỗ để đọc ra nguồn sáng, nó chỉ ra một mặt bị
+ * nhoè (luật 5). Nay màu PHẲNG + vát 2px (công thức `.khoi`), quầng logo giữ
+ * nguyên vì offset 0 → ánh sáng. Ba vai khai chung một `box-shadow` theo luật 6
+ * chứ không `composes: khoi` rồi khai đè — làm thế là mất trắng vát.
+ */
+.brandChip {
+  composes: khung from '../styles/pixel.module.css';
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  box-shadow: var(--px-vien-trong-day), var(--px-bong), var(--glow-logo);
+}
+
+.brandText {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: var(--text-bright);
+}
+
+.brandSlash {
+  color: var(--accent);
+}
+
+.brandScreen {
+  color: var(--text-muted);
+}
+
+.walletPill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(34, 211, 238, 0.05);
+  border: 1px solid var(--border-accent-soft);
+  border-radius: 0;
+  padding: 5px 10px;
+}
+
+.walletLabel {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.walletVal {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.walletUp {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--win);
+}
+
+.walletDown {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--lose-soft);
+}
+
+/* Nhắc skip — nhìn y dòng chữ của mẫu nhưng là <button> cho a11y */
+.skipHint {
+  composes: doiMau from '../styles/pixel.module.css';
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+}
+.skipHint:hover {
+  color: var(--text-title);
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.prompt {
+  color: var(--accent);
+}
+
+.question {
+  margin: 0;
+  font-family: var(--font-human);
+  font-size: 17.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-title);
+}
+
+.doors {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hint {
+  margin: 0;
+  text-align: center;
+  font-size: 10.5px;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
+.hintRow {
+  display: flex;
+  justify-content: center;
+  padding: 2px 0;
+}
+
+.retryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tongWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.tongLabel {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--accent-bright);
+}
+
+.odoRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tongGlow {
+  position: absolute;
+  inset: -16px;
+  background: radial-gradient(closest-side, rgba(74, 222, 128, 0.4), rgba(74, 222, 128, 0));
+  pointer-events: none;
+}
+
+.tongT {
+  font-weight: 800;
+  font-size: 24px;
+  color: var(--win);
+}
+
+.walletRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.walletLabel {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.walletVal {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-max);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.walletDelta {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--win);
+}
+
+/* ── Ca THUA: vốn về "tạch" ra 0 + mặt mếu ── */
+.vonRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vonLabel {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.vonVal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-max);
+}
+
+/* "Tạch": giật nảy một cái rồi đứng im, đổi đỏ — KHÔNG đếm số.
+   Cú nảy là VẬT đổi hình + đổi chỗ → nhảy 5 nấc (thang "nảy/đáp"), không
+   `cubic-bezier`: đường cong đàn hồi đó là nhịp của vật mềm. Bản thân keyframe
+   đã có 6 mốc nên 5 nấc/đoạn vẫn giữ nguyên hình dáng cú giật. */
+.vonTach {
+  color: var(--lose-soft);
+  animation: tachHit 550ms steps(5, end) both;
+}
+
+@keyframes tachHit {
+  0% { transform: scale(1.5) translateY(-4px); opacity: 0; }
+  35% { transform: scale(0.88) translateY(2px); opacity: 1; }
+  55% { transform: scale(1.06) translateY(0); }
+  70% { transform: translateX(-3px); }
+  84% { transform: translateX(3px); }
+  100% { transform: none; }
+}
+
+/*
+ * Mặt mếu lắc lư — nay là `<PixelIcon name="sad">`, tức một sprite trên lưới.
+ * `rotate(-6deg)` GỠ BỎ: xoay một sprite pixel 6° thì trình duyệt phải nội suy
+ * lại từng ô, và cả khuôn mặt nhoè đúng vào lúc người chơi nhìn nó lâu nhất.
+ * Còn lại đúng cú nhún 2 KHUNG HÌNH — `steps(1)` giữ nguyên vị trí rồi nhảy một
+ * phát, y như animation chờ của sprite cổ điển. Quãng nhún đổi 2px → một đơn vị
+ * khấc để nó không rơi vào nửa điểm ảnh.
+ */
+.sadFace {
+  display: inline-flex;
+  animation: sadBob 2.4s steps(1, end) 0.6s infinite;
+}
+
+@keyframes sadBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(var(--px-do-day)); }
+}
+
+/* ── Thưởng chuỗi: khối lửa port từ Mẫu E (firepulse → emberglow + than bay) ── */
+.streakRow {
+  composes: fireBlock from '../styles/motion.module.css';
+  --dl-badgeup-dur: 0.45s;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(251, 146, 60, 0.1);
+  border: 1px solid var(--border-gold);
+  border-radius: 0;
+  padding: 7px 10px;
+}
+/* (firepulse/emberglow đã dồn về motion.module.css — trước đây bị chép ở cả
+   MarketResult lẫn MarketDetail, đúng thứ A8.9 cấm.) */
+
+.flameGlow {
+  position: absolute;
+  inset: -12px -6px -4px;
+  z-index: 0;
+  border-radius: 0;
+  background: radial-gradient(
+    70% 120% at 50% 100%,
+    rgba(253, 224, 71, 0.5),
+    rgba(249, 115, 22, 0.35) 38%,
+    rgba(220, 38, 38, 0.2) 60%,
+    rgba(0, 0, 0, 0) 78%
+  );
+  filter: blur(7px);
+  transform-origin: 50% 100%;
+  animation: flameburst 3.1s ease-in-out 0.1s both;
+  pointer-events: none;
+}
+
+@keyframes flameburst {
+  0% { transform: scaleY(1.5) scaleX(1.12); opacity: 0.9; }
+  30% { transform: scaleY(1.25) scaleX(1.05); opacity: 0.75; }
+  100% { transform: scaleY(0.7) scaleX(0.9); opacity: 0; }
+}
+
+.ember {
+  position: absolute;
+  bottom: 3px;
+  z-index: 2;
+  width: 3px;
+  height: 3px;
+  border-radius: 0;
+  background: var(--gold-ember);
+  box-shadow: 0 0 6px var(--gold-flame);
+  opacity: 0;
+  pointer-events: none;
+  /* Tàn lửa là VẬT 3×3 đang ĐỔI CHỖ → nhảy nấc như sprite, cùng thang 12 nấc
+     với bản ở màn chi tiết dự báo. Quầng 6px quanh nó vẫn giữ blur. */
+  animation: emberfloat 2.1s steps(12, end) 2.6s infinite;
+}
+
+@keyframes emberfloat {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  18% { opacity: 1; }
+  100% { transform: translateY(-15px) translateX(3px) scale(0.25); opacity: 0; }
+}
+
+.streakText {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.streakTitle {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.streakRate {
+  background: var(--gold);
+  color: #241a04;
+  border-radius: 0;
+  padding: 0 4px;
+}
+
+.streakSub {
+  font-size: 10px;
+  color: var(--text-dim-2);
+}
+
+.streakVal {
+  position: relative;
+  z-index: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--win);
+  flex-shrink: 0;
+}
+
+.badges {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.footNote {
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.cancelBox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-body);
+  background: rgba(248, 113, 113, 0.07);
+  border: 1px solid var(--border-lose);
+  border-radius: 0;
+  padding: 12px;
+}
+
+.note {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.errBox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  border: 1px dashed var(--border-idle);
+  border-radius: 0;
+  padding: 14px;
+}
+
+/* (skeleton dùng class .skeleton toàn cục — styles/base.css) */

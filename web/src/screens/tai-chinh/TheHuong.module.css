@@ -1,0 +1,139 @@
+/*
+ * TẤM HƯỚNG — mô hình DEMO bản 6 (founder 11/10, câu B). Góc khấc · nút (?) · con dấu DÙNG LẠI `Guong.module.css`.
+ * Demo (`.luat` · `.tuy-chon`): dòng nhận định là HỘP chữ phẳng nền tối; ba nút chọn là PHÍM NỔI, phím đang chọn đổi sang vàng + dấu ●.
+ *
+ * ⚠ MÀU THEO VAI — chỉ tên công năng trỏ về `pfm_token.css` (luật 5 `00-doc-truoc.md`), khai MỘT chỗ ở `.the`:
+ *   · `--h-quyet` VÀNG  = quyết định / mốc của CHÍNH người dùng (cùng nghĩa họ VÀNG của biểu đồ D426);
+ *   · `--h-tieu`  XANH  = tiền đã TIÊU;
+ *   · `--h-noi`   mờ    = lời kể;
+ *   · phím đang chọn mang vàng (mốc của người dùng); không `--win`/`--lose` ở tệp này (A10 🔒 — "chưa tới" không phải lời phán).
+ * ⚠ BA TẦNG BỀ MẶT: hộp dòng học PHẲNG (lõm nhẹ) · phím chọn NỔI (mặt phím + vạch đáy dày + bóng cứng) · dải chấm LÕM (nền inset).
+ * ⚠ CHỮ ≥ 12px. CHUYỂN ĐỘNG chỉ `transform`/`opacity`: dòng + phím trượt vào so le `--nhip-pfm-led` (back-ease-out, cùng đường cong
+ *   D426/D429 — không đẻ easing thứ hai); phím lún `steps(2)`. `@keyframes` cùng tệp (lint:css-anim). Giảm chuyển động: tắt cái nháy.
+ * ⚠ Tệp tự reset nút (repo không reset `<button>` toàn cục). Không bo góc: pixel art.
+ */
+
+.the {
+  --h-quyet: var(--v-3);
+  --h-tieu: var(--c-3);
+  --h-noi: var(--chu-than);
+  --h-noi-vach: var(--c-3);
+  --h-hop: var(--n-1);
+  --h-phim: var(--n-4b);
+  --h-phim-vach: var(--n-6);
+  --h-phim-chon: var(--c-3);
+  --h-phim-chon-sang: var(--c-4);
+  --h-bong-nut: var(--n-0);
+  position: relative;
+  padding: 0 0 8px;
+}
+
+/* ── NHÃN DẢI — chữ + vạch kéo hết hàng (nếp `.tam-tag` demo + `.muc` D429) ───────────────────── */
+.muc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 5px;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: var(--v-3);
+}
+.muc::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.rong { margin: 6px 0 2px; font-size: 12.5px; line-height: 1.55; color: var(--chu-mo); }
+
+/* ── HỘP DÒNG HỌC — như `.luat` của demo: hộp phẳng nền tối, một câu 15–16px ───────────────────── */
+.dong {
+  margin-top: 6px;
+  padding: 8px 10px;
+  background: var(--h-hop);
+  box-shadow: var(--px-vien);
+  animation: hgVao var(--nhip-nd-day, 620ms) cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(var(--i, 0) * var(--nhip-pfm-led, 60ms));
+}
+@keyframes hgVao { from { transform: translateX(-12px); opacity: 0; } }
+.cau { display: block; font-size: 15px; font-weight: 500; line-height: 1.35; color: var(--text-bright); }
+.so { font-weight: 700; font-variant-numeric: tabular-nums; }
+.hoQuyet .so { color: var(--h-quyet); }
+.hoTieu .so { color: var(--h-tieu); }
+.hoNoi .cau { color: var(--h-noi); }
+/* Lời kể đi kèm — dòng phụ dưới câu, mép trái lam; không tranh cỡ với câu chính. */
+.noiKem {
+  display: block;
+  margin-top: 4px;
+  padding-left: 7px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text-muted);
+  border-left: 2px solid var(--h-noi-vach);
+}
+
+/* ── BA PHÍM CHỌN — như `.tuy-chon button` của demo: nổi, đang chọn = vàng + ● ────────────────── */
+.tuyChon { display: flex; flex-direction: column; gap: 6px; }
+.phim {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 10px;
+  font: inherit;
+  font-size: var(--tk-body);
+  letter-spacing: 0.06em;
+  text-align: left;
+  color: var(--n-10);
+  background: var(--h-phim);
+  border: 0;
+  border-bottom: 3px solid var(--h-phim-vach);
+  border-radius: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 1px 0 0 rgba(255, 255, 255, 0.07), inset -1px 0 0 rgba(0, 0, 0, 0.3), var(--px-bong);
+  cursor: pointer;
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+  animation: hgVao var(--nhip-nd-day, 620ms) cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(var(--i, 0) * var(--nhip-pfm-led, 60ms));
+}
+.phim:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.35); }
+.phim[aria-pressed='true'] {
+  color: var(--h-phim-chon-sang);
+  background: color-mix(in srgb, var(--h-phim-chon) 22%, var(--h-phim));
+  border-bottom-color: var(--h-phim-chon);
+}
+.nhanPhim { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.chamTron { flex: none; min-width: 12px; text-align: right; font-size: 14px; }
+@media (hover: hover) and (pointer: fine) {
+  .phim:hover { color: var(--text-title); }
+}
+/* Dòng trạng thái là MÔ TẢ ("làm đúng 3/4 lần" · "chưa có lần chia nào") — chữ phụ theo token, KHÔNG màu cảnh báo/đỏ (founder 11/10). */
+.trangThai { margin: 7px 0 0; font-size: 13px; line-height: 1.4; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+/* ── DẢI CHẤM — LÕM (nền inset): hướng tuần trước đếm được gì · app đoán về bạn ─────────────────── */
+.cham {
+  margin: 12px -2px 0;
+  padding: 1px 10px 9px;
+  background: var(--surface-inset);
+  border-top: 1px solid var(--line);
+}
+.hangCham { display: flex; align-items: center; gap: 8px; min-height: 34px; margin-top: 4px; }
+.tenCham { flex: 1; min-width: 0; font-size: 12.5px; line-height: 1.4; color: var(--text-dim); }
+.chip {
+  flex: none;
+  padding: 3px 7px 3px 8px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+  white-space: nowrap;
+}
+.chipToi { color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+.soApp { flex: none; font-size: 13px; color: var(--text-bright); font-variant-numeric: tabular-nums; }
+.phuCham { margin: 4px 0 0; font-size: 12px; line-height: 1.5; color: var(--chu-mo); }
+/* Con dấu ĐÃ CHỐT SỔ thu nhỏ vào một hàng — cùng lớp `.dau` (hoạt ảnh đóng dấu steps) của GƯƠNG. */
+/* ⚠ Hai lớp (`.hangCham .dauNho`): `.dau` của GƯƠNG khai cao 72px — một lớp đơn ở tệp khác thắng hay thua tuỳ THỨ TỰ
+   BUNDLE; tăng độ ưu tiên thì không phụ thuộc thứ tự nạp. */
+.hangCham .dauNho { flex: none; height: 30px; margin-top: 0; padding: 0 8px; font-size: 12px; }
+.hangCham .voTay { flex: none; height: 30px; margin-top: 0; padding: 0 8px; font-size: 18px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dong, .phim { animation: none; }
+}

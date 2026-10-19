@@ -1,0 +1,11 @@
+{
+  // Bản demo "khách nâng cao" (link pitch deck, 28/09): máy chủ thật chạy trong Web Worker trên PGlite. Kiểm kiểu phần
+  // `src/demo` cùng đồ thị import của server; server tự có tsc gốc chặt riêng, nên ở đây không bật lại noUnusedLocals.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noUnusedLocals": false,
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"]
+  },
+  "include": ["src/demo", "src/vite-env.d.ts", "tests/demo_may_chu.test.ts"],
+  "exclude": []
+}

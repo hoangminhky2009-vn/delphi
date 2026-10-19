@@ -1,0 +1,95 @@
+/*
+ * LÕI ĐÒN BẨY GÃY ĐÔI — xem docstring `LoiGay.tsx` để biết vì sao là hình chứ
+ * không phải chữ, và vì sao hai nửa là hai bản cắt của cùng một bức.
+ *
+ * ⚠ CHỈ `transform` và `opacity` được động. Đó là TẬP GIAO của web · Discord
+ * Activity · RN-Flutter (D105/D115), không phải mẹo tiết kiệm pin.
+ * ⚠ `clip-path` ở đây TĨNH — đặt một lần để cắt nửa lá, không animate.
+ * ⚠ §XI: `border-radius: 0`, không blur, không gradient mềm.
+ */
+
+.khoi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Hộp lá — giữ đúng tỷ lệ art 4:3 của lưới 80×60. */
+.la {
+  position: relative;
+  width: 168px;
+  height: 126px;
+}
+
+/*
+ * HAI NỬA. Mỗi nửa là một bản ĐẦY ĐỦ của bức tranh, bị `clip-path` cắt còn một
+ * bên — nên khi chúng còn chồng khít nhau thì mắt thấy MỘT lá lành lặn, không
+ * thấy đường ghép. Đó là điều kiện để cú gãy có nghĩa: phải lành trước đã.
+ */
+.nua {
+  position: absolute;
+  inset: 0;
+  transition: transform 260ms steps(5, end);
+}
+.trai { clip-path: inset(0 50% 0 0); }
+.phai { clip-path: inset(0 0 0 50%); }
+
+.art { display: block; width: 100%; height: 100%; }
+.art > svg { display: block; width: 100%; height: 100%; }
+
+/*
+ * CÚ GÃY — hai nửa trượt ra và ĐỔ theo hai chiều ngược nhau, như một thanh
+ * cứng vừa bị bẻ. Xoay nhẹ thôi (3°): xoay nhiều thì nó đọc ra "hai mảnh bay",
+ * xoay ít mới đọc ra "một vật vừa gãy".
+ */
+.gay.trai  { transform: translate(-13px, 5px) rotate(-3deg); }
+.gay.phai  { transform: translate(13px, 5px) rotate(3deg); }
+
+/*
+ * VẾT NỨT — dải răng cưa dọc giữa lá, chỉ hiện SAU cú gãy.
+ * Vẽ bằng `repeating-linear-gradient` TĨNH (không animate), đúng idiom vạch
+ * nhiễu của `MarketMap`. Không blur.
+ */
+.nut {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 3px);
+  width: 6px;
+  opacity: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    #0a0612 0 5px,
+    transparent 5px 8px,
+    #0a0612 8px 13px,
+    transparent 13px 15px
+  );
+  transition: opacity 120ms steps(2, end);
+}
+.nutHien { opacity: 1; }
+
+/* Số chip mất — vào SAU cú gãy, không tranh khoảnh khắc với nó. */
+.so {
+  color: var(--lose, #f87171);
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 200ms steps(4, end),
+    transform 200ms steps(4, end);
+}
+.soHien {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * ⚠ Tắt cái ĐỘNG, giữ cái TIN. Hai nửa vẫn đứng ở vị trí ĐÃ GÃY (component
+   * đặt `daGay` = true ngay từ đầu ở nhánh này), vết nứt vẫn hiện, con số vẫn
+   * đọc được — chỉ không có cú trượt. Người bật tiết kiệm chuyển động vẫn phải
+   * hiểu được chuyện gì vừa xảy ra với tiền của họ.
+   */
+  .nua, .nut, .so { transition: none; }
+  .so { opacity: 1; transform: none; }
+}

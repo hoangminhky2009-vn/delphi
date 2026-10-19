@@ -1,0 +1,402 @@
+/*
+ * CÀI ĐẶT PFM — CHÉP TỪ DEMO ĐÃ CHỐT (A11.25): `docs/ui-ux/demo/pfm-cai-dat.html`, bản D295
+ * (bốn cửa + công tắc chung · mã khôi phục · sao lưu · khôi phục · xoá sạch · khác).
+ * Mọi số đo và token màu chép nguyên; chú thích gốc của demo giữ lại ở chỗ nó ghi một cái
+ * giá đã trả. Thấy chỗ nào nên khác thì sửa Ở DEMO rồi chốt lại, đừng sửa ở đây.
+ *
+ * ⚠ Không `composes` từ `pixel.module.css` trừ ĐÚNG `.khac` (cùng nếp `Guong.module.css`):
+ * tệp tự reset nút của mình — repo KHÔNG có reset toàn cục cho `<button>`.
+ * ⚠ Ranh D182: `steps()` cho VẬT (thanh trượt công tắc, ô LED, nút lún, con dấu) ·
+ *   `ease-in-out` cho ÁNH SÁNG thở (`tho`). Không `cubic-bezier` trong tệp này.
+ * ⚠ TÊN LỚP đã grep trước khi đặt (D241): vệt tiến độ của nút giữ tên `giuDay`, KHÔNG phải
+ *   `day` — `Hu.module.css` có `.day` (vùng đáy) và `.huDay` (hũ đầy); bỏ dấu là ba chữ y hệt.
+ */
+
+/*
+ * GÓC KHẤC PIXEL — MỘT NGUỒN (A11.5): `composes` lớp `khung` của `pixel.module.css` chứ
+ * không chép lại polygon. Demo gọi lớp này là `.khac`; giữ tên để đối chiếu không qua từ
+ * điển thứ ba.
+ */
+.khac {
+  composes: khung from '@/styles/pixel.module.css';
+}
+
+/*
+ * ⚠⚠ RESET NÚT PHẢI Ở ĐỘ ĐẶC HIỆU (0,0,1) — `:where(.man) button`, không phải `.man button`.
+ * Đây là hai bẫy CHỒNG lên nhau, và bản đầu tránh bẫy một rồi rơi thẳng vào bẫy hai:
+ *   · `button {}` trần trong `*.module.css` là TOÀN CỤC — đè mọi nút của app khi module nạp.
+ *   · `.man button` là (0,1,1) — thắng MỌI lớp một-class của chính tệp này (`.nut2` `.hoi`
+ *     `.congTac` `.btGiu` đều (0,1,0)), nên nó xoá viền/nền/màu của đúng những nút nó vừa
+ *     reset. Đo trên trình duyệt: nút "GIỮ 2 GIÂY ĐỂ XOÁ" mất viền, mất nền, mất màu `--lose`
+ *     ⇒ một hành động KHÔNG HOÀN TÁC ĐƯỢC trông như một dòng chữ nhạt. jsdom không áp CSS
+ *     module nên 1511 bài xanh không thấy gì.
+ * `:where()` giữ phạm vi mà không cộng điểm — bằng đúng `button{}` của demo trong so sánh
+ * độ đặc hiệu, nhưng không rò ra ngoài khối.
+ *
+ * ⚠ `font-size`/`line-height` khai LẠI ở `.man`: khối này sống trong `ScreenFrame .body`
+ * (12,5px / 1.55) còn demo là `body` mặc định (16px / normal). Kế thừa im lặng ấy kéo mọi
+ * dòng cao thêm ~35% và khối ① dài thêm ~76px so với số đã chốt ở demo — "chép nguyên số đo"
+ * chỉ đúng khi cái nền chữ cũng bằng nhau.
+ */
+.man { display: block; font-size: 16px; line-height: normal; }
+:where(.man) button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+:where(.man) button:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 1px; }
+
+/* ── Đầu trang ─────────────────────────────────────────────────────────── */
+.dauTrang { padding: 14px 2px 4px; }
+.nhanTrang { margin: 0; font-size: 20px; letter-spacing: 1.5px; color: var(--text-bright); }
+.phuTrang { margin: 3px 0 0; font-size: 12px; letter-spacing: 1px; color: var(--chu-mo); }
+
+/* ── Khối thẻ dùng chung (chép demo: khoi2/hang2/ten2/chuThich/tieu) ─────────── */
+.tieu {
+  margin: 13px 0 8px;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  padding-left: 1.5px;
+  color: var(--text-muted);
+}
+.tieuKhac { margin: 0 0 2px; }
+.khoi2 {
+  border: 1px solid var(--line);
+  background: var(--surface-card);
+  padding: 12px;
+  margin-bottom: 9px;
+}
+.hang2 { display: flex; align-items: baseline; gap: 8px; }
+.ten2 { flex: 1; font-size: 15px; color: var(--text-bright); }
+.chuThich { margin: 7px 0 0; font-size: 12px; line-height: 1.55; color: var(--chu-mo); }
+
+.nut2 {
+  flex: 1;
+  min-width: 74px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  font-size: 12.5px;
+  letter-spacing: 1px;
+  padding-left: 1px;
+  color: var(--text-dim);
+  border: 1px solid var(--line-2);
+  box-shadow: var(--px-bong);
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.nut2:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+.nut2.chinh { border-color: var(--accent); color: var(--accent-bright); background: rgba(34, 211, 238, .10); }
+.nut2[disabled] { opacity: .4; pointer-events: none; }
+.rong100 { width: 100%; flex: none; }
+/* ⚠ `.nut2` khai `flex: 1` vì nó sinh ra cho HÀNG NÚT (hai ba nút chia đều). Đặt
+   một mình trong `.hangCt` thì nó nuốt hết chỗ trống — đo được 141px cho chữ
+   "SỬA", trong khi cột công tắc của hai hàng trên chỉ 40px, nên ba hàng nhìn
+   lệch hẳn. `.nutHang` là biến thể "một nút đứng cuối hàng": ôm sát chữ, vẫn
+   giữ 44px chiều cao (vùng chạm). */
+.nutHang { flex: none; }
+
+.hoi {
+  position: relative;
+  flex: none;
+  width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text-muted);
+  border: 1px solid var(--line-2);
+}
+/* Lớp phủ 44×44 nới vùng chạm — ⚠ dưới `.khac` thì `clip-path` xén nó (D292); khối ①
+   vì thế đặt trạng thái lên NÚT bọc `.cham44` (xem dưới). Khối ②/④ giữ nguyên demo. */
+.hoi::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+.hoi[aria-expanded='true'] { border-color: var(--accent); color: var(--accent); }
+.giai {
+  margin: 7px 0 0;
+  padding: 9px 10px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  background: var(--surface-inset);
+  border-left: 2px solid var(--accent);
+}
+.giai b { color: var(--text-bright); font-weight: 700; }
+
+.oNhap {
+  width: 100%;
+  height: 44px;
+  margin-top: 8px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: var(--text-bright);
+  background: var(--surface-inset);
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  outline: none;
+}
+.oNhap::placeholder { color: var(--chu-mo); letter-spacing: 2px; }
+.oNhap:focus { border-color: var(--accent); }
+.oNhap.loi { border-color: var(--lose); }
+
+/* ── SỐ KHỐI kiểu huy hiệu (①…⑥) ────────────────────────────────────────
+   ⚠ KHÔNG đổi nền huy hiệu theo trạng thái khoá: bản đầu dùng `--n-5` cho khối khoá,
+   đo ra 2,09 — dưới sàn rất xa. Badge nằm NGOÀI `.than2` (không ăn opacity khoá) nên
+   nó phải tự đứng vững; giữ `--chu-mo` (5,26) cho mọi trạng thái, `.khoaNhan` lo việc
+   nói "khối này chưa hoạt động". */
+.soKhoi {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin-right: 6px;
+  font-size: 12px;
+  color: var(--nen-trang);
+  background: var(--chu-mo);
+  vertical-align: -5px;
+}
+
+/* ── Công tắc (khối ⑥ dùng thẳng; khối ① bọc trong `.cham44`) ──────────────
+   Thanh trượt "cạch cạch" là VẬT máy nên steps(). */
+.congTac {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 22px;
+  background: var(--mat-phim);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.congTac::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+.congTac .nut {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: var(--chu-mo);
+  transition: transform 110ms steps(3, end), background-color 110ms steps(3, end);
+}
+.congTac[aria-checked='true'] { background: rgba(34, 211, 238, .14); box-shadow: inset 0 0 0 1px var(--accent); }
+.congTac[aria-checked='true'] .nut { background: var(--accent); transform: translateX(18px); }
+.congTac[disabled] { opacity: .4; pointer-events: none; }
+
+/* ── Trạng thái KHOÁ của một khối (②–④ trước khi cửa SAO LƯU KÉT bật; ⑤ không bao
+   giờ khoá — quyền xoá không phụ thuộc đồng ý). Xám đi bằng OPACITY, không filter. */
+.khoa .than2 { opacity: .4; pointer-events: none; }
+/* ⚠ `--chu-phu` (n8), KHÔNG `--chu-mo` (n7): trên nền `--mat-phim-phu` này `--chu-mo`
+   chỉ ra 3,90 — dưới sàn 4,5 của §6.2. `--chu-phu` đo 6,29. */
+.khoaNhan {
+  display: none;
+  margin: 7px 0 0;
+  padding: 7px 9px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--chu-phu);
+  background: var(--mat-phim-phu);
+  border-left: 3px solid var(--n-5);
+}
+.khoa .khoaNhan { display: block; }
+
+/* ── Khối ① — BỐN CỬA + MỘT CÔNG TẮC CHUNG (D295) ─────────────────────────
+   ⚠ BỌC CHẠM 44×44 KHÔNG BỊ `clip-path` XÉN (bài học D292): NÚT là phần tử bọc này
+   (không clip), `.congTac`/`.hoi` chỉ là hình vẽ bên trong. Trạng thái nằm trên NÚT. */
+.cham44 { display: grid; place-items: center; width: 44px; height: 44px; flex: none; }
+.cham44 > * { pointer-events: none; }
+.cham44[aria-checked='true'] .congTac { background: rgba(34, 211, 238, .14); box-shadow: inset 0 0 0 1px var(--accent); }
+.cham44[aria-checked='true'] .congTac .nut { background: var(--accent); transform: translateX(18px); }
+.cham44[aria-expanded='true'] .hoi { border-color: var(--accent); color: var(--accent); }
+.cham44[disabled] { opacity: .4; pointer-events: none; }
+
+/* Một hàng = một cửa. ON và OFF khác nhau bằng HÌNH (viền trái + nền + màu tên).
+   ⚠ Chữ phụ dùng `--chu-phu` (n8), KHÔNG `--chu-mo`: trên nền hàng `--chu-mo` đo ≈4,5,
+   phía ON tụt dưới sàn; `--chu-phu` đo ≈7,2. */
+.cua {
+  margin-top: 7px;
+  padding: 2px 6px 8px 9px;
+  border-left: 3px solid var(--n-5);
+  background: var(--surface-inset);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.cua.bat {
+  border-left-color: var(--accent);
+  background: rgba(34, 211, 238, .07);
+  box-shadow: inset 0 0 0 1px rgba(34, 211, 238, .35);
+}
+.cuaDau { display: flex; align-items: center; gap: 2px; }
+.cuaDau .than { flex: 1; min-width: 0; padding: 4px 0; }
+.cuaTen { display: block; font-size: 13.5px; letter-spacing: 1px; color: var(--chu-sang); }
+.cua.bat .cuaTen { color: var(--accent-bright); }
+.cuaTom { display: block; margin-top: 2px; font-size: 12px; line-height: 1.45; color: var(--chu-phu); }
+/* Dòng RỜI MÁY luôn hiện — "cái gì rời máy" là sự thật chất liệu của một cú đồng ý;
+   giấu nó sau nút `?` rồi ghi vết "đã hiện văn bản" là vết giả. */
+.cuaDong { margin: 3px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--text-dim); }
+.cuaDong b { font-weight: 700; letter-spacing: 1px; color: var(--chu-phu); }
+.cua.bat .cuaDong b { color: var(--accent); }
+.cuaVet { margin: 5px 0 0; font-size: 12px; letter-spacing: .5px; color: var(--chu-phu); }
+.cua.bat .cuaVet { color: var(--accent); }
+.loiCua { margin: 7px 0 0; font-size: 12px; line-height: 1.5; color: var(--lose); }
+
+/* ── MÃ KHÔI PHỤC (khối ②) ────────────────────────────────────────────── */
+.maChu {
+  margin: 4px 0 2px;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-align: center;
+  color: var(--text-bright);
+  font-variant-numeric: tabular-nums;
+  padding: 10px 4px;
+  background: var(--surface-inset);
+  border: 1px solid var(--line-2);
+}
+.hangMa { display: flex; gap: 7px; margin-top: 8px; }
+.oTick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 2px 0;
+  font-size: 12.5px;
+  color: var(--text-dim);
+}
+.oTick input { width: 18px; height: 18px; flex: none; accent-color: var(--accent); }
+.canhMa {
+  margin: 9px 0 0;
+  padding: 8px 9px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-bright);
+  background: rgba(248, 113, 113, .08);
+  border-left: 3px solid var(--lose);
+}
+
+/* ── LED nhịp máy, dùng chung cho rèn chìa · sao lưu · khôi phục ─────────
+   N ô rời rạc sáng lần lượt, KHÔNG phải một dải liên tục — đúng chữ "LED". */
+.led { display: flex; gap: 2px; height: 14px; margin-top: 9px; }
+.led i {
+  flex: 1;
+  background: var(--long-thanh);
+  box-shadow: inset 0 0 0 1px rgba(93, 114, 144, .25);
+  transition: transform 90ms steps(2, end), background-color 90ms steps(2, end);
+}
+.led i.on { background: var(--accent); transform: scaleY(1.2); }
+.ledNhan {
+  margin: 5px 0 0;
+  font-size: 12px;
+  letter-spacing: .5px;
+  color: var(--accent);
+  animation: tho 1200ms ease-in-out infinite;
+}
+@keyframes tho { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+
+/* ── Con dấu xác nhận (khối ⑤, sau khi xoá xong) — nhịp MÁY, steps(), 1 lần ── */
+@keyframes dongDauCaiDat {
+  0% { transform: scale(2.2) rotate(-10deg); opacity: 0; }
+  60% { transform: scale(.95) rotate(2deg); opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+.dauXoa {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  margin-top: 9px;
+  padding: 8px;
+  border: 2px solid var(--win);
+  color: var(--win);
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  animation: dongDauCaiDat 380ms steps(5, end) both;
+}
+
+/* ── KHÔI PHỤC — hoá đơn hoà giải (khối ④) ──────────────────────────────── */
+.hoaDon { display: flex; gap: 6px; margin-top: 9px; flex-wrap: wrap; }
+.hoaDon .o {
+  flex: 1;
+  min-width: 84px;
+  padding: 8px 6px;
+  text-align: center;
+  background: var(--mat-phim-phu);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.hoaDon .o b { display: block; font-size: 19px; font-variant-numeric: tabular-nums; color: var(--text-bright); }
+/* `--chu-phu`, không `--chu-mo` — cùng lý do đo ở `.khoaNhan` (nền `--mat-phim-phu`). */
+.hoaDon .o span { display: block; margin-top: 2px; font-size: 12px; letter-spacing: .5px; color: var(--chu-phu); }
+.hangHoi { display: flex; align-items: center; gap: 7px; margin-top: 9px; }
+.hangHoi p { margin: 0; flex: 1; font-size: 12px; color: var(--chu-mo); }
+
+/* ── XOÁ SẠCH — nút GIỮ 2 GIÂY (khối ⑤) ──────────────────────────────────── */
+.btGiu {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  overflow: hidden;
+  border: 1px solid rgba(248, 113, 113, .5);
+  color: var(--lose);
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  background: var(--surface-inset);
+  touch-action: none;
+  user-select: none;
+}
+/* Vệt tiến độ: demo đặt `width` bằng JS; ở đây cùng hình nhưng bằng `transform: scaleX`
+   (luật VFX: chỉ transform/opacity — cùng pixel, không đổi số đo nào). `--giu` ∈ [0,1]. */
+.giuDay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  background: rgba(248, 113, 113, .28);
+  z-index: 0;
+  transform: scaleX(var(--giu, 0));
+  transform-origin: left center;
+}
+.btGiu span { position: relative; z-index: 1; }
+.loiXoa { margin: 7px 0 0; font-size: 12px; line-height: 1.5; color: var(--lose); }
+
+/* ── Khối ⑥ — hai công tắc nhỏ + giải thích; khối ① dùng lại `.hangCt` cho công tắc chung ── */
+.hangCt { display: flex; align-items: center; gap: 9px; padding: 8px 0; }
+.hangCt:first-child { padding-top: 0; }
+.hangCt .than { flex: 1; min-width: 0; }
+.hangCt .ten2 { display: block; font-size: 13.5px; color: var(--text-bright); }
+.hangCt .mo { display: block; margin-top: 2px; font-size: 12px; line-height: 1.45; color: var(--chu-mo); }
+
+/* ── Toast nhỏ (đã chép mã) — neo trên đầu khối, không `fixed` (bài học D236 §8) ── */
+.toastNho {
+  margin-top: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  letter-spacing: .5px;
+  color: var(--win);
+  background: rgba(74, 222, 128, .10);
+  border: 1px solid rgba(74, 222, 128, .4);
+}
+
+/* ⚠ Mỗi `animation`/`transition` VẬT mới ⇒ đúng selector ấy vào đây (A11.18). */
+@media (prefers-reduced-motion: reduce) {
+  .congTac .nut { transition: none; }
+  .led i { transition: none; }
+  .led i.on { transform: none; }
+  .ledNhan { animation: none; opacity: 1; }
+  .dauXoa { animation: none; }
+  .nut2 { transition: none; }
+}

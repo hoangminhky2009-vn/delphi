@@ -1,0 +1,161 @@
+/*
+ * MODULE PREDICT MARKET — kế thừa Lobby.module.css (gỡ 25/07 cùng ResultsList).
+ * Thêm: hàng tab trạng thái (.tabRow/.tab/.tabOn) vì hai màn danh sách cũ đã
+ * gộp thành một, lọc bằng hai lớp (trạng thái × pool).
+ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.prompt {
+  color: var(--accent);
+}
+
+/* ── Hàng tab trạng thái ──────────────────────────────────────────────
+ * Hai ô rộng bằng nhau, viền dưới sáng lên ở ô đang chọn. Cố ý KHÔNG dùng
+ * <Chips> như lớp lọc pool: hai lớp lọc trông giống nhau thì người chơi không
+ * biết cái nào đang khống chế cái nào.
+ */
+.tabRow {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border-idle);
+}
+
+.tab {
+  composes: doiMau from '../styles/pixel.module.css';
+  flex: 1;
+  padding: 9px 6px 8px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.tab:hover {
+  color: var(--text-title);
+}
+
+.tabOn {
+  color: var(--accent-bright);
+  border-bottom-color: var(--accent);
+}
+
+/*
+ * Nút trông như link, dùng trong câu văn (empty-state). Cố ý KHÔNG dùng lại
+ * `.tab`: một chữ giữa câu mà mang style tab thì đọc như tab thứ ba bị lỗi.
+ */
+.nutChu {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Card sảnh — Mẫu E (mẫu gốc dòng 183–196)
+ * Bóng đổ nói thẻ DÀY bao nhiêu → vật → `--px-bong` (blur 0) thay cho
+ * `--shadow-card-sm` (nhoè 60px). Cử chỉ nhấc lên lấy từ `.nhac` cho khớp
+ * quãng và nhịp với thẻ ở Hub / Đấu trường. */
+.card {
+  composes: nhac from '../styles/pixel.module.css';
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: 0;
+  background: var(--surface-card-alt);
+  border: 1px solid var(--border-idle);
+  box-shadow: var(--px-bong);
+  padding: 14px;
+  text-decoration: none;
+  color: inherit;
+}
+.card:hover {
+  border-color: rgba(103, 232, 249, 0.55);
+  box-shadow: var(--px-bong-cao);
+}
+
+.cardTop {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  row-gap: 6px;
+  align-items: center;
+}
+
+.source {
+  margin-left: auto;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.question {
+  font-family: var(--font-human);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-title);
+}
+
+.cardFoot {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px dashed var(--border-idle);
+  padding-top: 9px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  border: 1px dashed var(--border-idle);
+  border-radius: 0;
+  padding: 14px;
+}
+
+.sectionLabel {
+  font-size: 10.5px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* (skeleton dùng class .skeleton toàn cục — styles/base.css) */

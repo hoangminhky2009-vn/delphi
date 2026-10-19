@@ -1,0 +1,115 @@
+/* Vương miện lửa — spec handoff Mẫu E (khối THƯỞNG CHUỖI). */
+
+/*
+ * QUẦNG LỬA — vai ÁNH SÁNG (luật 4): radial không có cạnh, trải ~340px ngang cả
+ * hàng thưởng chuỗi, thừa ngưỡng luật 5. `blur(7px)` ở ĐÂY là đúng chỗ và giữ
+ * nguyên; `flameburst` đổi ĐỘ MẠNH của quầng nên cũng giữ nhịp mượt. Đây là thứ
+ * duy nhất trong file còn được mềm.
+ */
+.burst {
+  position: absolute;
+  inset: -12px -6px -4px;
+  z-index: 0;
+  border-radius: 0;
+  background: radial-gradient(
+    70% 120% at 50% 100%,
+    rgba(253, 224, 71, 0.5),
+    rgba(249, 115, 22, 0.35) 38%,
+    rgba(220, 38, 38, 0.2) 60%,
+    rgba(0, 0, 0, 0) 78%
+  );
+  filter: blur(7px);
+  transform-origin: 50% 100%;
+  animation: flameburst 3.1s ease-in-out 0.1s both;
+  pointer-events: none;
+}
+
+@keyframes flameburst {
+  0% { transform: scaleY(1.5) scaleX(1.12); opacity: 0.9; }
+  30% { transform: scaleY(1.25) scaleX(1.05); opacity: 0.75; }
+  100% { transform: scaleY(0.7) scaleX(0.9); opacity: 0; }
+}
+
+/*
+ * Cụm 8 ngọn — cháy rồi lụi hẳn.
+ *
+ * `scale()` cũ bị gỡ khỏi cả `burnout` lẫn từng ngọn: ngọn lửa nay là SPRITE
+ * pixel (lưới `flame` 8×8 của PixelIcon), mà sprite dựng bằng `box-shadow` chỉ
+ * còn nét ở bội số NGUYÊN — phóng 1,06 lần là mọi ô lệch nửa điểm ảnh. Lửa tàn
+ * nay tàn bằng ĐỘ ĐỤC theo nấc, đúng cách sprite lửa tắt dần từng khung.
+ */
+.crown {
+  position: absolute;
+  inset: -4px;
+  z-index: 0;
+  pointer-events: none;
+  animation: burnout 3.2s steps(3, end) 0.1s both;
+}
+
+@keyframes burnout {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  58% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.tongue {
+  position: absolute;
+  line-height: 0; /* span bọc sprite — bỏ khoảng thừa của dòng chữ */
+  transform-origin: 50% 100%;
+}
+
+/* Tên keyframes phải export để dùng được trong inline style (CSS Modules) */
+
+/* Nhen: sprite lửa BẬT lên, không trồi lên — 2 khung, không có trạng thái nửa cháy. */
+@keyframes fireignite {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/*
+ * Cháy: hai khung, nhảy đúng MỘT Ô (2px ở sprite cỡ 16) và sáng thêm một nấc.
+ * `scaleY(1.15) skewX(-4deg)` cũ vừa kéo lệch lưới vừa cắt chéo — nghiêng một
+ * lưới ô vuông chỉ ra răng cưa, không ra ngọn lửa.
+ */
+@keyframes flamewob {
+  0% { transform: translateY(0); filter: brightness(1); }
+  100% { transform: translateY(-2px); filter: brightness(1.3); }
+}
+
+/* Than bay */
+.embers {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 3px;
+  height: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/*
+ * Đốm than: ô vuông đặc + quầng `0 0 6px` — offset 0 nên là ÁNH SÁNG, giữ blur
+ * (phép thử máy móc của luật 4: nhìn offset). Cạnh của chính đốm vẫn cứng.
+ */
+.ember {
+  position: absolute;
+  bottom: 0;
+  border-radius: 0;
+  background: var(--gold-ember);
+  box-shadow: 0 0 6px var(--gold-flame);
+  opacity: 0;
+  animation-name: emberfloat;
+  animation-timing-function: steps(10, end);
+  animation-iteration-count: infinite;
+}
+
+/*
+ * `scale(0.25)` cũ bỏ: đốm than to 2–3px, thu còn 1/4 là nửa điểm ảnh. Tàn dần
+ * bằng độ đục là đủ, và 10 nấc cho quãng bay lên đúng thang "quét/rơi".
+ */
+@keyframes emberfloat {
+  0% { transform: translate(0, 0); opacity: 0; }
+  18% { opacity: 1; }
+  100% { transform: translate(var(--drift, 3px), -15px); opacity: 0; }
+}

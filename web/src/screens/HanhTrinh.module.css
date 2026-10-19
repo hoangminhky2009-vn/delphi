@@ -1,0 +1,141 @@
+/* HÀNH TRÌNH MÙA — trang riêng kiểu TFT (04-hanh-trinh-mua). Terminal×Neon. */
+
+.trang {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.cho { color: var(--text-dim); padding: 24px 8px; text-align: center; }
+
+.dau {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.dauTen { display: flex; align-items: center; gap: 8px; }
+.dauTen h1 { font-size: 15px; letter-spacing: 1px; margin: 0; }
+.dauTen small { color: var(--text-dim); font-size: 10px; margin-left: 6px; }
+.dauSo { display: flex; align-items: center; gap: 12px; font-size: 12px; }
+.tuan { color: var(--text-dim); }
+.q { display: inline-flex; align-items: center; gap: 4px; color: var(--accent-bright); }
+
+.khoi {
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  background: rgba(10, 6, 24, 0.6);
+  padding: 12px;
+}
+.khoiDau {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.khoiPhu { color: var(--text-dim); font-size: 11px; margin: 0; }
+
+.thanh {
+  height: 8px;
+  background: rgba(139, 92, 246, 0.18);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.thanhTrong { display: block; height: 100%; background: var(--accent-bright); }
+
+/* Track DỌC (founder 02/08 — "làm lại thành dọc cho hợp điện thoại").
+ * Bản đầu cuộn NGANG kiểu TFT: trên điện thoại đó là cử chỉ tranh chấp với
+ * vuốt trang, ô 84px thì chữ phần thưởng phải xuống dòng nát. Xếp cột thì
+ * mỗi mốc là một hàng đủ rộng, trang tự cuộn dọc như mọi danh sách. */
+.track {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.moc {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  padding: 8px 10px;
+  font-size: 11px;
+}
+.mocSo { flex: 0 0 46px; color: var(--text-dim); font-size: 10px; }
+.mocQ { flex: 0 0 auto; color: var(--accent-bright); font-size: 12px; }
+.mocNhan2 { flex: 1; }
+.mocNhan2 { font-size: 10px; line-height: 1.25; }
+.mocDocBan { color: var(--gold-amber); font-size: 9px; letter-spacing: 1px; }
+.mocChoArt { color: var(--text-dim); font-size: 9px; font-style: italic; }
+.mocTick { position: absolute; top: 4px; right: 6px; color: var(--accent-bright); }
+
+.mocNhan { opacity: 0.55; }
+.mocKe { border-color: var(--accent-bright); box-shadow: 0 0 6px rgba(139, 92, 246, 0.5); }
+.mocKhoa { opacity: 0.8; }
+
+.diemDanhHang {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.viec { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.viecMo, .viecXong { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.viecMo { color: var(--text-dim); }
+.viecXong { color: var(--accent-bright); }
+.viecTen { flex: 1; min-width: 120px; }
+.viecThanh {
+  flex: 0 0 90px;
+  height: 6px;
+  background: rgba(139, 92, 246, 0.18);
+  overflow: hidden;
+}
+.viecThanhTrong { display: block; height: 100%; background: var(--accent-bright); }
+.viecSo { min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+
+.hetViec { color: var(--gold-amber); font-size: 11px; margin: 10px 0 0; }
+.chanTrang { color: var(--text-dim); font-size: 11px; margin: 10px 0 0; }
+.linkShop { color: var(--accent-bright); }
+
+/* ── Quà tri ân mùa beta (D68b) ─────────────────────────────────────────── */
+
+.quaMon {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gold, #fbbf24);
+  line-height: 1.5;
+}
+
+.quaGhiChu {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--text-muted, #93aac8);
+}
+
+.quaDieuKien {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-dim, #bfd1e6);
+}
+
+.quaXong {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--win, #4ade80);
+}
+
+.quaLoi {
+  margin: 0;
+  font-size: 12px;
+  color: var(--lose-soft, #f87171);
+}

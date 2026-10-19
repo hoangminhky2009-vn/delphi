@@ -1,0 +1,118 @@
+/*
+ * TẤM TRƯỢT — LỚP TRÊN CÙNG của trục Z. Luật ở docs/ui-ux/09-tang-khong-gian.md; hành vi ở `TamTruot.tsx`.
+ *
+ * VẬT hay ÁNH SÁNG: tấm trượt là VẬT thật có khối lượng ⇒ chuyển động VẬT LÝ (trồi có nảy, `cubic-bezier` đặt ở
+ * `motion.module.css`, composes — KHÔNG gõ lại cubic-bezier ở đây, xem pixelui.test §LUẬT 3). Nền tối mờ là ÁNH SÁNG ⇒ mờ dần.
+ * Chỉ animate `transform` / `opacity` (luật ba runtime).
+ */
+.nen {
+  composes: hubManToi from '@/styles/motion.module.css';
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-man-toi);
+  background: var(--nen-man-toi);
+  /* Nền mờ nhẹ (demo 11/10: blur 2 px) — chiều sâu của trục Z: thứ phía sau lùi xa chứ không chỉ tối đi. */
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+}
+.nenMo { opacity: 1; }
+
+.tam {
+  composes: hubTamTruot from '@/styles/motion.module.css';
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Trong Activity Discord / máy tính: tấm vẫn là cột điện thoại ở giữa, không giãn hết bề ngang. */
+  width: 100%;
+  max-width: var(--shell-width);
+  margin: 0 auto;
+  z-index: var(--z-tam-truot);
+  max-height: 78dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface-panel);
+  border-top: 1px solid var(--border-accent);
+  /* Thứ tự luật 6: vát (bề mặt) rồi bóng — gọi BIẾN, không composes lớp bóng. */
+  box-shadow: var(--o-vien), var(--tam-bong);
+  transform: translateY(105%);
+  touch-action: none;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: normal;
+  color: var(--text-body);
+}
+/*
+ * Cú nảy vượt quá vị trí 0 kéo mép dưới của tấm lên khỏi đáy màn một thoáng. Dải này (cùng nền) lấp đúng khe đó — không có nó,
+ * nội dung phía sau lộ ra dưới chân tấm mỗi lần trồi.
+ */
+.tam::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 80px;
+  background: var(--surface-panel);
+  pointer-events: none;
+}
+.tamLon { max-height: 90dvh; }
+.tamMo { transform: translateY(0); }
+
+.quai {
+  align-self: center;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 5px;
+  margin: 2px 0 4px;
+  background: rgba(147, 170, 200, 0.45);
+}
+
+/* Thân cuộn riêng: nội dung dài (bàn tiền, bài bách khoa) cuộn TRONG tấm, tấm không giãn quá 78 % màn. */
+.than {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+.chan {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.dong {
+  /* NÚT ĐÓNG NỔI (founder 11/10 — "thứ BẤM ĐƯỢC thì NỔI", khớp `.nut2` của demo PFM bản 6): mặt phím · vạch đáy 3px · bóng cứng · lún `steps()` (nhịp máy). */
+  height: 42px;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  border: 0;
+  border-bottom: 3px solid var(--n-6);
+  background: var(--n-4b);
+  color: var(--n-10);
+  font: inherit;
+  font-size: var(--tk-body);
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 1px 0 0 rgba(255, 255, 255, 0.07), inset -1px 0 0 rgba(0, 0, 0, 0.3), var(--px-bong);
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.dong:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.35); }
+@media (hover: hover) and (pointer: fine) {
+  .dong:hover { color: var(--text-title); }
+}
+
+/* Giảm chuyển động: hiện/ẩn tức thì — GIỮ nguyên thời gian đọc (chữ không đổi, chỉ bỏ trượt). */
+@media (prefers-reduced-motion: reduce) {
+  .nen, .tam { transition: none; }
+}

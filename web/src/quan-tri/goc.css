@@ -1,0 +1,3 @@
+/* D335 — nền của trang quản trị riêng. KHÔNG nạp `styles/base.css`: lớp nền động `body::before` của app người chơi
+   là trình diễn, không phải thứ đặt sau một bảng số. */
+html, body { margin: 0; background: var(--bg-page, #04070d); }

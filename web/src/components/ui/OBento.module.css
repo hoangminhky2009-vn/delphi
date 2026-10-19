@@ -1,0 +1,110 @@
+/*
+ * Ô BENTO + NÚT CHÍNH — LỚP GIỮA của trục Z. Luật phản hồi chạm ở đầu `OBento.tsx`; luật chung ở docs/ui-ux/09-tang-khong-gian.md.
+ *
+ * VẬT hay ÁNH SÁNG: ô là VẬT ⇒ bóng CỨNG (blur 0, `--px-bong`), lún là NHỊP MÁY (tức thì, KHÔNG transition), nảy về là
+ * CHUYỂN ĐỘNG VẬT LÝ (`composes: hubNay` — `cubic-bezier` đặt ở `motion.module.css`, không gõ ở đây). Thanh nạp là VẬT ⇒ `steps()`.
+ * Chỉ animate `transform` (+ `box-shadow` MỘT LẦN lúc thả, không vô hạn) — luật ba runtime.
+ */
+.o {
+  composes: hubNay from '@/styles/motion.module.css';
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 10px;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  background: var(--surface-card);
+  border: 1px solid var(--border-idle);
+  /* Thứ tự luật 6: vát (bề mặt) rồi bóng cứng (độ dày). Gọi BIẾN, không composes lớp bóng. */
+  box-shadow: var(--o-vien), var(--px-bong);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.o:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+.o:disabled { cursor: default; }
+
+.noiBat { border-color: color-mix(in srgb, var(--violet) 50%, transparent); }
+.mo { opacity: 0.72; }
+
+/*
+ * NHẤN = LÚN. `.o.lun` (hai lớp) thắng `.hubNay` về độ ưu tiên và TẮT transition ⇒ lún TỨC THÌ (≤ 0,05 s); bỏ lớp `lun` thì
+ * `transition` của `hubNay` trở lại và ô nảy về có vượt. Quãng lún = ĐÚNG độ dày bóng: ô "đáp trúng bóng của chính nó".
+ */
+.o.lun {
+  transition: none;
+  transform: translate(var(--px-do-day), var(--px-do-day));
+  box-shadow: var(--o-vien), 0 0 0 transparent;
+  border-color: var(--accent-bright);
+}
+.o.lun::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--accent-bright) 7%, transparent);
+  pointer-events: none;
+}
+
+/* Ô khoá: lắc ngang một nhịp rồi mới bung lý do. Tên keyframe ĐẶT TRƯỚC trong shorthand (lint:css-anim, vfx §2.4). */
+@keyframes lacO {
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-2px); }
+}
+.lac { animation: lacO var(--nhip-hub-lac, 160ms) steps(4, end) 1; }
+
+/* Giữ: thanh nạp pixel chạy dọc đáy ô (VẬT ⇒ steps). Giữ nguyên cả khi giảm chuyển động — nó là thông tin "đang giữ", không trang trí. */
+.nap {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--accent-bright);
+  transform: scaleX(0);
+  transform-origin: left;
+  pointer-events: none;
+}
+.giu .nap {
+  transform: scaleX(1);
+  transition: transform var(--nhip-hub-giu, 450ms) steps(9, end);
+}
+
+/* ───── NÚT CHÍNH ───── */
+.vao {
+  composes: hubNay from '@/styles/motion.module.css';
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 0;
+  border: 0;
+  background: var(--accent);
+  color: var(--bg-page);
+  font: inherit;
+  font-size: var(--tk-title);
+  letter-spacing: 0.2em;
+  /* Chân nút dày 4 px (màu cyan tối) + bóng cứng — nút "đứng" trên mặt bàn. */
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--accent), black 45%), var(--px-bong);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.vao:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+.vao:disabled { opacity: 0.55; cursor: default; }
+.vao.vaoLun {
+  transition: none;
+  transform: translateY(4px);
+  box-shadow: 0 0 0 transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lac { animation: none; }
+}

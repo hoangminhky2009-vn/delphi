@@ -1,0 +1,48 @@
+.wrap {
+  display: flex;
+}
+
+.col {
+  height: 52px;
+  width: 30px;
+  overflow: hidden;
+  position: relative;
+}
+
+/*
+ * CÚ ĐÁP CỦA MỘT CỘT — 5 tư thế rời, không phải một đường trượt.
+ *
+ * `steps(1, end)` chứ không `steps(5)`: nấc ở đây do CHÍNH 5 mốc keyframe đếm
+ * ra (0 → −7 → 3 → −2 → 0), vì `animation-timing-function` áp cho TỪNG khoảng
+ * giữa hai mốc. Viết `steps(5)` là chia mỗi khoảng làm 5 → 20 tư thế → gần như
+ * mượt trở lại, tức đúng thứ vừa gỡ bỏ. Đừng "sửa" con số này lên.
+ */
+.colLocked {
+  animation: digitquake 0.5s steps(1, end) both;
+}
+
+.strip {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  will-change: transform;
+}
+
+.digit {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 42px;
+  color: var(--win-peak);
+}
+
+@keyframes digitquake {
+  0% { transform: translateY(0); }
+  24% { transform: translateY(-7px); }
+  50% { transform: translateY(3px); }
+  72% { transform: translateY(-2px); }
+  100% { transform: translateY(0); }
+}

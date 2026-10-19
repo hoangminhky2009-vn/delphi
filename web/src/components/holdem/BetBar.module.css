@@ -1,0 +1,303 @@
+/*
+ * TỐ BÀI — thanh cược. Kéo hết = ALL IN thì thanh RỰC CHÁY.
+ * Không dùng slider mặc định của trình duyệt: thumb tự vẽ, track là gradient.
+ */
+
+.bet {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.nut {
+  /* §XI — nút pixel: góc khấc + bóng cứng + bấm lún theo nấc. */
+  composes: nut from '@/styles/pixel.module.css';
+  padding: 8px 12px;
+  border-color: var(--violet);
+  background: rgba(139, 92, 246, 0.12);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  /*
+   * ⚠ KHÔNG khai lại `transition` / `:hover transform` / `:active` ở đây.
+   *
+   * Quy tắc `composes` đưa lớp pixel vào TRƯỚC, nên bất cứ thuộc tính nào khai lại
+   * ở file này đều GHI ĐÈ nó. Đo được: nút vẫn có góc khấc và bóng cứng, nhưng
+   * `transitionTimingFunction` là `cubic-bezier(0.34, 1.56, …)` — tức nhìn thì
+   * pixel mà chuyển động vẫn trượt mượt, đúng thứ §XI luật 3 cấm.
+   *
+   * Hover/active/steps nay do `pixel.module.css` lo trọn: bấm là nút LÚN xuống
+   * đúng bằng độ dày bóng. Muốn đổi cảm giác bấm thì sửa ở đó, một chỗ cho cả app.
+   */
+}
+
+/* Trạng thái ĐANG CHỌN — chỉ đổi màu, hình khối vẫn của nút pixel. */
+.nutOn {
+  border-color: var(--gold-amber);
+  background: rgba(251, 191, 36, 0.2);
+  color: var(--gold-amber);
+}
+
+/*
+ * Ô HIỂN THỊ MỨC CAM KẾT — phải là MỘT KHUNG CỐ ĐỊNH, không co theo nội dung.
+ *
+ * ⚠ LỖI ĐÃ SỬA 26/07 (founder báo: "chữ bị lệch bên trái thay vì ở giữa").
+ * Ô này dựng cho một con số 2–4 ký tự ("50%") ở cỡ 26px. Khi kéo tới đáy nó đổi
+ * sang nhãn chữ 11 ký tự — ở 26px là ~176px, rộng gấp mấy lần chỗ nó có. Là một
+ * flex item không có bề rộng cố định, nó phình ra và đẩy cả hàng, nên chữ nằm dạt
+ * về mép trái thay vì cân giữa.
+ *
+ * Gốc lỗi KHÔNG phải ở chữ dùng — đổi nhãn về từ ngắn hơn chỉ che triệu chứng, và
+ * lần sau đổi chữ khác là lỗi quay lại. Gốc là ô co theo nội dung. Nay khung có bề
+ * rộng CỐ ĐỊNH và canh giữa cả hai chiều, nên nhãn dài bao nhiêu cũng nằm giữa.
+ */
+.phanTram {
+  display: flex;
+  align-items: center;
+  /*
+   * `safe center` CHỨ KHÔNG PHẢI `center` — đây là gốc của lỗi "chữ dạt trái"
+   * mà founder báo HAI LẦN (25/07 và 26/07).
+   *
+   * Với `center` thường, một flex item RỘNG HƠN khung thì phần tràn dồn hết
+   * sang PHẢI và mép trái bị cắt — mắt đọc ra đúng là "chữ lệch trái". Nó chỉ
+   * xuất hiện khi nội dung tràn, nên máy này vừa thì máy kia vỡ.
+   * `safe` bảo trình duyệt lùi về canh đầu dòng khi tràn, không cắt mép nữa.
+   */
+  justify-content: safe center;
+  /*
+   * ⚠ BỀ RỘNG PHẢI VỪA MÀN 390px, không chỉ "đủ chỗ cho chữ".
+   * Bản vá đầu đặt 92px cố định: chữ canh giữa đúng, nhưng cả hàng phình ra và
+   * TRANG TRÀN NGANG 45px — đo được ngay sau khi sửa. Ô số trước đó chỉ ~40px, nên
+   * ép 92px là cộng thêm ~50px vào một hàng vốn đã sát biên (nút nhanh + ô MỨC CAM
+   * KẾT rộng 118px). Sửa canh giữa mà đẻ ra tràn ngang thì chưa phải sửa xong.
+   *
+   * 64px vừa đủ cho "100%" ở 26px, và dạng chữ đã nhỏ còn 12px nên xuống hai dòng
+   * trong đúng khung đó.
+   */
+  min-width: 64px;
+  max-width: 64px;
+  min-height: 34px;
+  text-align: center;
+  color: var(--gold-amber);
+  /*
+   * ⚠ 24px, KHÔNG phải 26px. Chú thích cũ ngay trên kia ghi "64px vừa đủ cho
+   * '100%' ở 26px" — SAI, và nó đứng đó nhiều phiên. Đo thật ở 360px với đúng
+   * font/letter-spacing/tabular-nums của ô này:
+   *     26px → 66,6px   TRÀN ô 64px
+   *     25px → 64,0px   đúng bằng mép, không còn dư
+   *     24px → 61,5px   dư 2,5px  ← chọn
+   * Nên ngay cả sau khi nhãn chữ đã thu nhỏ, chính CON SỐ vẫn tràn mỗi khi kéo
+   * tới 100%. Đây là phần thứ hai của lỗi "lệch", tách hẳn khỏi phần nhãn chữ.
+   *
+   * Không nới ô rộng ra để chứa 26px: bản vá đầu tiên từng đặt 92px và làm CẢ
+   * TRANG TRÀN NGANG 45px trên màn 390px. Thu chữ thì rẻ, nới ô thì vỡ hàng.
+   */
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.5));
+}
+
+/*
+ * DẠNG CHỮ (dồn hết vốn) — cùng khung, cỡ chữ nhỏ lại và cho xuống dòng.
+ * 26px là cỡ của một con số; một cụm từ ở cỡ đó không có màn điện thoại nào chứa
+ * nổi. Nhỏ lại + xuống dòng giữ được khung, mà vẫn đủ nổi để đọc là một trạng thái
+ * đặc biệt chứ không phải một mức phần trăm.
+ */
+/*
+ * Nhãn hiện là "ALL-IN" (6 ký tự) nên vừa một dòng ở cỡ lớn hơn. 12px là cỡ đặt cho
+ * nhãn 11 ký tự cũ; giữ nguyên thì chữ bé không cần thiết.
+ *
+ * ⚠ KHUNG VẪN CỐ ĐỊNH — bố cục không phụ thuộc độ dài nhãn nữa (xem `.phanTram`),
+ * nên đổi chữ lần sau dài ngắn bao nhiêu cũng không tái phát lỗi dạt trái.
+ */
+.phanTramChu {
+  /*
+   * ⚠ LẦN SỬA THỨ BA. Hai lần trước đều chỉnh CỠ CHỮ theo một phép đo (17px →
+   * 15px), và đó chính là cái sai: cỡ chữ vừa trên máy này không có nghĩa vừa
+   * trên máy khác. Thủ phạm là `font-weight: 800` — JetBrains Mono không có nét
+   * 800 thật nên trình duyệt BÔI ĐẬM GIẢ, và mức giãn của nét giả khác nhau
+   * theo hệ điều hành. Đo ở máy dev rồi chốt một con số là chốt cho đúng một máy.
+   *
+   * Nay chặn bằng BỐN lớp độc lập, mỗi lớp một mình đã đủ khắc phục:
+   *   1. `safe center` ở `.phanTram` — tràn cũng không cắt mép trái.
+   *   2. `font-weight: 700` — nét THẬT của font, hết bôi đậm giả.
+   *   3. 13px thay 15px — thừa chỗ, không còn sát mép 64px.
+   *   4. `min-width: 0` + `max-width: 100%` — cho chữ CO LẠI thay vì tràn ra.
+   * Đây là chỗ nên làm bền theo cấu trúc, không nên tinh chỉnh theo số đo.
+   */
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 0;
+  max-width: 100%;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  /*
+   * Không cho bẻ ở gạch nối. Nhãn dài hơn ô thì THU NHỎ chứ không bẻ — khung vẫn
+   * cố định nên bố cục không vỡ dù nhãn đổi (xem `.phanTram`).
+   */
+  white-space: nowrap;
+  word-break: keep-all;
+}
+.grow { flex: 1; }
+
+.hop {
+  min-width: 118px;
+  padding: 7px 14px;
+  border: 1px solid var(--gold-amber);
+  /* §XI — ô MỨC CAM KẾT cũng là một khung pixel, không bo góc. */
+  composes: khung from '@/styles/pixel.module.css';
+  background: rgba(251, 191, 36, 0.08);
+  text-align: center;
+}
+.hopNhan {
+  color: var(--text-muted);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+}
+/* Icon xu đứng cạnh con số nên hàng phải là flex — chữ 19px và lưới 16px không
+   tự canh giữa với nhau bằng `text-align` được. */
+.hopSo {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-amber);
+  font-size: 19px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.thanh {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  margin-top: 10px;
+  /* Thanh tiến trình: góc vuông. 6px bo trên thanh cao 6px là một viên thuốc con
+     nhộng — thứ duy nhất cong trên cả màn pixel. */
+  border-radius: 0;
+  outline: none;
+  background: linear-gradient(
+    90deg, var(--violet) var(--p), rgba(93, 114, 144, 0.3) var(--p));
+}
+.thanh::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  /*
+   * §XI — NÚM VUÔNG, không tròn.
+   *
+   * Bản cũ là đĩa tròn 20px có `radial-gradient` và quầng blur 16px: trên một màn
+   * mà icon, thẻ, khung, nút đều là pixel thì cái núm này là VẬT DUY NHẤT có đường
+   * cong và có gradient — mắt bắt ra ngay, và nó kéo cả màn về cảm giác "web bình
+   * thường dán thêm pixel".
+   *
+   * Nay: khối vuông, hai sắc độ tím phẳng, bóng CỨNG, nhảy theo `steps`.
+   */
+  width: 18px;
+  height: 18px;
+  border-radius: 0;
+  background: var(--violet);
+  box-shadow:
+    inset 2px 2px 0 rgba(221, 214, 254, 0.9),
+    inset -2px -2px 0 rgba(76, 29, 149, 0.9),
+    3px 3px 0 rgba(10, 6, 24, 0.65);
+  cursor: grab;
+  transition: transform 0.12s steps(2, end);
+}
+.thanh::-webkit-slider-thumb:active { transform: scale(1.25); cursor: grabbing; }
+.thanh::-moz-range-thumb {
+  /* Giữ ĐỒNG BỘ với webkit ở trên — hai trình duyệt phải ra cùng một núm. */
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 0;
+  background: var(--violet);
+  box-shadow:
+    inset 2px 2px 0 rgba(221, 214, 254, 0.9),
+    inset -2px -2px 0 rgba(76, 29, 149, 0.9),
+    3px 3px 0 rgba(10, 6, 24, 0.65);
+  cursor: grab;
+}
+
+/* ══ ALL IN: RỰC CHÁY ══
+ * ⚠ `composes` CHỈ dùng được trên MỘT class đơn — viết `.chay .thanh { composes }`
+ * làm postcss nổ ("composition is only allowed when selector is single :local
+ * class name"). Nên lớp cháy phải là CLASS RIÊNG gắn thẳng ở TSX, không qua bộ
+ * chọn con. Các rule KHÔNG có composes (::-webkit-slider-thumb, .hop) thì vẫn
+ * dùng bộ chọn con bình thường. */
+/*
+ * Thanh cháy: BỐN DẢI PHẲNG chứ không phải một dải hoà sắc.
+ *
+ * Thanh chỉ cao 6px. Một chuyển sắc liên tục trên 6px sinh ra vô số sắc độ trung
+ * gian mà mắt đọc thành "vệt nhoè", đúng thứ luật 5 đo được ở lá bài úp 4×8. Cắt
+ * thành bốn dải cứng vẫn là `linear-gradient` — chỉ khác là nó tô khối theo lối
+ * pixel art: vàng → cam → đỏ → than, ranh giới rõ.
+ * Quầng 24px/48px thì GIỮ NGUYÊN: offset 0, trải rộng hơn cả thanh → ánh sáng.
+ */
+.thanhChay {
+  composes: adLua from '../../styles/motion.module.css';
+  background: linear-gradient(
+    90deg,
+    var(--gold-amber) 0 45%, #f97316 45% 75%, var(--danger) 75% 92%, #7c2d12 92%);
+  box-shadow: 0 0 24px rgba(249, 115, 22, 0.75), 0 0 48px rgba(239, 68, 68, 0.45);
+}
+/*
+ * ⚠ NÚM CHÁY TỪNG LÀ CHỖ TÁI PHÁT — luật 6 gọi đích danh: đoạn ngay phía trên đã
+ * gỡ `radial-gradient` khỏi núm thường, rồi trạng thái cháy trả nó về. Một quả
+ * cầu sáng mềm 18×18 là vật duy nhất có đường cong trên cả màn, và nó chỉ hiện ra
+ * đúng lúc người chơi nhìn chằm chằm vào thanh.
+ * Nay: màu phẳng cam, khối nổi bằng vát 2px (đồng bộ núm thường), quầng lửa giữ.
+ */
+.thanhChay::-webkit-slider-thumb {
+  transform: scale(1.15);
+  background: #f97316;
+  box-shadow:
+    inset 2px 2px 0 rgba(254, 243, 199, 0.95),
+    inset -2px -2px 0 rgba(124, 45, 18, 0.95),
+    0 0 22px #f97316, 0 0 44px var(--danger);
+}
+/* Giữ ĐỒNG BỘ với webkit — trước đây Firefox không có núm cháy nào cả. */
+.thanhChay::-moz-range-thumb {
+  transform: scale(1.15);
+  background: #f97316;
+  box-shadow:
+    inset 2px 2px 0 rgba(254, 243, 199, 0.95),
+    inset -2px -2px 0 rgba(124, 45, 18, 0.95),
+    0 0 22px #f97316, 0 0 44px var(--danger);
+}
+.phanTramChay {
+  composes: adLua from '../../styles/motion.module.css';
+  color: var(--gold-flame);
+  filter: drop-shadow(0 0 18px #f97316) drop-shadow(0 0 36px var(--danger));
+}
+.chay .hop {
+  border-color: #f97316;
+  background: rgba(249, 115, 22, 0.16);
+  box-shadow: inset 0 0 26px rgba(249, 115, 22, 0.5), 0 0 20px rgba(249, 115, 22, 0.35);
+}
+
+/*
+ * Tàn lửa bay lên từ thanh khi đang cháy.
+ *
+ * Ô VUÔNG, không phải chấm tròn — cùng lý do hạt pháo giấy là ô vuông
+ * (PhaoGiay.tsx): trên màn toàn pixel thì một hạt bo tròn là thứ duy nhất có
+ * đường cong và mắt bắt ra ngay.
+ * Quầng 6px cũng bỏ: luật 5 đo rằng chuyển sắc dưới 12px trên một vật NHỎ HƠN
+ * thế không đọc ra "có nguồn sáng" mà đọc ra "cạnh bị nhoè" — 6px quanh một hạt
+ * 3px thì hạt biến mất trong chính quầng của nó. 3px = đúng một đơn vị khấc.
+ */
+.tan {
+  composes: adTanBay from '../../styles/motion.module.css';
+  position: absolute;
+  bottom: 6px;
+  width: 3px;
+  height: 3px;
+  border-radius: 0;
+  pointer-events: none;
+  background: var(--gold-amber);
+}

@@ -1,0 +1,134 @@
+/*
+ * HỘP VỠ PIXEL — kiểu dáng + chuyển động.
+ *
+ * ⚠ @keyframes PHẢI NẰM CÙNG FILE với class dùng nó. CSS Modules đổi tên mọi
+ * animation-name trong `*.module.css`; gọi tên một keyframe khai ở file khác thì
+ * trình duyệt bỏ qua LẶNG LẼ — build xanh, không cảnh báo, hiệu ứng không chạy.
+ * `npm run lint:css-anim` canh đúng luật này.
+ *
+ * ⚠ CHỈ `transform` và `opacity` được animate. Mọi thuộc tính khác bắt tính lại
+ * bố cục mỗi khung hình, và ở đây có tới 48 phần tử cùng chạy.
+ *
+ * §XI pixel: không bo góc, không blur, cạnh sắc.
+ */
+
+.san {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+
+/* Chỉ bật lớp hợp thành trong lúc thật sự có chuyển động — xem HopVo.tsx. */
+.sanTang {
+  will-change: transform;
+}
+
+/* ── Pha 1: hộp đen + vòng sáng xoay ─────────────────────────────────────── */
+
+.hop {
+  position: absolute;
+  inset: 8px;
+  background: #0a0618;
+  border: 2px solid #1e1b3a;
+}
+
+.vong {
+  position: absolute;
+  inset: -6px;
+  border: 2px solid transparent;
+  border-top-color: var(--mau-bac, #67e8f9);
+  border-right-color: var(--mau-bac, #67e8f9);
+  animation: vongXoay 620ms linear infinite;
+}
+
+@keyframes vongXoay {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Pha 2: rung ─────────────────────────────────────────────────────────── */
+
+.rung {
+  animation: hopRung 260ms steps(2, end) 3;
+}
+
+/*
+ * `steps()` chứ không phải easing mượt: chuyển động pixel phải GIẬT, mượt là
+ * ngôn ngữ của vector. Cùng lý do §XI cấm bo góc.
+ */
+@keyframes hopRung {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(2px, -1px); }
+  75% { transform: translate(-1px, -1px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ── Pha 3: vỡ thành mảnh ────────────────────────────────────────────────── */
+
+.lopManh {
+  position: absolute;
+  inset: 8px;
+}
+
+.manh {
+  position: absolute;
+  background: var(--mau-bac, #67e8f9);
+  will-change: transform, opacity;
+  animation: manhBay 620ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@keyframes manhBay {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  30% { opacity: 1; }
+  100% {
+    transform: translate(var(--dx), var(--dy)) rotate(var(--xoay)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+/* ── Pha 4: món lộ ra, phóng to nhẹ rồi khựng ────────────────────────────── */
+
+.mon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.monHien {
+  animation: monBung 400ms cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+
+/*
+ * "Phóng to nhẹ rồi khựng một phát" (founder): vọt qua 1.0 rồi rơi về đúng 1.0
+ * và DỪNG HẲN. Cú khựng nằm ở chỗ không có dao động tắt dần — đó là điều làm
+ * nó đọc ra "chốt" thay vì "nảy".
+ */
+@keyframes monBung {
+  0% { transform: scale(0.4); opacity: 0; }
+  55% { transform: scale(1.14); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Tông màu theo bậc ───────────────────────────────────────────────────── */
+
+.bac_thuong { --mau-bac: #94a3b8; }
+.bac_hiem { --mau-bac: var(--accent-bright); }
+.bac_epic { --mau-bac: var(--gold-amber); }
+
+/*
+ * reduced-motion: component đã nhảy thẳng pha `xong` bằng JS nên không có mảnh
+ * nào được dựng. Chốt thêm ở CSS phòng khi có ai render pha khác về sau.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .vong,
+  .rung,
+  .manh,
+  .monHien {
+    animation: none;
+  }
+}

@@ -1,0 +1,173 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.balanceCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-card);
+  border: 1px solid var(--border-accent-soft);
+  border-radius: 0;
+  /* `--shadow-card-sm` = `0 20px 60px`: có offset → nó nói thẻ DÀY bao nhiêu,
+     tức vai VẬT, nên blur phải bằng 0. */
+  box-shadow: var(--px-bong);
+  padding: 18px 14px;
+}
+
+.balanceLabel {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+}
+
+.balanceValue {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--win-peak);
+  text-shadow: 0 0 14px rgba(74, 222, 128, 0.35);
+}
+
+.subsidyRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* Icon pixel đứng trong dòng chữ: hạ một khấc cho nó nằm ngang thân chữ. */
+.nutIcon {
+  vertical-align: calc(-1 * var(--px-do-day));
+}
+
+.claimErr {
+  font-size: 11.5px;
+  color: var(--lose-soft);
+  text-align: center;
+}
+
+.dayGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dayLabel {
+  font-size: 10.5px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  border-bottom: 1px dashed var(--border-idle-soft);
+  padding-bottom: 4px;
+}
+
+.entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-idle);
+  border: 1px solid var(--border-idle-soft);
+  border-radius: 0;
+  padding: 9px 12px;
+}
+
+.entryMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.entryReason {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-body);
+}
+
+.entryLink {
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.entryTime {
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+.entryNums {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.deltaUp {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--win);
+}
+
+.deltaDown {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--lose-soft);
+}
+
+.balanceAfter {
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+/* Trả thưởng của kèo CHƯA công bố — che số, mời bấm công bố (xem Wallet.tsx) */
+.sealed {
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--accent);
+}
+
+.errBox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  border: 1px dashed var(--border-idle);
+  border-radius: 0;
+  padding: 14px;
+}
+
+/* (skeleton dùng class .skeleton toàn cục — styles/base.css) */
+
+/*
+ * Ô chừa cho điểm quest (Q) — 25/07. Trông rõ là "chưa mở", không phải một khối
+ * dữ liệu đang rỗng: viền nét đứt + mờ. Không bao giờ in số 0 ở đây (xem TSX).
+ */
+.oQ {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 4px;
+  padding: 12px;
+  border: 1px dashed var(--border-idle);
+  border-radius: 0;
+  opacity: 0.7;
+}
+
+.oQNhan {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.oQCho {
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}

@@ -1,0 +1,177 @@
+/*
+ * MÀN CHÀO VAI — xem lý lẽ ở `ChaoVai.tsx`.
+ * §XI: radius 0, không blur, chỉ animate `transform`/`opacity` (tập giao của
+ * web · Discord Activity · native — xem `ThanhPhongCach.module.css`).
+ */
+
+.phu {
+  position: fixed;
+  inset: 0;
+  z-index: 78; /* trên bàn và trên shop (70), dưới chip bay (80) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgb(4 6 12 / 88%);
+  cursor: pointer;
+  animation: cvVao 220ms steps(5, end) both;
+}
+
+.tat { animation: cvRa 260ms steps(5, end) both; }
+
+.khoi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 320px;
+  padding: 18px 16px;
+  border: 2px solid var(--gold-amber, #fbbf24);
+  border-radius: 0;
+  background: var(--nen-2, #12161f);
+  text-align: center;
+}
+
+.nhan {
+  color: var(--text-muted);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+}
+
+/* Icon vào sau một nhịp — cùng luật "độ trễ mới làm nên hoành tráng" của D113,
+   ở liều rất nhẹ vì đây là màn chào chứ không phải phần thưởng. */
+.icon { animation: cvDau 320ms steps(6, end) 120ms both; }
+
+.ten {
+  color: var(--gold-amber, #fbbf24);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.dong {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  width: 100%;
+  text-align: left;
+}
+
+.k {
+  flex: 0 0 42px;
+  color: var(--text-muted);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+}
+
+.v {
+  flex: 1;
+  color: var(--text-body, #e6edf3);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.gia { color: var(--text-dim, #7b8494); }
+
+.nhac {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+
+@keyframes cvVao {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes cvRa {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes cvDau {
+  0% { transform: scale(1.9); opacity: 0.2; }
+  60% { transform: scale(1); opacity: 1; }
+  75% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+/* ─── 12/09 — PHA CHIA VAI (trước "VAI CỦA BẠN") ────────────────────────────
+   Founder: bàn tập đi thẳng vào trận nên chưa có khoảnh khắc nào cho thấy CẢ BÀN
+   được chia vai. Mỗi ghế một lá: avatar · icon vai · tên vai · ×vốn; lá đáp
+   xuống lần lượt cách nhau `--nhip-chia-vai` (lib/nhip.ts), lá của mình cuối
+   cùng và viền vàng. Lá là VẬT ⇒ `steps()`; một phần tử một chủ `animation`. */
+.chia {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  width: 100%;
+  margin: 6px 0 2px;
+}
+.laVai {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  padding: 6px 2px 5px;
+  border: 1px solid var(--border-accent-soft, rgba(34, 211, 238, 0.25));
+  background: rgba(6, 4, 16, 0.6);
+  animation: cvChia 240ms steps(4, end) both;
+  animation-delay: calc(var(--nhip-chia-vai, 350ms) * var(--tre, 0));
+}
+/* D542 — TRẬN CÓ: mỗi vai một ô (icon · số to · tên), đáp lần lượt cùng nhịp chia vai cũ. */
+.demVai { display: flex; justify-content: center; gap: 10px; width: 100%; margin: 8px 0 4px; }
+.oDem {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 76px; padding: 8px 6px 6px;
+  border: 1px solid var(--border-accent-soft, rgba(34, 211, 238, 0.25)); background: rgba(6, 4, 16, 0.6);
+  animation: cvChia 240ms steps(4, end) both; animation-delay: calc(var(--nhip-chia-vai, 350ms) * var(--tre, 0));
+}
+.soDem { font-size: 22px; line-height: 1; color: var(--gold-amber, #fbbf24); font-variant-numeric: tabular-nums; }
+.tenDem { font-size: 10px; letter-spacing: 0.08em; color: var(--text-bright, #e2e8f0); text-transform: uppercase; }
+.laToi {
+  border-color: var(--gold-amber, #fbbf24);
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.35);
+}
+.laMat { display: flex; align-items: center; height: 32px; }
+.laTen {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--text-body, #e6edf3);
+  font-size: 7.5px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.laToi .laTen { color: var(--gold-amber, #fbbf24); }
+.laVon {
+  color: var(--text-muted);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+}
+@keyframes cvChia {
+  0% { transform: translateY(-14px) scale(0.6); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* ⚠ Tắt CHUYỂN ĐỘNG, KHÔNG rút ngắn thời gian: 5 giây là để ĐỌC, và người bật
+   tiết kiệm chuyển động vẫn cần chừng ấy. Xem chú thích ở `ChaoVai.tsx`. */
+@media (prefers-reduced-motion: reduce) {
+  .phu, .tat, .icon, .laVai { animation: none; }
+  .tat { opacity: 0; }
+}
+
+/*
+ * D312 — CÂU LUẬT dưới ba dòng QUYỀN/GIÁ/VỐN. Cỡ nhỏ hơn và màu mờ hơn ba dòng
+ * kia có chủ ý: đây là nền, không phải danh tính — mắt phải đọc TÊN VAI trước.
+ */
+.luat {
+  margin-top: 10px;
+  max-width: 30ch;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-muted, #93aac8);
+  text-align: center;
+}
+.luat b { color: var(--text-bright, #e8f6ff); font-weight: 700; }

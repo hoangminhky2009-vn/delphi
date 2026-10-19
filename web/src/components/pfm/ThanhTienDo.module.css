@@ -1,0 +1,67 @@
+/*
+ * `.tt` — chép từ demo đã chốt (A11.25). Đừng "dọn lại cho gọn": mỗi dòng dưới đây có
+ * một lý do đã trả giá, ghi ngay tại chỗ.
+ */
+
+/*
+ * ⚠ `--tt-cao` — MỘT núm cỡ, không phải một component thứ hai. Demo dùng cùng thanh này ở
+ * hai cỡ: 8px ở thẻ hũ mini của màn SỔ, **13px** ở thẻ hũ đầy đủ của màn HŨ
+ * (`.khoi2 .tt{height:13px}`). Fork một `ThanhTienDoLon` là dựng bản cài đặt thứ hai của
+ * cùng công thức mốc/màu và nó SẼ trôi (D61); một biến kế thừa xuống thì màn cha đặt một
+ * dòng, còn mọi luật bên trong vẫn đúng một chỗ.
+ */
+.tt {
+  position: relative;
+  display: block;
+  height: var(--tt-cao, 8px);
+  margin-top: 5px;
+  overflow: hidden;
+  background: var(--long-thanh);
+  box-shadow: inset 0 0 0 1px rgba(93, 114, 144, .25);
+}
+
+/*
+ * ⚠ `background-color` LONGHAND, không dùng shorthand `background: var(--nac)`: một
+ * shorthand chứa var() thành "pending substitution" — nó vừa reset ngầm các longhand
+ * khác của background, vừa làm `getComputedStyle` đọc ra trong suốt nên KHÔNG kiểm được
+ * bằng máy.
+ */
+.tan {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--p);
+  background-color: var(--nac);
+}
+
+/*
+ * ⚠ KHÔNG chia khúc. Founder 04/09: *"tuyến tính của t là 1 cái thanh MƯỢT MÀ chứ ko
+ * phải chia khúc, chỉ thêm các mốc ở trên đó thôi."* Bản đầu của demo phủ một lưới vạch
+ * 1px lên thanh để giữ chất pixel — nhưng lưới ấy làm mắt đọc ra CÁC Ô, tức đúng thứ vừa
+ * bỏ. Và nó không cần: §XI đòi CẠNH CỨNG chứ không đòi ô rời, mà mép của phần tô vốn đã
+ * là cạnh cứng.
+ */
+.tt u {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--chu-mo);
+  transform: translateX(-1px);
+}
+
+/*
+ * Mốc ĐÃ QUA chuyển vàng và ĐỨNG LẠI đó — thành tựu phải CỘNG DỒN nhìn thấy được, không
+ * phải một cú nháy rồi mất.
+ *
+ * ⚠⚠ PHẢI LÀ `.tt u.dat`, KHÔNG PHẢI `.dat` — và tôi vừa dính đúng cái bẫy demo đã ghi
+ * sẵn ("rút gọn về lớp đơn là thua độ ưu tiên"). `.tt u` là (0,1,1), `.dat` một mình là
+ * (0,1,0) ⇒ nền xám của `.tt u` THẮNG, mốc đã đạt vẫn xám. Ảnh chụp không cho thấy: một
+ * vạch 2px xám giữa nền tối trông y như một vạch 2px vàng bị ám. Chỉ `getComputedStyle`
+ * mới nói ra (`rgb(109,132,162)` thay vì vàng).
+ */
+.tt u.dat {
+  background: var(--gold);
+  box-shadow: 0 0 0 1px rgba(4, 7, 13, .7);
+}

@@ -1,0 +1,87 @@
+/*
+ * §XI — avatar là VẬT (có cạnh chỉ được bằng ngón tay), nên mọi thứ ở đây cứng:
+ * không bo góc, không blur, không co giãn mượt.
+ *
+ * `image-rendering: pixelated` là dòng quan trọng nhất trong file. SVG mặc định
+ * được nội suy khi phóng to, mà nội suy một lưới ô vuông = mép nhoè = đúng thứ
+ * §XI viết ra để chống. Có nó thì 32 ô phóng lên 96px vẫn là 96 ô vuông sắc cạnh.
+ */
+.o {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 0;
+  line-height: 0;
+  image-rendering: pixelated;
+}
+
+.o > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+/*
+ * Ghế MÁY: quầng lạnh rất nhạt.
+ *
+ * Đây là ÁNH SÁNG chứ không phải vật (xoá đi thì bot vẫn nguyên hình), nên blur
+ * được phép — luật 4 của pixel.module.css. Nó KHÔNG phải dấu hiệu nhận biết bot:
+ * sáu dấu hiệu kia nằm trong chính lưới, đọc được cả khi CSS này không tải.
+ */
+.may {
+  box-shadow: 0 0 10px rgba(148, 163, 184, 0.28);
+}
+
+/* ── BẢNG CHỌN LÁ GỐC ───────────────────────────────────────────────────── */
+
+.chon {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/*
+ * KHÔNG lá nào được chọn sẵn: nếu onboard chọn giùm thì phân bố thu về là phân bố
+ * của CÁI MẶC ĐỊNH, không phải của gu — và cả cột dữ liệu mất nghĩa.
+ */
+.the {
+  composes: nut from '@/styles/pixel.module.css';
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px;
+  text-align: center;
+}
+
+/*
+ * Lá ĐANG CHỌN: viền cyan + nhấc lên một nấc.
+ *
+ * ⚠ KHÔNG `composes` lớp bóng ở đây rồi khai `box-shadow` lại — `composes` xong
+ * khai đè cùng thuộc tính là GHI ĐÈ IM LẶNG (đã dính bốn lần, không lần nào build
+ * đỏ). Nên khai MỘT `box-shadow` gồm đủ các vai, theo đúng luật 6.
+ *
+ * ⚠ `.the.theChon` chứ không phải `.theChon`: `.the` composes `.nut`, mà `.nut`
+ * có `:hover` riêng (0,3,0) đụng đúng `border-color` + `color` của lá đang chọn.
+ * Ghép lớp cho lá đang chọn nặng hơn lá thường là để trỏ chuột vào không xoá
+ * mất dấu. Việc thắng chính `.nut` thì `@layer pixel` đã lo (19/09) — xem chú
+ * thích dài ở `pixel.module.css`, đừng chép lại ở đây.
+ */
+.the.theChon {
+  border-color: var(--accent, #22d3ee);
+  color: var(--text-bright);
+  box-shadow: var(--px-bong-cao), 0 0 18px rgba(34, 211, 238, 0.4);
+  transform: translate(-1px, -1px);
+}
+
+.tenLa {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+}
+
+.moTa {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.3;
+}

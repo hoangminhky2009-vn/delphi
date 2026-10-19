@@ -1,0 +1,175 @@
+/*
+ * PFM — MÀN CAM KẾT. Theo demo `#man-ck`. Câu "nếu–thì" dựng thành MỘT DÒNG CHỮ
+ * có ô điền, không phải một biểu mẫu ba trường: người ta đang viết một lời dặn
+ * cho chính mình, và hình dạng phải nói ra điều đó.
+ */
+.the {
+  background: var(--surface-idle);
+  border: 1px solid var(--border-idle);
+  border-radius: 0;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.nhan {
+  margin: 0 0 9px;
+  font-size: 10.5px;
+  letter-spacing: 1.6px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.giai {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+/* ── Câu nếu–thì ───────────────────────────────────────────────────────────── */
+.cau {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 10px;
+}
+.tu {
+  flex: none;
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  flex: 1 1 100%;
+}
+.chip {
+  font: inherit;
+  padding: 0 10px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  cursor: pointer;
+  border: 0;
+  border-radius: 0;
+  color: var(--text-bright);
+  background: var(--mat-phim, rgba(255, 255, 255, 0.03));
+  box-shadow: var(--px-vien), inset 0 0 0 1px var(--border-idle);
+}
+.chip[aria-checked='true'] {
+  color: var(--bg-deep);
+  background: var(--accent);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+}
+/*
+ * Chip ĐƯỢC GỢI mang cờ ⚑ — cùng nếp "game điền sẵn" ở màn phỏng vấn, và cùng lý
+ * do: nó nói ra rằng lựa chọn này tới từ câu 6 chứ không phải người dùng vừa
+ * chạm. Bỏ cờ đi là để một suy luận của máy đội lốt lời khai của người.
+ */
+.chipGoiY {
+  box-shadow: var(--px-vien), inset 0 0 0 1.5px var(--gold);
+}
+.chipGoiY::before {
+  content: '⚑';
+  margin-right: 5px;
+  font-size: 10px;
+  color: var(--gold);
+}
+.chip[aria-checked='true'].chipGoiY::before { color: var(--bg-deep); }
+
+/*
+ * Ô MỨC — viền vàng vì nó là "ô app từ chối điền". Placeholder `— — —` giữ
+ * nguyên từ demo: nó phải trông như một chỗ TRỐNG CÓ CHỦ Ý, không phải ô hỏng.
+ */
+.oMuc {
+  font: inherit;
+  font-size: 14px;
+  width: 130px;
+  padding: 8px 10px;
+  color: var(--text-bright);
+  background: var(--mat-phim, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--gold);
+  border-radius: 0;
+  font-variant-numeric: tabular-nums;
+}
+.donVi {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.oLoi {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.oChu {
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 9px 10px;
+  resize: vertical;
+  color: var(--text-bright);
+  background: var(--mat-phim, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-idle);
+  border-radius: 0;
+}
+.oMuc:focus-visible,
+.oChu:focus-visible,
+.chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.khoiPhu {
+  margin: 0 0 6px;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.viSao {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  border-left: 3px solid var(--border-accent-soft);
+  padding-left: 9px;
+}
+
+/* Xem trước: đúng MỘT thẻ Oracle, không hơn. */
+.loiNhacXem {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  border: 1px solid var(--border-accent-soft);
+  background: rgba(34, 211, 238, 0.05);
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+.loi {
+  margin: 0 0 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--lose-soft);
+}
+.day {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.boQua {
+  font: inherit;
+  font-size: 11.5px;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+}

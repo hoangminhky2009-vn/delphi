@@ -1,0 +1,873 @@
+/* BÀN ĐẤU — bố cục theo ảnh tham chiếu founder 20/07. */
+
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px;
+  /* ⭐ 13/09 tối — DẢI ĐẦU LÀ HÀNG ĐẦU CỦA MỘT TẤM BÀN, không phải một cái hộp riêng.
+     Viền/nền/bóng của nó nay do `.banDau` lo (xem khối MỘT MẶT BÀN ở dưới). */
+}
+.k { color: var(--text-muted); font-size: var(--fs-micro); letter-spacing: var(--ls-nhan); }
+/* D443 — "/ 15" cạnh số vòng: nhỏ hơn số vòng (`--fs-title`) một nấc. */
+.kTong { font-size: var(--fs-human); }
+
+/*
+ * LOẠI VÒNG cạnh số vòng (23/08) — thay ô nở ra giữa dải lịch, thứ vừa được thu
+ * còn vạch màu. Nhạt hơn con số vòng: nó là BỐI CẢNH, không tranh chú ý với
+ * đồng hồ ngay bên phải (cùng lý lẽ của nhãn chương hồi).
+ */
+.loaiVong {
+  padding: 1px 5px;
+  border: 1px solid rgba(93, 114, 144, 0.4);
+  color: var(--text-muted);
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  letter-spacing: var(--ls-nut);
+}
+.v {
+  font-size: var(--fs-title);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.sep { width: 1px; height: 22px; margin: 0 4px; background: var(--border-idle); }
+/*
+ * D401 — CỤM PHẢI của hàng HUD: [vạch · đồng hồ · GIẢI], MỘT khối không tự xuống dòng.
+ * `flex: 1 1 0` + `min-width: min-content`: hàng (vẫn `wrap`) ngắt dòng theo bề ngang TỐI THIỂU của cụm, rồi cụm nở
+ * lấp phần còn lại. Chật quá thì CẢ CỤM xuống dòng cùng nhau, không bao giờ để GIẢI rơi một mình. Thanh đồng hồ 26px,
+ * màn < 375px còn 12px (DongHoVong.module.css); GIẢI bám mép phải. Khe trong cụm 6px (hàng 8px): đo 24/09, ca xấu
+ * nhất có thật — vòng 2 chữ số · "KỲ NGỘ" · giải 6 chữ số — ở màn 360px thiếu đúng 2px với khe 8.
+ */
+.cumPhai {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  gap: 6px;
+  min-width: min-content;
+}
+.oDongHo { display: flex; }
+.oGiai { display: flex; flex-shrink: 0; margin-left: auto; }
+
+/* `.pnl` ĐỨNG MỘT MÌNH (màn lỗi, màn tổng kết) thì vẫn là một tấm thẻ có viền; trong bàn
+   đấu nó tan vào tấm chung — xem khối MỘT MẶT BÀN ở dưới. */
+.pnl {
+  margin-bottom: 8px;
+  border: 1px solid var(--border-idle);
+  border-radius: 0;
+  background: var(--surface-panel);
+  box-shadow: var(--px-bong), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+/* 13/09 tối — tiêu đề mục KHÔNG còn là một thanh có nền và gạch dưới. Founder chỉ đúng
+   nó: *"đang tạo sự phân tách giữa các khối trông rất ngứa mắt"*. Nay nó chỉ là một hàng
+   chữ mở đầu mục — thứ phân mục là KHOẢNG TRỐNG và một chỉ mảnh, không phải một cái nẹp. */
+.hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px 3px;
+}
+.hdrT {
+  color: var(--text-muted);
+  font-size: var(--fs-meta);
+  font-weight: 800;
+  letter-spacing: var(--ls-nhan);
+}
+.hdrT small { color: var(--text-muted); font-weight: 400; letter-spacing: var(--ls-nut); }
+.bd { padding: 10px; }
+/* 13/09 tối — bản đồ và dải sáu mã là MỘT mặt nỉ liền: bỏ khe giữa chúng, và cho mặt ấy
+   tràn sát mép trong của mục (đệm 10px của `.bd`) để nó đọc ra là MẶT SÀN của mục, không
+   phải một hộp thứ hai nằm trong hộp. */
+.bd > [class*="map"] + [class*="dai"],
+.bd > [class*="dai"] { margin-top: 0; }
+
+/* Hàng trên bản đồ: CHIP LÃI SUẤT dán trái (founder 08/08 — góc "LX"), nút
+   Bảng điện tử dán phải. Không nhét vào `.hdr`: header đã là flex hai đầu,
+   thêm phần tử thứ ba là hai nhãn bị ép sát nhau ở 390px. */
+/* D443 — `.hangBang` (hàng chip trên đầu bản đồ) đã gỡ: chip lãi suất · SỔ xuống hàng công cụ của thanh đáy
+   (`TayBai .hangCongCu`), nút BẢNG ĐIỆN TỬ xuống hàng nút. Founder 28/09: *"Thu nhỏ phần lãi suất và sổ lại tý"* ⇒
+   đệm 5/9 → 3/7 px, chữ về thang `--fs-label`: chip cao ~27 → ~21 px. */
+.lxChip {
+  padding: 3px 7px;
+  /* 13/09 tối — AFFORDANCE: lam là màu DUY NHẤT của thứ bấm được (founder: *"chọn một màu
+     nhấn duy nhất chỉ dành cho các phần tử có thể tương tác"*). Nhãn tĩnh, viền bảng, chữ
+     phụ đều đã rút về xám tối, nên một vệt lam giờ CHẮC CHẮN nghĩa là "chạm được". */
+  border: 1px solid var(--border-accent);
+  border-radius: 0;
+  background: rgba(34, 211, 238, 0.08);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.07), inset -1px -1px 0 rgba(0, 0, 0, 0.5);
+  color: var(--accent-soft);
+  font: inherit;
+  font-size: var(--fs-label);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.lxChip b { color: var(--accent-bright); }
+
+.lxChipMo {
+  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.18);
+  color: var(--accent-peak);
+}
+
+/* 12/09 (Q3) — nút SỔ LIÊN HỆ, cùng hàng với chip LX (D443: hàng công cụ ở thanh đáy; khoảng cách do `gap` của hàng). */
+.soChip {
+  composes: lxChip;
+  letter-spacing: var(--ls-nhan);
+}
+
+/* D443 — hàng MÃ ĐANG CẦM trong khung NAV: chiếm trọn một dòng dưới NAV · tiền mặt · xu. */
+.footCam {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+.soChipMo { composes: lxChipMo; }
+
+/* D443 — MŨI TAM GIÁC vẽ bằng viền. Không dùng ký tự ▾ ▴ ▸: Handjet không có glyph ấy, trình duyệt mượn font hệ điều
+   hành (Consolas / Segoe UI Symbol) vẽ ⇒ lại một kiểu chữ thứ hai giữa câu. Mặc định chỉ XUỐNG; `.muiLen` / `.muiPhai`
+   xoay (transform tĩnh, không hoạt ảnh). */
+.mui {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 5px;
+  vertical-align: middle;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid currentColor;
+}
+.muiLen { transform: rotate(180deg); }
+.muiPhai { transform: rotate(-90deg); }
+
+/* D336 lượt 2 — một dòng nhắc chỗ đọc sâu, thay khối bách khoa từng mở dưới sổ. */
+.soNhac {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: var(--fs-label);
+  line-height: 1.4;
+}
+.soNhac b { color: var(--accent-soft); font-weight: 800; letter-spacing: var(--ls-nut); }
+
+/* 12/09 — nhãn "VÌ SAO ▸" đứng cạnh con số % ở thanh tay cầm. Founder: *"nó
+   chẳng nói cho t biết phải bấm vào đây để xem lý do"* — con số là cửa duy nhất
+   ghim đáy (D119) mà chỉ nháy, không nói. Cùng chữ với nút VÌ SAO trong khối kết
+   quả: một cửa, hai chỗ, một tên. Chữ thường (không ChuPixel) cùng luật với nút kia. */
+.moiViSao {
+  padding: 2px 4px;
+  color: var(--text-muted);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-nhan);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.moiViSaoMo { color: var(--accent-soft); }
+
+/* Cụm NHÃN + SỐ ở thanh tay cầm — một khối để coach rọi trọn cửa VÌ SAO
+   (`data-tap="vi-sao"`), không rọi nửa cái. */
+.cumViSao {
+  /* D400 — mốc cho hàng hộp khoản nổi (`KhoanNoi`) mọc lên từ mép trên con số vòng. */
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Bảng thông tin CÔNG KHAI — bấm chip mới mở, miễn phí (khác Bảng điện tử). */
+.lxPanel {
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-accent-soft);
+  border-left-width: 3px;
+  background: rgba(34, 211, 238, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.lxDong {
+  font-size: var(--fs-body);
+  color: var(--text-body);
+}
+
+.lxDong b { color: var(--accent-bright); }
+
+.lxPhu {
+  font-size: var(--fs-meta);
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.lxPhu b { color: var(--text-body); }
+
+/* Mọi nút trong file này nay lấy hình khối từ `.nut`: góc khấc, bóng cứng, lún
+   xuống khi bấm, và MỘT nhịp `steps()` chung. Trước đó mỗi nút tự gõ một
+   `cubic-bezier(0.34, 1.56, …)` — cú nảy đàn hồi đó là chuyển động của vật MỀM,
+   nó cãi thẳng với cạnh cứng của cả khung hình. */
+.mini {
+  composes: nut from '@/styles/pixel.module.css';
+  padding: 5px 10px;
+  border-color: rgba(34, 211, 238, 0.28);
+  background: rgba(34, 211, 238, 0.1);
+  color: var(--accent);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-nhan);
+  white-space: nowrap;
+}
+.mini:hover:not(:disabled) {
+  background: rgba(34, 211, 238, 0.18);
+  /* Nhấc = bóng dày gấp đôi, blur vẫn 0. `0 4px 14px` cũ là bóng của vật cong. */
+  box-shadow: var(--px-bong-cao);
+}
+
+.dt {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  align-items: center;
+  min-width: 132px;
+  padding: 7px 9px;
+  border: 1px solid rgba(139, 92, 246, 0.32);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.35);
+  font-size: var(--fs-label);
+  /* Đổi trạng thái là NHỊ PHÂN → nhảy hai nấc, cùng nhịp với mọi chỗ khác thay
+     cho thang 0,3s riêng. Opacity (đối thủ cháy) cố ý rơi khỏi transition: nó
+     lật thẳng, và một ô mờ dần trong 0,3s đọc như đang tải chứ không như chết. */
+  composes: doiMau from '@/styles/pixel.module.css';
+}
+.dtBac { color: var(--gold-amber); font-size: var(--fs-micro); letter-spacing: var(--ls-nut); }
+
+/* HAI SHOP CẠNH NHAU (founder 20/07): tài sản trái · chiến thuật phải.
+ * Trước đây 5 lá một hàng dọc bắt lướt lên xuống liên tục để so hai bộ.
+ * Thẻ thu nhỏ (100px thay vì ~180px) để cả hai bộ nằm gọn trong một tầm nhìn. */
+.hai {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 10px;
+  align-items: start;
+}
+@media (max-width: 640px) { .hai { grid-template-columns: 1fr; } }
+
+.shop { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+@media (max-width: 400px) {
+  .shop { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Khối "BỘ BÀI CỦA BẠN" đã chuyển hẳn sang màn shop (ShopManHinh) 20/07 —
+   founder: giữ lại ở đây làm phần danh mục trong shop thành thừa thãi.
+   CSS của nó đi theo, không để lại lớp mồ côi (A8.9). */
+
+/* QUYẾT ĐỊNH — ba thẻ lớn.
+   (Khối `.dc*` hiện KHÔNG còn nơi dùng trong `AlphaDraftMatch.tsx` — ba thẻ lớn
+   đã nhường chỗ cho `.nutHD` ở thanh dính đáy. Vẫn áp luật pixel cho nó thay vì
+   xoá: xoá lớp là việc của một lượt dọn riêng, còn để lại một khối cubic-bezier
+   thì lượt sau lại chép nhầm từ đây ra.) */
+.dc {
+  position: relative;
+  overflow: hidden;
+  padding: 12px 10px;
+  border: 1.5px solid var(--bd);
+  border-radius: 0;
+  background: linear-gradient(168deg, var(--gl), rgba(8, 6, 20, 0.9));
+  color: var(--text-bright);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: var(--px-bong);
+  /* 4–5 nấc cho cú nảy/đáp; quầng thì đổi ĐỘ MẠNH nên vẫn được mượt, nhưng ở đây
+     nó đi chung `box-shadow` với bóng cấu trúc nên phải theo nhịp của bóng. */
+  transition:
+    transform 160ms steps(4, end),
+    box-shadow 160ms steps(4, end);
+}
+.dc:hover:not(:disabled) {
+  transform: translateY(calc(-1 * var(--px-do-day)));
+  box-shadow: var(--px-bong-cao), 0 0 26px var(--gl);
+}
+.dc:active:not(:disabled) {
+  transform: translate(var(--px-do-day), var(--px-do-day));
+  box-shadow: 0 0 26px var(--gl);
+}
+.dc:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* Thanh cuối: vốn + vàng */
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 2px 6px;
+}
+.hpWrap { flex: 1; min-width: 150px; }
+/* 13/09 tối — PHÂN CẤP: NAV là ĐIỂM NEO của cả màn số (26px, vàng = giá trị), tiền mặt và
+   vàng tụt xuống 13px xám, nhãn 8,5px. Trước đó ba con số cùng 15px đậm ⇒ mắt không biết
+   đọc cái nào trước (founder: *"đều có sức nặng thị giác tương đương… không có điểm neo"*). */
+.navSo {
+  color: var(--gold-amber);
+  font-size: var(--fs-hero);
+  font-weight: 800;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+.navPhan { color: var(--text-muted); font-size: var(--fs-meta); font-weight: 400; }
+.oSo { text-align: right; }
+.soPhu {
+  color: var(--text-dim);
+  font-size: var(--fs-human);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+/*
+ * ⚠ `.hpBar` / `.hpFill` / `.hpThap` GỠ 23/08 (founder: *"Nav tổng tài sản có
+ * thanh ở trên rồi đ** cần thanh ở dưới nữa"*). Bàn đấu vẽ hai thanh cho cùng
+ * một đại lượng — LĂNG KÍNH trên đầu đã chia NAV thành ba đoạn, thanh này chỉ
+ * nói lại tổng của chúng. Con số NAV và `(155%)` ở lại; hình vẽ thừa thì đi.
+ * KHÔNG dựng lại: muốn "NAV đang lên hay xuống" thì đọc ở LĂNG KÍNH — nó đã
+ * biết đỏ/rung khi lỗ và xanh/phát sáng khi lãi (`LangKinh.module.css`).
+ */
+.nhanNho { color: var(--text-muted); font-size: var(--fs-micro); letter-spacing: var(--ls-nhan); }
+
+.nhipTim { composes: adNhipTim from '../../styles/motion.module.css'; }
+
+/* `.ketTran` (một dòng 30px "THẮNG / HẠNG n") đã GỠ cùng lúc với việc đổi thứ tự
+ * đọc ở trên. Giữ lại một class không ai gọi là để lại một cái bẫy trông như còn
+ * cơ chế — lần sau ai đó sẽ dùng nó và mất luôn thứ tự vừa sửa. */
+.thang { color: var(--gold-amber); text-shadow: 0 0 40px var(--gold-amber); }
+.hang {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 4px;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.32);
+}
+
+/*
+ * Lỗi CHỐT VÒNG — ngay trên thanh hành động, tức đúng chỗ mắt đang nhìn khi
+ * vừa bấm. Trước đây `nop.isError` không được vẽ ở đâu cả (rà mạng kém 11/08).
+ */
+.nopLoi {
+  margin: 0 0 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--lose);
+  border-radius: 0;
+  background: rgba(69, 10, 20, 0.7);
+  color: #fecdd3;
+  font-size: var(--fs-label);
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * THANH HÀNH ĐỘNG GỌN (kiểu TFT — founder 20/07)
+ *
+ * Màn chính chỉ còn ba nút: GIỮ · THEO · BỎ. Thanh kéo vốn CHỈ hiện khi bấm
+ * THEO — trước đây nó chiếm chỗ suốt trận dù phần lớn vòng không dùng tới.
+ * Shop bật/tắt bằng icon và TỰ MỞ mỗi khi sang vòng mới.
+ *
+ * Dính đáy màn: trên điện thoại, nút quyết định phải luôn với tới được mà
+ * không cần cuộn — đó là nút bấm nhiều nhất trong cả trận.
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+/* ⚠ PHẢI NGỒI TRÊN BottomNav, KHÔNG ĐƯỢC ĐÈ LÊN.
+ * BottomNav là `fixed; bottom:0; z-index:50`. Bản đầu tôi để thanh này
+ * `bottom:0; z-index:60` → nó phủ kín menu chính, người chơi vào Alpha Draft
+ * là mất đường về Sảnh/Hồ sơ (founder báo 20/07). Nay đẩy lên đúng chiều cao
+ * menu và hạ z-index xuống dưới menu. */
+.thanhDay {
+  /* Mép TRÊN cứng: đây là tấm che đè lên nội dung cuộn, không phải bóng đổ —
+     bóng xuống-phải ở vị trí này rơi ra ngoài viewport. */
+  composes: mepChe from '@/styles/pixel.module.css';
+  position: sticky;
+  z-index: 45;
+  bottom: var(--cao-nav);
+  /* 13/09 tối — tấm này chỉ là CHỖ NGỒI của tầng hành động: mặt nỉ nổi của `TayBai .tay`
+     là bề mặt duy nhất ở đây, nên không nền riêng, không viền, không đệm. */
+  margin: 2px 0 0;
+  padding: 0;
+  background: transparent;
+  /* `backdrop-filter: blur(10px)` gỡ 26/07: nền đục 90–97% nên chẳng có gì lọt
+     qua để làm mờ, nhưng lớp compositing thì GPU vẫn phải dựng mỗi khung cuộn. */
+}
+
+/* Founder 02/08 — BottomNav ẨN trong trận (AppShell `toanMan`): "bấm nhầm vào
+ * là mất trận đấu". Thanh hành động nay dính SÁT đáy, chỉ chừa vùng an toàn
+ * máy tai thỏ. Ai bật lại BottomNav trong trận thì phải trả 62px về đây. */
+.banDau {
+  --cao-nav: env(safe-area-inset-bottom);
+  /* Chừa chỗ để khối cuối không bị thanh hành động che mất. */
+  padding-bottom: calc(var(--cao-nav) + 8px);
+  /* ⭐⭐⭐ 13/09 tối (đợt 2) — BÀN ĐẤU LÀ MỘT HUD GAME, KHÔNG PHẢI MỘT CHỒNG HỘP WEB.
+     Founder bác cả hai cực đã thử: năm cái hộp rời (*"tách 1 màn hình ra làm nhiều phần,
+     ngứa mắt"*) VÀ một tấm liền phẳng (*"phẳng trơn, khó nhìn và phân biệt"*). Lối ra là
+     lối thứ ba: PHÂN TẦNG THEO CHIỀU SÂU, mỗi tầng một vai, không tầng nào cần nẹp:
+       · nền = CĂN PHÒNG (vignette tím, không viền, không bề mặt riêng);
+       · BỐI CẢNH (dải ghế · sóng gió/bản đồ) = GIẾNG LÕM — bóng rơi vào trong;
+       · SỐ (NAV · tiền mặt · vàng) = phẳng, nằm thẳng trên nền phòng;
+       · HÀNH ĐỘNG (tay cầm + CHỐT) = tấm NỔI, có bóng pixel, sát ngón cái.
+     Ranh giới đọc ra bằng SẮC ĐỘ + BÓNG + 10px thở, đúng chỉ đạo *"dùng đổ bóng hoặc
+     đổi sắc độ nền… không cần viền kẻ rập khuôn"*. ⚠ Ai định thêm `border` cho một mục
+     ở đây thì dừng lại: cái nẹp ấy chính là thứ vừa gỡ, hai lần. */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: radial-gradient(130% 430px at 50% -70px, rgba(139, 92, 246, 0.13), transparent 60%);
+}
+/* GIẾNG BỐI CẢNH — thứ để ĐỌC, nằm thấp hơn mặt phòng. */
+.banDau > .pnl {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.6);
+}
+/* HUD + SỐ — phẳng trên nền phòng, không bề mặt riêng. */
+/*
+ * D541 — BÀN VỪA MỘT KHUNG HÌNH: thu các khối trong luồng theo `--vua` (JS đo, `lib/vua_khung`). `zoom` dàn lại bố cục — chữ nét, không mờ pixel
+ * như `transform: scale`. Lớp phủ cố định (shop · trợ lý · bảng) không nằm trong danh sách này ⇒ giữ nguyên cỡ.
+ */
+.banDau > .strip, .banDau > .pnl, .banDau > .foot, .banDau > .thanhDay { zoom: var(--vua, 1); }
+.banDau > .strip,
+.banDau > .foot {
+  margin: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hangNut { display: flex; gap: 8px; align-items: stretch; }
+
+/* Nút icon vuông — shop, ẩn/hiện */
+.nutIcon {
+  composes: nut from '@/styles/pixel.module.css';
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  border-width: 1.5px;
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(139, 92, 246, 0.12);
+  color: var(--text-bright);
+}
+/* Cú lún khi bấm do `.nut` lo; ở đây chỉ còn đổi nền. */
+.nutIcon:hover:not(:disabled) { background: rgba(139, 92, 246, 0.25); }
+/* Quầng cyan (offset 0 = ánh sáng) PHẢI đi cùng `var(--px-bong)` trong một khai
+   báo — `box-shadow` không cộng dồn, khai trần là xoá mất độ dày của `.nut`. */
+.nutIconOn {
+  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.2);
+  box-shadow: var(--px-bong), 0 0 18px rgba(34, 211, 238, 0.35);
+}
+/* (`.iconTo` gỡ: giỏ hàng nay là `<PixelIcon name="shop">`, tự mang cỡ lưới.) */
+.iconChu { font-size: var(--fs-micro); letter-spacing: var(--ls-nut); color: var(--text-muted); }
+
+/*
+ * Icon pixel nằm TRONG DÒNG CHỮ. `PixelIcon` render một `inline-block` cao đúng
+ * cỡ lưới, mà mặc định inline-block ngồi trên đường baseline nên nó đội chữ lên
+ * và làm giãn dòng. Hạ xuống một khấc là nó nằm ngang thân chữ.
+ */
+.iconDong { vertical-align: calc(-1 * var(--px-do-day)); }
+/*
+ * Chấm đếm số thẻ đang chọn.
+ *
+ * ⚠ PHẢI NẰM TRONG LÒNG NÚT. Từ khi `.nutIcon` composes `nut` (tức `khung`, tức
+ * `clip-path`), mọi thứ nằm ngoài hộp của nút bị CẮT — kể cả con của nó. Ở
+ * `top: -6px; right: -6px` cũ, chấm này thò ra ngoài hai cạnh nên hơn nửa con số
+ * biến mất: người chơi không còn đếm được mình đang chọn mấy thẻ.
+ * 2px chứ 0px: khấc 3px ăn một tam giác ở góc, lùi vào 2px là con số nằm trọn
+ * trong đa giác.
+ */
+.chamDem {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 17px;
+  padding: 1px 4px;
+  border-radius: 0;
+  background: var(--gold-amber);
+  color: #1a1000;
+  font-size: var(--fs-micro);
+  font-weight: 800;
+  text-align: center;
+}
+
+/* Ba nút quyết định — to, dễ bấm bằng ngón cái */
+.nutHD {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 6px;
+  border: 1.5px solid var(--bd);
+  border-radius: 0;
+  background: linear-gradient(168deg, var(--gl), rgba(8, 6, 20, 0.9));
+  color: var(--text-bright);
+  font: inherit;
+  cursor: pointer;
+  box-shadow: var(--px-bong);
+  /* 4 nấc — thang "cú nảy/đáp". Không `cubic-bezier`: đó là nhịp của vật mềm. */
+  transition: transform 160ms steps(4, end), box-shadow 160ms steps(4, end);
+}
+.nutHD:hover:not(:disabled) {
+  transform: translateY(calc(-1 * var(--px-do-day)));
+  box-shadow: var(--px-bong-cao), 0 0 22px var(--gl);
+}
+/* Bấm = khối LÚN đúng bằng độ dày bóng, không phải co nhỏ lại. Nút co 5% là cử
+   chỉ của vật đàn hồi; vật ở đây có cạnh cứng nên nó phải chìm xuống mặt bàn. */
+.nutHD:active:not(:disabled) {
+  transform: translate(var(--px-do-day), var(--px-do-day));
+  box-shadow: 0 0 22px var(--gl);
+}
+.nutHD:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* (`.hdIcon` gỡ 26/07 — xem chú thích ở `AlphaDraftMatch.tsx`, chỗ ba nút
+   quyết định: không có lưới pixel nào đúng nghĩa "giữ vị thế" / "bỏ vòng".) */
+.hdChu { font-size: var(--fs-meta); font-weight: 800; letter-spacing: var(--ls-nut); color: var(--bd); }
+.hdPhu { font-size: var(--fs-micro); letter-spacing: var(--ls-nut); color: var(--text-muted); }
+
+.nutXacNhan {
+  composes: nut from '@/styles/pixel.module.css';
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border-width: 1.5px;
+  border-color: var(--gold-amber);
+  background: rgba(251, 191, 36, 0.18);
+  color: var(--gold-amber);
+  font-size: var(--fs-human);
+  font-weight: 800;
+  letter-spacing: var(--ls-nhan);
+}
+/* Quầng vàng vẫn giữ blur (ánh sáng), nhưng phải kèm bóng dày trong CÙNG khai
+   báo, nếu không nút mất luôn độ dày đúng lúc người chơi trỏ vào. */
+.nutXacNhan:hover:not(:disabled) {
+  box-shadow: var(--px-bong-cao), 0 0 24px rgba(251, 191, 36, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nuoc { animation: none; }
+}
+
+/* Nút thoát trận. Nhỏ nhưng luôn hiện — thoát giữa trận giờ là ĐẦU HÀNG nên
+   người chơi phải luôn thấy đường ra, không đi vòng qua menu dưới. */
+.nutThoat {
+  composes: nut from '@/styles/pixel.module.css';
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
+  border-color: rgba(226, 232, 240, 0.28);
+  background: rgba(0, 0, 0, 0.4);
+  color: rgba(226, 232, 240, 0.85);
+  font-size: var(--fs-body);
+  line-height: 1;
+}
+
+/* Nút thoát là nút DUY NHẤT trong file sáng lên màu ĐỎ chứ không cyan, nên nó
+   phải thắng `.nut:hover:not(:disabled)`. Hai selector đó cùng độ ưu tiên
+   (0,3,0) — ai thắng phụ thuộc thứ tự file trong bundle, tức là may rủi. Thêm
+   tên thẻ `button` đẩy lên (0,3,1) để kết quả là tất định. */
+button.nutThoat:hover:not(:disabled) {
+  border-color: rgba(239, 68, 68, 0.6);
+  color: var(--lose-tag);
+}
+
+/*
+ * Chấm "hàng mới" trên nút SHOP — thở nhẹ để bắt mắt mà không ồn.
+ *
+ * `border-radius: 50%` gỡ 26/07: đây là hình tròn DUY NHẤT còn sót trên thanh
+ * hành động, và ở 8×8 điểm ảnh thì một đường tròn chỉ ra được bậc thang răng cưa
+ * chứ không ra đường cong. Ô LED vuông đọc đúng hơn và đúng lưới.
+ *
+ * Nhịp thở thì GIỮ MƯỢT (`ease-in-out`): thứ đang đổi là ĐỘ MẠNH của ánh sáng,
+ * không phải hình của vật — `steps()` ở đây ra strobe, mà mắt đọc strobe là lỗi
+ * render. Chỉ bỏ `scale()`: cỡ là hình của VẬT, và một ô 8px co còn 6,6px thì
+ * rơi khỏi lưới số nguyên.
+ */
+
+/* Ô chờ kết quả — giữ CHỖ để lúc có kết quả layout không giật nhảy. */
+.choKetQua {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 78px;
+  padding: 14px;
+}
+
+.choChu {
+  color: var(--text-muted);
+  font-size: var(--fs-meta);
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Hàng nút xác nhận: XÁC NHẬN + ALL IN nằm cạnh nhau. */
+.hangXacNhan {
+  display: flex;
+  gap: 8px;
+}
+
+.hangXacNhan > .nutXacNhan { flex: 1; }
+
+/*
+ * ⚠⚠ `.nutAllIn` + `@keyframes admAllInTho` ĐÃ GỠ 23/08 — CSS CHẾT.
+ *
+ * `grep nutAllIn` trong toàn bộ TSX ra 0 kết quả: nút ALL-IN nay là một CHIP
+ * trong `HangChip` (bàn cược, D92), không phải một nút riêng ở thanh hành
+ * động nữa. Khối này còn sót lại từ mô hình cược tuần tự trước D40.
+ * ⚠ Vì sao đáng gỡ chứ không phải "để đó cho lành": nó khai một animation VÔ
+ * HẠN (`admAllInTho`, 1,4s, animate `box-shadow`), nên ai đi đếm chi phí hoạt
+ * ảnh của màn trận sẽ cộng nhầm nó vào — và `lint:css-anim` không bắt được vì
+ * keyframe CÓ người tham chiếu, chỉ là người ấy không bao giờ được mount.
+ */
+
+/* Sau khi all-in: không còn nút nào, chỉ còn băng báo đang chạy nốt board. */
+.baoAllIn {
+  padding: 16px 12px;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  border-radius: 0;
+  background: rgba(251, 191, 36, 0.09);
+  color: var(--gold-amber, #fbbf24);
+  font-weight: 800;
+  font-size: var(--fs-body);
+  letter-spacing: 0;
+  text-align: center;
+}
+
+/* ── NHÁNH LỖI ────────────────────────────────────────────────────────────
+   Màn nào cũng phải có đường ra. Trước 25/07 bàn đấu chỉ có skeleton, nên mọi
+   thất bại đều hiện ra thành "chờ mãi" — người chơi không biết mình đang chờ
+   cái gì và cũng không có nút nào để bấm. */
+.loi {
+  padding: var(--pad-card);
+  border: 1px solid var(--red);
+  border-left-width: 3px;
+  background: rgba(239, 68, 68, .08);
+  color: var(--text);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+}
+
+.loiNut {
+  display: flex;
+  gap: var(--gap-item);
+  margin-top: var(--gap-item);
+}
+
+/* `.nutPhu` từng chép tay đúng nội dung của `.nut` (viền `--line`, nền
+   `--surface-2`, chữ `--text-dim`, hover cyan) mà thiếu khối và nhịp. */
+.nutPhu {
+  composes: nut from '@/styles/pixel.module.css';
+  flex: 1 1 0;
+  padding: 11px;
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-nut);
+}
+
+/* ── PHÍ CỦA MÌNH ─────────────────────────────────────────────────────────
+   Đứng NGAY TRÊN bảng "vì sao", vì nó là một dòng của chính câu trả lời đó.
+   Nhánh giẫm đạp phải đọc ra ngay là BẤT THƯỜNG — nó là khoảnh khắc đáng kể
+   lại ("cả bàn cùng chạy nên tôi mất gấp đôi"), không phải một khoản thuế đều. */
+.phi {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-tight);
+  flex-wrap: wrap;
+  padding: var(--pad-block);
+  margin-bottom: var(--gap-item);
+  border: 1px solid var(--amber);
+  border-left-width: 3px;
+  background: rgba(251, 191, 36, .07);
+}
+
+.phiNhan {
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-nut);
+  color: var(--amber);
+  font-weight: 800;
+}
+
+/* D443 — `--fs-num` CHƯA TỪNG được khai (từ bản D2) ⇒ khai báo vô hiệu, chữ rơi về cỡ kế thừa; bài canh thang chữ bắt
+   được. Về thang: `--fs-human`. */
+.phiSo {
+  font-size: var(--fs-human);
+  font-weight: 800;
+  color: var(--red);
+}
+
+.phiVi {
+  flex: 1 1 100%;
+  font-size: var(--fs-micro);
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
+/* Headline lãi/lỗ luôn hiện + nút mở chain (founder 01/08). */
+.pnlHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 4px;
+}
+.pnlXanh { color: var(--win); font-size: var(--fs-stat); letter-spacing: var(--ls-nut); }
+.pnlDo { color: var(--lose-tag); font-size: var(--fs-stat); letter-spacing: var(--ls-nut); }
+
+/* ── LÃI/LỖ GHIM ĐÁY (founder 02/08 — tầng 3 của "ba tầng cứng") ──────────
+ * Nằm trong .thanhDay (sticky) nên luôn trong khung hình. Cỡ chữ hạ xuống 14px
+ * so với headline 20px: hai vế trên một hàng 390px, 20px là tràn. */
+.pnlDinh {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin-bottom: 6px;
+  font-weight: 800;
+}
+.pnlDinh > span { font-size: var(--fs-human); }
+/* `.pnlCho` GỠ 23/08 cùng vế "VÒNG" ở thanh đáy (D114) — nhãn "chưa chốt vòng
+   nào" không còn nhánh nào gọi tới. Cùng lý lẽ đã dùng cho `.hpBar`/`.hpFill`.
+   Thêm lại được nếu `.pnlDinh` cần một trạng thái rỗng. */
+.nutLyDo {
+  font: inherit;
+  font-size: var(--fs-meta);
+  padding: 4px 10px;
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.nutLyDo:hover { border-color: var(--accent-bright); }
+
+/*
+ * v32 — HÀNG CHIP KỲ NGỘ. Map 16 có hai kỳ ngộ nên phải xuống dòng được;
+ * §XI: radius 0, không animation (chip là BỐI CẢNH, không phải cảnh báo —
+ * nó không được tranh chú ý với đồng hồ và viền gấp giờ, D77).
+ */
+.hangChip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* M3+M4 (17/08) — hai dải mỏng dưới dải trạng thái. Gộp một khối để chúng
+   đứng cùng nhịp thở, và để phần còn lại của màn không phải nhích. */
+.langKinhHang {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0 0 8px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * TẤM VÌ SAO — chi tiết lãi/lỗ vòng vừa chốt, TRƯỢT LÊN TỪ ĐÁY.
+ *
+ * Founder 23/08 (lượt 3): *"phần đó đổi lại thành hiển thị % và khi bấm vào sẽ
+ * hiện 1 màn hình thể hiện chi tiết lí do, thay thế cho chức năng hiển thị cũ"*
+ * — và chốt dạng: trượt từ dưới lên, chạm 30% còn lại để nó thụt xuống.
+ *
+ * ⚠ VÌ SAO KHÔNG PHẢI LỚP PHỦ TOÀN MÀN: vòng sau đã bắt đầu đếm giờ ngay lúc
+ * người chơi đọc cái này (D76 cấp 15s ĐỌC, không cấp vô hạn). Che sạch mặt bàn
+ * là giấu mất ô vừa lật và cái đồng hồ đang chạy. Chừa 30% trên vừa giữ được
+ * bối cảnh, vừa CHÍNH LÀ nút tắt — không phải đi tìm chữ ✕ nhỏ xíu.
+ *
+ * ⚠ `fixed` nên nó nằm NGOÀI luồng: mở/đóng không đẩy bố cục bàn một pixel nào.
+ * Bản cũ bung tại chỗ và làm cả trang nhảy đúng lúc người chơi đang đọc số.
+ */
+.viSaoNen {
+  position: fixed;
+  inset: 0;
+  z-index: 76;                    /* trên bàn + đồng hồ (75), dưới chào vai (78) */
+  background: rgba(4, 3, 12, 0.55);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.viSaoTam {
+  position: fixed;
+  z-index: 77;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  /* Kẹp theo cột app: `fixed` thoát khỏi `--shell-width` nên trên desktop nó
+     sẽ trải hết 1920px nếu không kẹp — đúng lỗi shop đã dính 27/07. */
+  width: min(100%, var(--shell-width));
+  margin-inline: auto;
+  max-height: 70vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 2px solid var(--violet);
+  background: linear-gradient(180deg, #0b0818 0%, #06040f 100%);
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+  /*
+   * Trượt lên theo NẤC — §XI luật 3, cùng nhịp `steps` với shop.
+   * ⚠ KHÔNG `both`: fill-backwards giữ khung `from` (translateY(100%) = NẰM
+   * NGOÀI MÀN) trong mọi khoảnh khắc hoạt ảnh chưa chạy. Bình thường cửa sổ đó
+   * bằng 0, nhưng khi hoạt ảnh không chạy được thì tấm đứng luôn dưới mép màn
+   * và người chơi bấm số xong KHÔNG THẤY GÌ — đo được đúng ca đó trên pane
+   * không vẽ (bottom 875 / màn 550). Không fill thì vị trí nghỉ luôn là đúng
+   * chỗ, hoạt ảnh chỉ là thứ tô điểm đường đi tới đó.
+   */
+  animation: viSaoLen 200ms steps(6, end);
+}
+
+@keyframes viSaoLen {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* Tay nắm: dấu hiệu "kéo/chạm ra ngoài để đóng", không phải nút riêng. */
+.viSaoNam {
+  width: 46px;
+  height: 4px;
+  margin: 0 auto 8px;
+  background: rgba(148, 163, 184, 0.55);
+}
+
+/*
+ * ⭐ D373 — TẤM KẾT QUẢ NÓI NÓ THUỘC VỀ VÒNG NÀO.
+ *
+ * Founder 21/09: *"sao lại hiển thị ở round trước?"*. Tấm bung ra SAU khi bàn đã sang vòng kế
+ * (đồng hồ, bản đồ, Oracle đều đã đổi số), nên con số đọc ra như trễ một nhịp. Nó không trễ —
+ * nó thuộc vòng vừa đóng. Trước bản này không một chữ nào trên tấm nói điều đó.
+ */
+.viSaoVong {
+  margin-bottom: 6px;
+  color: var(--slate-300, #cbd5e1);
+  font-size: var(--fs-label);
+  font-weight: 800;
+  letter-spacing: var(--ls-nhan);
+  text-align: center;
+}
+.viSaoVongO {
+  color: var(--gold-amber, #fbbf24);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viSaoTam { animation: none; }
+}
+
+/* 13/09 — thanh phong cách GỘP vào khung NAV: chiếm trọn hàng đầu; bỏ khung riêng
+   của nó (khung trong khung) — chỉ giữ dải màu và hạng. */
+.footPC { flex: 1 1 100%; min-width: 0; }
+/* 13/09 (D321 lượt 3) — con số NAV mang VÀNG = vai "giá trị", cùng màu rail của chính khung. */
+.soKim { color: var(--gold-amber); }
+.foot .footPC > * { border: 0; background: transparent; padding-left: 0; padding-right: 0; }
+
+/* D533 — dòng chờ màn của bàn (thay nút "▶ MÀN VÒNG" của D472 — founder 06/10 bỏ nút): chữ NÓI, không viền nút, sát phải dòng mã đang cầm. */
+.choMan {
+  margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; min-width: 0;
+  font-size: var(--fs-label); font-weight: 800; letter-spacing: var(--ls-nut); color: var(--gold); font-variant-numeric: tabular-nums;
+}
+.choMan > span { white-space: nowrap; }
+.choManLoi { color: var(--lose); text-align: right; }
+.hangMan { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.hangMan > :first-child { min-width: 0; flex: 1 1 auto; }

@@ -1,0 +1,296 @@
+/*
+ * TAY — khối ghim đáy màn trận (D184). Thay LĂNG KÍNH + DANH MỤC±% + dòng chữ
+ * mời chốt + ba nút rời.
+ *
+ * ⚠ Chỉ animate `transform`/`opacity` (luật 2 của `docs/ui-ux/00-doc-truoc.md`:
+ * tập giao ba runtime — web · Discord Activity · native mai sau).
+ * ⚠ Nút dùng `composes: nut` từ `pixel.module.css` ⇒ TUYỆT ĐỐI không gõ
+ * `cubic-bezier` trong file này (ghi đè im lặng `steps()`, đã mất một lần ở
+ * `BetBar`). Cần búng thì viết keyframe ở `motion.module.css` rồi composes.
+ */
+
+.tay {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  /* ⭐ NỈ THỨ BA (31/08) — "chỗ để bài" đúng nghĩa: bài đang cầm trên tay.
+     ⚠ KHÁC hai mặt kia: mặt này CÓ chữ nằm trực tiếp (tên mã, tổng, nhãn nút),
+     nên màu nỉ được chọn bằng phép đo chứ không bằng mắt — `#072b17` giữ mọi
+     màu chữ ≥ 5,55 (thấp nhất là `--lose`). Đục 0.97 như cũ vì thanh này NỔI
+     đè lên nội dung đang cuộn. */
+  /* 13/09 tối — CÙNG MỘT MẶT NỈ với bản đồ (`--felt-mat`): hai mảng xanh cạnh nhau mà
+     khác công thức thì đọc ra là hai chất liệu, không phải một cái bàn. Rail vàng bên
+     trái đã GỠ cùng mọi rail khác (founder: *"đ** phải bảo m thêm mấy cái thanh màu bên
+     trái… thừa thãi v** lại còn tách 1 màn hình ra làm nhiều phần"*). */
+  /* D442 (founder 27/09 tối) — thanh thao tác về MẶT TRUNG TÍNH xám kim loại (vân dệt đen giữ nguyên — vạch tối chỉ
+     tăng tương phản). Chữ trên mặt này: `--lose` 6,19 ở đỉnh — cao hơn nỉ cũ 5,06. */
+  background: var(--felt-det-tay), var(--mat-trung-mat);
+  /* Tầng HÀNH ĐỘNG = tấm NỔI: bóng pixel 3px + cạnh trên sáng. Nó là thứ duy nhất trên
+     màn nhô LÊN khỏi mặt phòng (bối cảnh thì lõm xuống) — mắt tìm ra chỗ phải bấm bằng
+     chiều sâu, không bằng viền. */
+  box-shadow: var(--px-bong), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+/* ─── HÀNG 1 — mã đang cầm ─────────────────────────────────────────────── */
+
+.hangMa {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 20px;
+}
+
+/* D443 — nhãn đầu hàng mã đang cầm (hàng nay đứng trong khung NAV, không còn cạnh nút). */
+.nhanCam {
+  color: var(--text-muted);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-nhan);
+}
+
+/* D443 — hàng CÔNG CỤ (chip lãi suất · SỔ) + con số vòng (cửa VÌ SAO) — hàng đầu của vùng bấm. */
+.hangCongCu {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+}
+
+.oKetQua {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* D443 — NGĂN KÉO của hàng công cụ: mở ngay trên hàng ấy; cao tối đa 42 % màn, dư thì cuộn TRONG ngăn (thanh đáy là
+   sticky — ngăn cao quá thì nó đè kín bản đồ). */
+.ngan {
+  max-height: 42vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.day { flex: 1; }
+
+.oMa {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 5px;
+  background: var(--surface-inset);
+  /* Mã đang cầm = giá trị ⇒ VÀNG, cùng vai với cọc chip dưới nó. */
+  border: 1px solid var(--border-gold);
+  color: var(--gold-amber);
+  font-size: var(--fs-label);
+  letter-spacing: var(--ls-nut);
+}
+
+.oMaKhong {
+  border-color: rgba(248, 113, 113, 0.5);
+  color: var(--lose);
+}
+
+.tenMa { text-transform: uppercase; }
+
+/*
+ * CỌC NẰM NGANG ở đây (khác cọc DỌC trên lá): hàng này chật và nhiều mã, xếp
+ * dọc thì mỗi ô cao 30px và cả hàng đội lên. Ngữ nghĩa giữ nguyên — số lát vẫn
+ * là số chip, lát mỏng vẫn là Chia Lệnh.
+ */
+.coc {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 10px;
+}
+
+/*
+ * ⭐ CHIP MỌC LÊN (31/08) — cọc chip là vật CASINO nhất màn hình và tới hôm
+ * nay nó đứng im tuyệt đối: đặt thêm một mốc thì một ô vuông xuất hiện tức
+ * thì, không một nhịp nào. Khảo sát xếp đây vào nhóm "khoảnh khắc có tiền mà
+ * câm", cùng hàng với NAV không chạy số.
+ *
+ * ⚠ VÌ SAO KHÔNG CẦN CỜ "vừa thêm" Ở TSX: chip dựng bằng `Array.from` với
+ * `key={`d${i}`}`, nên chip THỨ N+1 là một node MỚI ⇒ animation chạy đúng một
+ * lần lúc nó gắn vào cây. Chip cũ không remount nên không diễn lại. Trạng thái
+ * "cái nào vừa thêm" vốn đã nằm trong cây React — thêm một cờ nữa là dựng bản
+ * sao thứ hai của cùng một sự thật (D61).
+ *
+ * ⚠ `scaleY` + `transform-origin: bottom` chứ không animate `height`: cọc nằm
+ * trong `inline-flex` nên đổi `height` là đội lại bố cục cả hàng mỗi khung
+ * hình. `steps(4)` — chip cao 9px, mượt thì không có gì để mượt.
+ */
+.chip {
+  display: block;
+  width: 3px;
+  height: 9px;
+  background: var(--gold-amber);
+  border: 1px solid rgba(10, 6, 24, 0.75);
+  transform-origin: bottom;
+  animation: tbChipMoc 240ms steps(4, end) 1 both;
+}
+
+@keyframes tbChipMoc {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+/* MẢNH = phần lẻ dưới 25%. Thấp hơn hẳn, vì mắt đọc KÍCH THƯỚC chứ không đọc màu. */
+.chipManhCss { height: 4px; }
+
+.chipKhong { background: var(--lose); }
+
+.trong {
+  color: var(--text-muted);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-nhan);
+}
+
+
+/* ─── HÀNG 2 — lõi đang cầm ────────────────────────────────────────────── */
+
+
+
+
+/* ─── HÀNG 3 — hành động ───────────────────────────────────────────────── */
+
+.hangNut {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.nutShop {
+  composes: nut from '../../styles/pixel.module.css';
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 56px;
+  padding: 5px 8px;
+}
+
+/* D443 — cùng nét 800 với BẢNG và CHỐT VÒNG trên một hàng (trước 400 vì nút không kế thừa nét). */
+.nutChu { font-size: var(--fs-micro); letter-spacing: var(--ls-nut); font-weight: 800; }
+
+.dem {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 14px;
+  padding: 0 3px;
+  background: var(--accent);
+  color: #04101c;
+  font-size: var(--fs-micro);
+  line-height: 14px;
+  text-align: center;
+}
+
+/*
+ * CHẤM "CÓ LÕI CHỜ CHỌN" trên nút SHOP.
+ *
+ * ⚠ HỒI QUY ĐÃ SỬA (31/08): khi dời từ `AlphaDraftMatch.chamMoi` sang đây, chấm
+ * mất cả hai thứ làm nên nó — nhịp thở và MÀU. Nó rơi về `var(--lose)`, tức tin
+ * TỐT ("có hàng mới cho bạn") được vẽ bằng đúng màu app dùng cho MẤT TIỀN. Không
+ * lỗi, không test đỏ, và người chơi học sai một màu là học sai cả trận.
+ * ⇒ Luật rút ra: chấm THÔNG BÁO dùng HỔ PHÁCH; đỏ để dành riêng cho mất tiền.
+ *
+ * Quầng là ÁNH SÁNG (§XI luật 4) nên được mờ, và trải 12px = 4 đơn vị khấc
+ * (luật 5). Nhịp đi bằng `steps(2)`: đèn báo pixel nhấp hai trạng thái, không
+ * trôi mượt — mượt là ngôn ngữ vector.
+ */
+.cham {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 7px;
+  height: 7px;
+  background: var(--gold-amber);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.9);
+  animation: tbChamTho var(--nhip-tho, 1500ms) steps(2, end) infinite;
+}
+
+@keyframes tbChamTho {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* D116 — tắt CHUYỂN ĐỘNG, giữ TIN: chấm đứng im vẫn phải thấy được. */
+  .cham { animation: none; opacity: 1; }
+  /* Chip phải ở lại ĐÚNG cỡ: tắt là mất luôn cả cọc. */
+  .chip { animation: none; transform: none; }
+}
+
+.nutChot {
+  composes: nut from '../../styles/pixel.module.css';
+  flex: 1;
+  padding: 7px 10px;
+  padding: 13px 10px;
+}
+/*
+ * ⭐ CTA DUY NHẤT của cả màn (founder 13/09: *"một nút CTA duy nhất, to, màu nổi bật nhất, ở
+ * vị trí dễ chạm nhất"*). Lam ĐẶC, chữ tối trên nền sáng — không thứ gì khác trên bàn được
+ * phép đặc như thế, nên mắt rơi vào đây trước.
+ *
+ * ⚠⚠ TÊN LỚP VIẾT HAI LẦN LÀ CỐ Ý, ĐỪNG "DỌN". `composes: nut` dán thêm lớp `.nut` lên cùng
+ * phần tử, và trong bundle `pixel.module.css` đứng SAU file này ⇒ với mọi thuộc tính mà cả hai
+ * cùng khai (`background`, `color`, `border-color`, `box-shadow`), lớp gốc THẮNG. Đây không
+ * phải giả thuyết: đo trên bàn thật hôm nay, nút CHỐT nhận `--surface-inset` còn nút BỎ thì
+ * ĐỎ CỦA NÓ CHƯA BAO GIỜ HIỆN — cả hai đều im lặng ăn màu của `.nut` từ lâu. Nhân đôi tên lớp
+ * đẩy độ đặc hiệu lên (0,2,0) nên phần THỊ GIÁC của nút thắng, mà vẫn giữ nguyên khối/nhịp
+ * pixel thừa kế từ `.nut` (§XI).
+ */
+.nutChot.nutChot {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #04101c;
+  box-shadow: var(--px-bong), inset 0 2px 0 rgba(255, 255, 255, 0.35), 0 0 18px rgba(34, 211, 238, 0.3);
+}
+.nutChot.nutChot:hover:not(:disabled) { background: var(--accent-bright); color: #04101c; }
+/*
+ * D548 — CTA TẮT phải TRÔNG tắt. Lớp nhân đôi ở trên thắng luôn cả kiểu `:disabled` của `.nut` ⇒ trước đây nút đã khoá (đang gửi · đang diễn
+ * kết quả · chờ màn của bàn) vẫn lam đặc y như bấm được — founder tưởng bàn kẹt ở vòng 1. Tắt ⇒ khối xám chìm như hai nút phụ, chữ mờ.
+ */
+.nutChot.nutChot:disabled {
+  border-color: var(--border-idle-strong);
+  background: var(--surface-inset);
+  color: var(--text-muted);
+  box-shadow: var(--px-bong);
+  cursor: default;
+}
+
+.chotChu {
+  font-size: var(--fs-human);
+  letter-spacing: var(--ls-nhan);
+  font-weight: 800;
+}
+
+.nutBo {
+  composes: nut from '../../styles/pixel.module.css';
+  min-width: 52px;
+  padding: 7px 10px;
+  font-size: var(--fs-meta);
+  letter-spacing: var(--ls-nut);
+  font-weight: 800;
+}
+
+/*
+ * HAI NÚT PHỤ cùng MỘT bậc: khối xám có bevel hai hướng, không màu riêng. Nhân đôi tên lớp vì
+ * cùng lý do với `.nutChot.nutChot` ở trên (lớp `.nut` composed thắng ở mọi thuộc tính chung).
+ * Chúng phải đọc ra là BẤM ĐƯỢC nhưng thua hẳn CTA — đó là cả mục đích của việc chỉ có một CTA.
+ */
+.nutShop.nutShop,
+.nutBo.nutBo {
+  border-color: var(--border-idle-strong);
+  background: var(--surface-inset);
+  color: var(--text-dim);
+  box-shadow: var(--px-bong), inset 1px 1px 0 rgba(255, 255, 255, 0.07), inset -1px -1px 0 rgba(0, 0, 0, 0.5);
+}
+.nutShop.nutShop:hover:not(:disabled),
+.nutBo.nutBo:hover:not(:disabled) { border-color: var(--accent); color: var(--text-bright); }

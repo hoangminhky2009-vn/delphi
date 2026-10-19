@@ -1,0 +1,398 @@
+/*
+ * HÀNG CHIP — dải dán đáy shop trận nav (thiết kế 07 §2).
+ *
+ * Kế thừa nguyên `.nutMoc` / `.nutMocAll` / `.lenhTag` /
+ * `.nutChotShop` của ShopManHinh.module.css (chép sang đây vì CSS Modules không
+ * dùng chéo lớp giữa hai file mà không `composes`; và những lớp cũ ở file kia
+ * vẫn phục vụ nhánh trận cũ). Chỉ `transform`/`opacity`/màu (D68), `steps()`
+ * cho hình của vật (§XI luật 3), không bo góc.
+ */
+
+/* Dải dán đáy — nền ĐẶC vì nó đè lên nội dung cuộn; mép che phía trên (mepChe).
+   `margin-top: auto`: shop là cột flex — nội dung NGẮN hơn màn (đo 16/08: đáy
+   hàng ở 697/812) thì hàng vẫn phải rơi xuống SÁT ĐÁY, đúng tầm ngón cái; nội
+   dung dài thì sticky giữ nó trong tay khi cuộn. */
+.day {
+  position: sticky;
+  /* `bottom: 0` chứ không -8px: đo 16/08 trên máy 812px, -8px làm nút CHỐT lọt
+     4px dưới mép màn (816). Phần an toàn đáy đi bằng padding bên trong. */
+  bottom: 0;
+  z-index: 3;
+  margin: auto -8px 0;
+  padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  background: #0b0818;
+  box-shadow: 0 -3px 0 rgba(2, 1, 8, 0.8);
+}
+
+/* ── Ba mặt ─────────────────────────────────────────────────────────────── */
+.matHang {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.mat {
+  padding: 3px 8px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 0;
+  background: rgba(15, 23, 42, 0.6);
+  color: var(--text-muted, #93aac8);
+  font: inherit;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition:
+    color 120ms steps(2, end),
+    border-color 120ms steps(2, end),
+    background-color 120ms steps(2, end);
+}
+.mat:disabled { opacity: 0.4; cursor: default; }
+.matOn { border-color: var(--accent, #22d3ee); background: rgba(34, 211, 238, 0.12); color: var(--accent, #22d3ee); }
+.matRut.matOn { border-color: var(--win, #4ade80); background: rgba(74, 222, 128, 0.1); color: var(--win, #4ade80); }
+.matKhong.matOn { border-color: var(--lose, #f87171); background: rgba(248, 113, 113, 0.12); color: var(--lose, #f87171); }
+
+/*
+ * v54 (D403) — BÁN SẠCH: nút HÀNH ĐỘNG đứng cùng hàng mặt nhưng không phải một mặt. Dạt PHẢI (tách khỏi cụm công
+ * tắc MUA/RÚT/KHỐNG), viền lam vì bấm được (luật màu HUD: lam = thứ bấm được) nhưng KHÔNG đặc — khối lam đặc duy
+ * nhất của màn là CHỐT VÒNG. Lún một nấc khi bấm (`steps` — vật đổi trạng thái, A11.18).
+ */
+.banSach {
+  margin-left: auto;
+  padding: 3px 9px;
+  border: 1px solid var(--accent, #22d3ee);
+  border-radius: 0;
+  background: rgba(34, 211, 238, 0.08);
+  color: var(--accent, #22d3ee);
+  font: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
+  transition: transform 60ms steps(1, end), box-shadow 60ms steps(1, end);
+}
+.banSach:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+.banSach:disabled { opacity: 0.4; cursor: default; }
+
+/* Lời mời — nói tay đang cầm gì. Vàng khi đang cầm thứ gì đó. */
+.moi {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted, #93aac8);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.moiCam { color: var(--gold-amber, #fbbf24); }
+
+/* ── Bốn chip ───────────────────────────────────────────────────────────── */
+/*
+ * D375 — MẪU SỐ CỦA HÀNG CHIP. Một dòng 9px trên chip, cùng nhịp chữ với các nhãn khác
+ * của nỉ. Cố ý KHÔNG dùng màu cảnh báo: đây là MÔ TẢ ("chip tính trên số này"), không phải
+ * lời khuyên (A10). Con số mới là thứ đáng nhìn nên nó sáng hơn phần chữ.
+ */
+/* D432 — chỉ còn lời nhắc kéo ngang của Chia Lệnh (mẫu số nay in trên từng chip). */
+.nenChip {
+  margin-bottom: 3px;
+  color: var(--slate-400, #94a3b8);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+.nenChip b {
+  color: var(--slate-200, #e2e8f0);
+}
+
+.chips {
+  display: flex;
+  gap: 6px;
+}
+
+/* Chia Lệnh: 20 chip 5% — cuộn ngang, mỗi chip cùng một cỡ (vẫn cách đều). */
+.chipsMin {
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.chipsMin::-webkit-scrollbar { display: none; }
+.chipsMin > .nutMoc { flex: 0 0 56px; scroll-snap-align: start; }
+
+/*
+ * NÚT MỐC — chép từ ShopManHinh.module.css (04/08: "phải thấy như ĐẨY CHIP").
+ * Thêm dải chip pixel ở mép trên (`::before`) — cùng một dải cho CẢ BỐN nút,
+ * kể cả ALL-IN: bốn nút như nhau lúc yên là LUẬT DATA (D85 §1.2).
+ */
+.nutMoc {
+  position: relative;
+  flex: 1 1 0;
+  height: 44px;
+  padding: 5px 9px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  border-radius: 0;
+  background: rgba(15, 23, 42, 0.85);
+  color: #e2e8f0;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    transform 60ms steps(2, end),
+    background-color 160ms steps(2, end),
+    border-color 160ms steps(2, end),
+    color 160ms steps(2, end);
+  touch-action: manipulation;
+}
+.nutMoc::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  left: 8px;
+  height: 5px;
+  background: repeating-linear-gradient(90deg, rgba(191, 209, 230, 0.55) 0 5px, transparent 5px 9px);
+}
+.nutMoc:active:not(:disabled) {
+  transform: translateY(2px);
+  background: rgba(34, 211, 238, 0.22);
+  border-color: rgba(34, 211, 238, 0.9);
+}
+.nutMoc:disabled { opacity: 0.35; cursor: default; }
+
+/* Chip ĐANG CẦM: nhấc lên một đơn vị độ dày, viền vàng — "trên tay". */
+.cam {
+  transform: translateY(-3px);
+  border-color: var(--gold-amber, #fbbf24);
+  background: rgba(251, 191, 36, 0.14);
+  color: var(--gold-amber, #fbbf24);
+}
+.cam::before {
+  background: repeating-linear-gradient(90deg, var(--gold-amber, #fbbf24) 0 5px, transparent 5px 9px);
+}
+
+/*
+ * ── ALL-IN: TẤT CẢ SỨC NẶNG DỒN VÀO CÚ BẤM, KHÔNG MỘT PIXEL NÀO RA NGOÀI NÚT ──
+ *
+ * Lúc YÊN chỉ chữ đậm hơn (founder 16/08: "đặc biệt khi bấm, không phải phát
+ * sáng mặc định") — luật data §1.2: chip nào cũng bằng nhau, UI nghiêng về một
+ * mốc là bẻ trục khẩu vị rủi ro đang đo.
+ *
+ * Lúc BẤM (founder 22/08: *"chỉ cải tiến hiệu ứng khi bấm nút all in thôi"*) —
+ * ba lớp, tất cả bám vào chính cái nút:
+ *   1. `allDang`  — lún SÂU (5px) rồi bật CAO (−9px) rồi rơi về, 9 nấc/620ms.
+ *      Sâu hơn và cao hơn bản cũ (3px/−6px/7 nấc) vì nó là thứ duy nhất còn
+ *      lại để nói "nước đi này khác hạng".
+ *   2. `allXung`  — MỘT vòng xung vàng lan ra từ mép nút rồi tan (::after,
+ *      scale 1→2,1 + opacity 1→0). Đây là phần THAY cho loé toàn màn: cùng
+ *      ngôn ngữ "sóng xung kích", nhưng bán kính bằng cái nút chứ không bằng
+ *      màn hình. `inset: -2px` + `transform-origin: center` nên nó nở đều
+ *      quanh nút; `pointer-events: none` để không nuốt cú chạm kế.
+ *   3. Cột 8 chip vàng bay lên lá + một nhịp rung nặng (ShopManHinh lo).
+ *
+ * ⚠ VÌ SAO VÒNG XUNG DÙNG `outline` CHỨ KHÔNG `border`: border ăn vào hộp và
+ * đẩy bố cục của hàng chip mỗi khung hình (D68 — animate thứ gây layout là
+ * nguồn khựng), outline vẽ ngoài luồng bố cục. Và scale/opacity là hai thuộc
+ * tính compositor-only duy nhất được phép animate.
+ */
+.nutMocAll { font-weight: 800; letter-spacing: 0.5px; }
+.nutMocAll:active:not(:disabled) {
+  transform: translateY(4px);
+  background: rgba(251, 191, 36, 0.4);
+  border-color: var(--gold-amber);
+  color: var(--gold-amber, #fbbf24);
+}
+@keyframes allDang {
+  0% { transform: translateY(5px); background-color: rgba(251, 191, 36, 0.75); border-color: var(--gold); color: #0b0818; }
+  35% { transform: translateY(-9px); background-color: rgba(251, 191, 36, 0.45); border-color: var(--gold); color: #fff7cc; }
+  65% { transform: translateY(2px); background-color: rgba(251, 191, 36, 0.28); color: var(--gold-amber, #fbbf24); }
+  100% { transform: none; background-color: rgba(15, 23, 42, 0.85); border-color: rgba(148, 163, 184, 0.5); color: #e2e8f0; }
+}
+/*
+ * ⚠ `backwards` CHỨ KHÔNG `both` (sửa 23/08). `both` GIỮ khung 100% vĩnh viễn,
+ * mà khung 100% là bộ màu NGHỈ (xám) — nên sau cú ALL-IN đầu tiên, chip đó
+ * không bao giờ nhận được màu `.cam` nữa: nhấc nó lên tay thì chỉ dải chip
+ * `::before` chuyển vàng còn thân nút vẫn xám, trông như hỏng nửa vời.
+ * Khung 100% vốn TRÙNG với style nghỉ của `.chip`, nên bỏ `forwards` không đổi
+ * gì lúc đứng yên — chỉ trả lại quyền cho các lớp trạng thái.
+ */
+.allDang { animation: allDang 620ms steps(9, end) backwards; }
+/* Vòng xung — lan ra từ mép NÚT, tắt sau 420ms. Chỉ transform + opacity. */
+@keyframes allXung {
+  0% { opacity: 0.95; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.1); }
+}
+.allDang::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  outline: 2px solid var(--gold-amber, #fbbf24);
+  outline-offset: 0;
+  transform-origin: center;
+  pointer-events: none;
+  animation: allXung 420ms steps(6, end) both;
+}
+
+/* ── Lá đã xếp — chip đáp xuống bàn (chipDap, chép nguyên) ────────────── */
+.lenhDaXep {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+@keyframes chipDap {
+  0% { transform: translateY(9px); opacity: 0; }
+  55% { transform: translateY(-1px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.lenhTag {
+  animation: chipDap 150ms steps(3) both;
+  padding: 3px 6px;
+  border: 1px solid rgba(34, 211, 238, 0.6);
+  border-radius: 0;
+  background: rgba(34, 211, 238, 0.12);
+  color: var(--accent-bright);
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+.tagRut { border-color: rgba(74, 222, 128, 0.6); background: rgba(74, 222, 128, 0.1); color: var(--win, #4ade80); }
+.tagKhong { border-color: rgba(248, 113, 113, 0.6); background: rgba(248, 113, 113, 0.1); color: #fecaca; }
+.tagAll { border-color: rgba(251, 191, 36, 0.8); background: rgba(251, 191, 36, 0.14); color: var(--gold-amber, #fbbf24); font-weight: 800; }
+
+.khopLoi { flex-basis: 100%; font-size: 9px; color: var(--lose); }
+
+/* ── CHỐT + LẶP ─────────────────────────────────────────────────────────── */
+.chotHang {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.nutChot {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--accent-bright, #a78bfa);
+  border-radius: 0;
+  background: #17102e;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+.nutChot:hover { box-shadow: 0 0 8px rgba(139, 92, 246, 0.6); }
+.nutLap {
+  padding: 0 12px;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  border-radius: 0;
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--gold-amber, #fbbf24);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nutMoc, .mat { transition: background-color 120ms steps(2, end); }
+  .nutMoc:active:not(:disabled), .nutMocAll:active:not(:disabled), .cam { transform: none; }
+  .allDang, .lenhTag { animation: none; opacity: 1; }
+  /* Vòng xung TẮT HẲN chứ không đứng yên: nó là hoạt ảnh thuần (không chở
+     thông tin — nhãn "ALL-IN" trên nút và tag lệnh đã nói đủ), mà một vòng
+     outline đứng yên vĩnh viễn quanh chip thì đọc thành "chip này đang được
+     chọn sẵn" — đúng thứ §1.2 cấm. */
+  .allDang::after { display: none; }
+}
+
+/* D321b (13/09) — hàng hành động như demo: ↺ và 🏦 là ô vuông 44px, CHỐT chiếm phần còn lại. */
+.nutLap {
+  flex: 0 0 44px;
+  padding: 0;
+  font-size: 17px;
+  line-height: 1;
+}
+.nutBank[aria-expanded="true"] { background: rgba(251, 191, 36, 0.28); }
+
+/*
+ * D432 — NHÃN + SỐ TIỀN TRÊN CHIP. Hai dòng xếp dọc trong cùng một nút: phần trăm (to, trắng) và số tiền chip ấy đặt
+ * (nhỏ, mờ — nó là chú thích của nhãn, không tranh với nhãn). Bốn chip in như nhau: luật data D85 §1.2 (không chip nào
+ * nổi hơn lúc yên) vẫn đứng — ALL-IN không được là chip duy nhất mang số.
+ */
+.nhanMoc,
+.soMoc {
+  display: block;
+  line-height: 1;
+}
+.nhanMoc { position: relative; top: 3px; }
+.soMoc {
+  position: relative;
+  top: 5px;
+  color: var(--text-muted, #93aac8);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.cam .soMoc { color: var(--gold-amber, #fbbf24); }
+
+/*
+ * D432 — PHÍ ở đầu hàng lệnh. Số VÀNG (tiền — luật màu HUD), khung mờ vì bản thân nó là chữ đọc, chỉ dấu `!` mang lam
+ * (thứ bấm được). Lún một nấc khi bấm như mọi nút vật (A11.18: `steps`).
+ */
+.nutPhi {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 3px 6px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 0;
+  background: rgba(15, 23, 42, 0.7);
+  color: var(--text-muted, #93aac8);
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
+  transition: transform 60ms steps(1, end), box-shadow 60ms steps(1, end);
+}
+.nutPhi b { color: var(--gold-amber, #fbbf24); font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.nutPhi:active { transform: translateY(2px); box-shadow: none; }
+.phiHoi {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--border-accent, rgba(34, 211, 238, 0.6));
+  color: var(--accent-bright, #67e8f9);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+/*
+ * D540 — PHIẾU LỆNH mọc trên lưới tài sản (cha đặt vị trí). Một tấm nổi: nền tối đục, viền vàng 2 px + bóng cứng (vật, blur 0), mũi chỉ
+ * xuống/lên vào thẻ đang chọn (`--mui` = tâm cột, do cha đổ). Chip giữ nguyên cỡ dải đáy (≥ 44 px ngón cái).
+ */
+.phieu {
+  position: relative; display: flex; flex-direction: column; gap: 6px; padding: 6px;
+  background: var(--bg-page); border: 2px solid var(--gold); box-shadow: 3px 3px 0 var(--ink);
+}
+.phieu::after {
+  content: ''; position: absolute; left: var(--mui, 50%); width: 0; height: 0; translate: -50% 0;
+  border-left: 7px solid transparent; border-right: 7px solid transparent;
+}
+.phieu[data-mui='tren']::after { top: -9px; border-bottom: 7px solid var(--gold); }
+.phieu[data-mui='duoi']::after { bottom: -9px; border-top: 7px solid var(--gold); }
+.phieuDau { display: flex; align-items: center; gap: 6px; min-height: 30px; }
+.phieuTen { font-size: 13px; letter-spacing: 0.06em; color: var(--gold); white-space: nowrap; }
+.phieuMat { display: flex; gap: 4px; flex: 1; }
+.phieuDong {
+  margin-left: auto; min-width: 32px; min-height: 30px; font: inherit; font-size: 14px; cursor: pointer;
+  color: var(--text-muted); background: transparent; border: 1px solid var(--line, rgba(147, 170, 200, 0.3));
+}

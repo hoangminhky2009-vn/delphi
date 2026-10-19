@@ -1,0 +1,60 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/*
+ * Chip lọc LÀ NÚT — nên hình khối (góc khấc, bóng cứng, lún khi bấm) và nhịp
+ * `steps()` đến từ `.nut`, không gõ lại ở đây. Đổi lấy: xoá được khai báo
+ * `transition: … 0.2s` tự gõ, vốn là một thang nhịp thứ hai cho đúng việc mà
+ * `.doiMau` bên trong `.nut` đã làm.
+ */
+.chip {
+  composes: nut from '@/styles/pixel.module.css';
+  /* `.nut` để `font-family: inherit` — không khai lại là chip rơi về font của
+     thân trang, mất chất mono của bảng giá. */
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--surface-idle);
+  border: 1px solid var(--border-idle-strong);
+  padding: 6px 12px;
+}
+.chip:hover {
+  color: var(--text-title);
+  border-color: rgba(103, 232, 249, 0.6);
+}
+
+/*
+ * ⚠ `.chip` đã composes `.nut`, tức đã có bóng cứng. Khai `box-shadow` ở đây là
+ * THAY TRỌN chứ không cộng dồn — nên quầng phải đi kèm bóng trong CÙNG khai báo,
+ * đúng thứ tự luật 6. Viết mỗi `0 0 10px …` là chip đang-chọn tự dẹt xuống đúng
+ * lúc nó cần nổi nhất.
+ *
+ * ⚠ `.chip.active` chứ không phải `.active` — và KHÔNG phải để thắng `.nut`:
+ * `@layer pixel` lo việc đó rồi (xem chú thích dài ở `pixel.module.css`, 19/09).
+ * Ghép lớp ở đây là để thắng `.chip:hover` ngay phía trên: hai cái cùng (0,2,0)
+ * thì chip ĐANG CHỌN mà bị trỏ vào sẽ mất dấu chọn. Đây là màn hỏi nhiều câu
+ * một lúc, nên "cái nào đang chọn" phải đúng kể cả khi con trỏ đang đậu lên nó.
+ */
+.chip.active {
+  color: var(--accent-peak);
+  background: rgba(34, 211, 238, 0.12);
+  border-color: var(--border-accent-strong);
+  box-shadow: var(--px-bong), 0 0 10px rgba(34, 211, 238, 0.2);
+}

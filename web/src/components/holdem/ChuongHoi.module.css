@@ -1,0 +1,56 @@
+/*
+ * NHÃN CHƯƠNG HỒI — một dòng, đứng yên, §XI (radius 0, không animation).
+ *
+ * Màu nhuộm theo `data-chuong`: cùng luật màu của map — màu mã hoá HƯỚNG
+ * (xanh = thuận, đỏ = nghịch, tím = phồng), không bịa bảng màu mới.
+ */
+.hoi {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 8px;
+  border: 1px solid var(--line, #24304a);
+  border-radius: 0;
+  background: rgb(0 0 0 / 25%);
+  font-size: var(--fs-meta);
+  line-height: 1.3;
+}
+
+/*
+ * BẢN GỌN — sống TRONG hàng đầu của khối thị trường, không phải một hàng riêng.
+ * Bỏ viền và nền: ở đây nó là cái NHÃN của khối chứ không còn là một ô độc lập,
+ * mà một cái hộp lồng trong hộp thì chỉ thêm đường kẻ chứ không thêm tin.
+ */
+.gon {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: inherit;
+}
+
+.nhan {
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-nhan);
+  color: var(--text-dim, #7b8494);
+}
+
+.ten {
+  font-weight: 800;
+  letter-spacing: var(--ls-nut);
+  color: var(--accent, #22d3ee);
+}
+
+.phu {
+  color: var(--text-dim, #7b8494);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Nhuộm tên theo hồi — hướng nào màu nấy, khớp luật màu ô sự kiện của map. */
+.hoi[data-chuong='song_gio'] .ten { color: var(--danger, #f87171); }
+.hoi[data-chuong='tien_dat'] .ten { color: var(--danger, #f87171); }
+.hoi[data-chuong='bong_bong'] .ten { color: #c084fc; }
+.hoi[data-chuong='gay_dung'] .ten,
+.hoi[data-chuong='tien_re'] .ten { color: var(--win, #4ade80); }

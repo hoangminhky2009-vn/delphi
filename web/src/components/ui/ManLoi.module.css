@@ -1,0 +1,51 @@
+/* Màn lỗi — cố ý ĐƠN GIẢN: nó phải vẽ được kể cả khi phần còn lại đã hỏng,
+   nên không dùng token layout phức tạp, không phụ thuộc component nào khác. */
+.boc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 20px calc(32px + env(safe-area-inset-bottom));
+  min-height: 100dvh;
+  text-align: center;
+  background: var(--nen, #05070d);
+  color: var(--chu, #e6edf7);
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+.tieuDe {
+  margin: 8px 0 0;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  color: var(--canh-bao, #ff5c7a);
+}
+.chinh { margin: 0; max-width: 32ch; line-height: 1.55; font-size: 14px; }
+.trandan {
+  margin: 0;
+  max-width: 34ch;
+  line-height: 1.55;
+  font-size: 13px;
+  color: var(--chu-mo, #93a4bd);
+}
+.nut { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+.chinhNut, .phuNut {
+  padding: 12px 20px;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  border: 1px solid var(--vien, #24304a);
+
+  min-height: 44px; /* mốc chạm được trên điện thoại */
+}
+.chinhNut { background: var(--neon, #35e0c8); color: #05070d; border-color: transparent; }
+.phuNut { background: transparent; color: var(--chu, #e6edf7); }
+.chiTiet { margin-top: 18px; max-width: 90vw; font-size: 12px; color: var(--chu-mo, #93a4bd); }
+.chiTiet summary { cursor: pointer; letter-spacing: 0.06em; }
+.chiTiet pre {
+  margin: 8px 0 0;
+  padding: 10px;
+  overflow-x: auto;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.04);
+
+}

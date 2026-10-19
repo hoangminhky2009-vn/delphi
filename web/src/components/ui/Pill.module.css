@@ -1,0 +1,54 @@
+.pill {
+  composes: khung from '@/styles/pixel.module.css';
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  border-radius: 0;
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+
+.dot {
+  composes: dotpulse from '../../styles/motion.module.css';
+  width: 6px;
+  height: 6px;
+  border-radius: 0;
+  background: currentColor;
+}
+
+.muted {
+  color: var(--text-muted);
+  border: 1px solid var(--border-idle-strong);
+}
+
+.accent {
+  color: var(--accent-bright);
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid var(--border-accent);
+  font-weight: 700;
+}
+
+.win {
+  color: var(--win-on);
+  background: var(--win);
+  border: 1px solid var(--win);
+  font-weight: 800;
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.5);
+}
+
+.lose {
+  color: var(--lose-tag);
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid var(--border-lose);
+  font-weight: 800;
+}
+
+.gold {
+  color: var(--gold);
+  background: rgba(251, 146, 60, 0.1);
+  border: 1px solid var(--border-gold);
+  font-weight: 700;
+}

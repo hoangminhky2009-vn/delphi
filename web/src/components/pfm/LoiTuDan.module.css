@@ -1,0 +1,90 @@
+/*
+ * ORACLE GIÚP 3 — lời tự dặn lúc tiền vừa về (D365). Khuôn theo demo §`.loiBan` + `.hu`.
+ */
+
+.khoi { margin: 0 0 11px; }
+
+/* Chữ của CHÍNH người dùng — cỡ lớn hơn lời dẫn, vì nó mới là nội dung. */
+.loi {
+  margin: 9px 0 0;
+  padding: 9px 11px;
+  border-left: 2px solid var(--gold);
+  background: var(--n-1);
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text-bright);
+}
+
+.huTen {
+  display: flex;
+  justify-content: space-between;
+  gap: 9px;
+  margin: 11px 0 0;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--chu-phu);
+}
+
+.huTen span { color: var(--accent-bright); }
+
+.nut {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 6px;
+  border: 1px solid var(--accent);
+  background: var(--n-1);
+  color: var(--accent-bright);
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.nut:active { transform: translate(1px, 1px); }
+
+.vi { margin: 6px 0 0; font-size: 12px; line-height: 1.45; color: var(--chu-mo); }
+
+/*
+ * ── BẢN MỘT HÀNG (D453, màn SỔ) ──────────────────────────────────────────────────────────────────────────────
+ * Một hàng cao 44px: nhãn · chữ (cắt …) · nút. Viền trái lam = giọng Oracle (không mascot — SỔ là mặt ghi nhanh).
+ * ⚠ Nền bắt buộc cho nút (repo không reset `<button>`). Chữ ≥ 12px. Lún `steps` (nhịp máy).
+ */
+.gonHang {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-bottom: 7px;
+  padding: 4px 4px 4px 9px;
+  background: var(--mat-ban);
+  border: 1px solid var(--line);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.gonNhan { flex: none; font-size: 12px; letter-spacing: 1px; color: var(--accent); }
+.gonLoi, .gonChu {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  color: var(--text-bright);
+}
+.gonChu b { color: var(--gold); font-variant-numeric: tabular-nums; }
+.gonNut, .gonLuu, .gonThoi {
+  flex: none;
+  height: 36px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--accent-bright);
+  background: rgba(34, 211, 238, .08);
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  box-shadow: var(--px-bong);
+  cursor: pointer;
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.gonThoi { width: 36px; padding: 0; color: var(--text-muted); background: var(--surface-inset); border-color: var(--line-2); }
+.gonNut:active, .gonLuu:active, .gonThoi:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }

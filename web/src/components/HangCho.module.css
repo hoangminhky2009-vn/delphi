@@ -1,0 +1,121 @@
+/*
+ * MÀN HÀNG CHỜ (D207). Giọng Terminal × Neon, luật chuyển động D182.
+ *
+ * ⚠ @keyframes PHẢI ở CÙNG FILE với chỗ dùng — CSS Modules đổi tên
+ * animation-name theo file, gọi tên từ file khác là animation chết câm
+ * (`scripts/lint_css_anim.ts` canh). Hai cái dưới đây đều khai tại chỗ.
+ *
+ * RANH EASING (D182):
+ *   · con trỏ nháy = NHỊP MÁY   ⇒ steps(1) — nó phải bật/tắt dứt khoát
+ *   · quầng thở    = ÁNH SÁNG   ⇒ ease-in-out (steps trên nhịp thở = strobe,
+ *                                 mắt đọc ra là lỗi render)
+ * Chỉ animate `opacity` — màn này hiện đúng lúc máy đang ngộp, không phải lúc
+ * để đi tính lại layout.
+ */
+
+.phu {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--bg-page);
+  /* Đặc hoàn toàn: sau lưng là một app chưa có dữ liệu, để lộ ra chỉ gây hiểu
+     nhầm là app hỏng. */
+  overflow-y: auto;
+}
+
+.the {
+  width: 100%;
+  max-width: 360px;
+  padding: 28px 22px;
+  text-align: center;
+  background: var(--surface-card);
+  border: 1px solid var(--line-soft, rgba(34, 211, 238, 0.25));
+  box-shadow: 0 0 40px rgba(34, 211, 238, 0.12);
+  animation: tho 3.2s ease-in-out infinite;
+}
+
+.nhan {
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+
+.nhay {
+  animation: nhayCon 1s steps(1) infinite;
+}
+
+.tieuDe {
+  margin: 0 0 22px;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  color: var(--text-bright);
+}
+
+.oSo {
+  padding: 18px 12px;
+  margin-bottom: 16px;
+  background: var(--surface-inset);
+  border: 1px solid rgba(34, 211, 238, 0.18);
+}
+
+.soNhan,
+.soPhu {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--text-muted);
+}
+
+.so {
+  margin: 6px 0 4px;
+  font-size: 64px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-bright);
+  text-shadow: 0 0 24px rgba(34, 211, 238, 0.5);
+}
+
+.soPhu {
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.suc {
+  margin-bottom: 18px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}
+
+.suc b {
+  color: var(--gold, #fde047);
+}
+
+.loi {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+.loi b {
+  color: var(--text-dim);
+}
+
+@keyframes nhayCon {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes tho {
+  0%, 100% { opacity: 0.94; }
+  50% { opacity: 1; }
+}
+
+/* Người tắt hiệu ứng chuyển động: bỏ cả hai, giữ nguyên chữ và số. */
+@media (prefers-reduced-motion: reduce) {
+  .the, .nhay { animation: none; }
+}

@@ -1,0 +1,74 @@
+/*
+ * KHOẢN NỔI (D400) — hộp chữ lãi/lỗ từng khoản trôi lên trên con số vòng.
+ * ⚠ Chuyển động VẬT LÝ nằm ở `motion.module.css` (ranh tầng tệp §2.3): `.o` composes `khoanNoiDay` (bị đẩy lên một
+ *   nấc), `.hop` composes `khoanNoi` (vòng đời), `.hopRa` composes `khoanNoiRaGiai` (D401 — vòng đời của hộp rơi từ
+ *   GIẢI: không mờ vào, hiện ngay ở giải rồi nở dần trên đường bay). File này KHÔNG composes pixel và không tự khai
+ *   `animation`. Dáng hộp chung nằm ở `.vat` — hai lớp vòng đời composes nó, nên hai hộp không thể lệch nhau.
+ * ⚠ Chỉ `transform`/`opacity` chuyển động (luật 60 FPS).
+ */
+
+/* Mốc 0×0 neo ở mép trên con số vòng: mọi hộp đứng đáy-phải của mốc rồi dịch lên theo nấc. */
+.khung {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.o {
+  composes: khoanNoiDay from '../../styles/motion.module.css';
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+/* D401 — khung BAY của hộp rơi từ giải (WAAPI trong KhoanNoi.tsx). Không khai gì chuyển động ở đây: nó là chủ
+   `transform` của riêng cú bay, đứng giữa `.o` (nấc) và hộp (vòng đời). */
+.bay {
+  display: block;
+}
+
+/* Hộp: cao cố định 20px để nấc tính được bằng số (`NAC_KHOAN_NOI` = 20 + khe 4). Viền + bóng đổ cứng 2.5D như
+   vật pixel khác của bàn; màu viền = màu khoản (lãi xanh · lỗ đỏ · trượt giá cam) — CÙNG token bảng VÌ SAO. */
+.vat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 7px;
+  white-space: nowrap;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-body);
+  background: rgba(4, 7, 13, 0.9);
+  border: 1px solid var(--khoan-mau);
+  border-left-width: 3px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+}
+/* ⚠ `.vat` phải đứng TRƯỚC hai lớp composes nó — postcss-modules-scope của vite báo lỗi "referenced class name
+   not found" nếu lớp được composes khai sau (vitest KHÔNG báo — lỗi này chỉ lộ khi dựng thật, soi màn 24/09). */
+.hop {
+  composes: vat;
+  composes: khoanNoi from '../../styles/motion.module.css';
+}
+.hopRa {
+  composes: vat;
+  composes: khoanNoiRaGiai from '../../styles/motion.module.css';
+}
+.lai { --khoan-mau: var(--win); }
+.lo { --khoan-mau: var(--lose); }
+.truot { --khoan-mau: var(--gold-flame); }
+
+.nhan { color: var(--text-dim); letter-spacing: 0.04em; }
+.so {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--khoan-mau);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.pct { color: var(--khoan-mau); font-style: normal; opacity: 0.85; }

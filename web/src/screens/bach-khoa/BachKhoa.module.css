@@ -1,0 +1,173 @@
+/*
+ * BÁCH KHOA (D334) — trang tra cứu, bám demo docs/ui-ux/demo/bach-khoa.html.
+ * Tầng theo chiều sâu, không viền (HUD 13/09): giếng LÕM cho chỗ đọc số, tấm NỔI cho thứ chạm được.
+ * Luật màu: lam (`--accent`) CHỈ ở thứ chạm được · xanh/đỏ CHỈ ở mức khoẻ/yếu và tăng/giảm · tím là khung.
+ * Không `animation`: trang để đọc, không phải màn chơi.
+ */
+
+/* ── DANH SÁCH ─────────────────────────────────────────────────────────────── */
+.danhSach { display: flex; flex-direction: column; gap: 10px; padding-bottom: 24px; }
+.demGap { align-self: flex-end; font-size: var(--fs-micro); letter-spacing: .1em; color: var(--text-muted); }
+.demGap b { color: var(--text-bright); font-size: 14px; }
+
+.tim {
+  display: flex; align-items: center; gap: 8px; padding: 9px 10px;
+  background: var(--surface-inset); box-shadow: inset 0 2px 7px rgba(0, 0, 0, .7);
+  color: var(--text-muted);
+}
+.tim input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--text-bright); font: inherit; font-size: 13px; }
+.tim input::placeholder { color: var(--text-dim); }
+
+.chipNhomHang { display: flex; gap: 6px; overflow-x: auto; margin: 0 -2px; padding: 0 2px 2px; scrollbar-width: none; }
+.chipNhomHang::-webkit-scrollbar { display: none; }
+.chipNhom {
+  flex: 0 0 auto; border: 0; cursor: pointer; padding: 6px 10px; font: inherit; font-size: 10.5px; letter-spacing: .06em;
+  color: var(--accent); background: rgba(34, 211, 238, .07); box-shadow: inset 0 0 0 1px rgba(34, 211, 238, .32);
+}
+.chipNhomBat { color: #04101c; background: var(--accent); box-shadow: 3px 3px 0 rgba(10, 6, 24, .7); }
+/* D543 — ô lọc CÁCH MẤT TIỀN: chấm vàng góc trên-phải khi có cách mới chưa xem (vật tĩnh — không nhấp nháy). */
+.chipMatTien { position: relative; }
+.chamMoi { position: absolute; top: -3px; right: -3px; width: 8px; height: 8px; background: var(--gold); box-shadow: 0 0 0 2px var(--bg-page); }
+
+.phan { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.phanDau { margin: 0; font-size: 11px; font-weight: 800; letter-spacing: .14em; color: var(--text-muted); }
+.luoi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.o {
+  display: flex; flex-direction: column; gap: 6px; min-height: 118px; padding: 9px; border: 0; cursor: pointer;
+  text-align: left; font: inherit; color: var(--text-bright);
+  background: linear-gradient(178deg, #0a1524, #060c17);
+  box-shadow: 3px 3px 0 rgba(10, 6, 24, .7), inset 0 1px 0 rgba(255, 255, 255, .06);
+  transition: transform .12s steps(2, end), box-shadow .12s steps(2, end);
+}
+.o:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(10, 6, 24, .7), inset 0 1px 0 rgba(255, 255, 255, .06); }
+.oDau { display: flex; gap: 7px; align-items: flex-start; }
+.oIcon { flex: 0 0 auto; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #0a0f1c; box-shadow: 2px 2px 0 rgba(10, 6, 24, .7); }
+.oTen { font-size: 11.5px; font-weight: 800; letter-spacing: .03em; line-height: 1.25; }
+.oAnh { display: block; margin-top: 2px; font-size: 8.5px; font-weight: 400; letter-spacing: .08em; color: var(--text-dim); }
+.oNhac { font-size: 10px; line-height: 1.45; color: var(--text-muted); }
+.oChan { margin-top: auto; font-size: 9px; letter-spacing: .08em; color: var(--text-dim); }
+.oChua .oIcon { filter: grayscale(1); opacity: .55; }
+.oChua .oTen { color: var(--text-muted); }
+
+.rong { margin-top: 16px; font-size: 12px; color: var(--text-muted); }
+
+/* ── TRANG MỤC ─────────────────────────────────────────────────────────────── */
+.trang { display: flex; flex-direction: column; gap: 14px; padding-bottom: 28px; }
+.thanh { display: flex; align-items: center; gap: 8px; }
+.lui {
+  border: 0; cursor: pointer; padding: 6px 10px; font: inherit; font-size: 10.5px; letter-spacing: .08em;
+  color: var(--accent); background: rgba(34, 211, 238, .08); box-shadow: inset 0 0 0 1px rgba(34, 211, 238, .32);
+}
+.thanhNhom { margin-left: auto; font-size: 10px; letter-spacing: .12em; color: var(--text-dim); }
+
+.hero { display: flex; gap: 12px; align-items: center; }
+.heroIcon { flex: 0 0 auto; width: 58px; height: 58px; display: flex; align-items: center; justify-content: center; background: #0a0f1c; box-shadow: 3px 3px 0 rgba(10, 6, 24, .7); }
+.heroTen { margin: 0; font-size: 21px; font-weight: 800; line-height: 1.1; letter-spacing: .02em; color: var(--text-bright); }
+.heroAnh { margin-top: 4px; font-size: 10px; letter-spacing: .14em; color: var(--text-dim); }
+.the { display: inline-block; margin-top: 6px; padding: 2px 6px; font-size: 9.5px; letter-spacing: .08em; color: var(--text-muted); background: rgba(255, 255, 255, .05); }
+
+.motCau { margin: 0; font-size: 17px; line-height: 1.45; font-weight: 700; color: var(--text-bright); }
+
+.khoi { display: flex; flex-direction: column; gap: 8px; }
+.khoiDau { margin: 0; font-size: 10.5px; font-weight: 800; letter-spacing: .16em; color: var(--text-muted); }
+.chuThich { margin: 0; font-size: 9.5px; color: var(--text-dim); }
+
+.cuaBan { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px; font-size: 12px; color: var(--text-body); background: var(--surface-inset); box-shadow: inset 0 2px 7px rgba(0, 0, 0, .7); }
+
+.laVai { padding: 10px; background: linear-gradient(178deg, #0a1524, #060c17); box-shadow: 3px 3px 0 rgba(10, 6, 24, .7), inset 0 1px 0 rgba(255, 255, 255, .06); }
+.laVaiTen { font-size: 14px; font-weight: 800; letter-spacing: .08em; color: var(--text-bright); }
+.laVaiDong { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; margin: 8px 0 0; font-size: 12px; line-height: 1.45; }
+.laVaiDong dt { font-size: 9.5px; letter-spacing: .12em; color: var(--text-dim); padding-top: 2px; }
+.laVaiDong dd { margin: 0; color: var(--text-body); }
+
+.dongLuat { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 11px; letter-spacing: .06em; color: var(--text-body); }
+.iconDong { vertical-align: -3px; }
+.cham { color: var(--text-dim); }
+.bangDon { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; background: var(--surface-inset); box-shadow: inset 0 2px 7px rgba(0, 0, 0, .7); }
+.chipMuc { display: flex; justify-content: space-between; gap: 6px; font-size: 11px; line-height: 1.4; }
+.chipNhan { color: var(--text-muted); }
+.dayChip { display: flex; flex-direction: column; gap: 3px; width: 100%; }
+.tot2, .tot1 { color: var(--win); font-weight: 700; }
+.trung { color: var(--text-muted); font-weight: 700; }
+.xau1, .xau2 { color: var(--lose); font-weight: 700; }
+
+.ngoai { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--text-bright); }
+.viDu { margin: 0; padding-left: 10px; font-size: 12px; line-height: 1.55; color: var(--text-muted); box-shadow: inset 2px 0 0 rgba(147, 170, 200, .25); }
+
+.haiCot { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.chuoi { display: flex; flex-direction: column; gap: 6px; padding: 10px; background: var(--surface-inset); box-shadow: inset 0 2px 7px rgba(0, 0, 0, .7); }
+.chuoiTen { font-size: 10px; font-weight: 800; letter-spacing: .1em; color: var(--text-muted); }
+.buoc { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0; }
+.buoc li { position: relative; display: flex; gap: 8px; padding: 0 0 10px; font-size: 12px; line-height: 1.5; color: var(--text-body); }
+.buoc li::after { content: ''; position: absolute; left: 8px; top: 20px; bottom: 2px; width: 2px; background: repeating-linear-gradient(180deg, rgba(139, 92, 246, .55) 0 3px, transparent 3px 6px); }
+.nut { flex: 0 0 auto; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: #fff; background: var(--violet); box-shadow: 2px 2px 0 rgba(10, 6, 24, .7); }
+.ket { font-size: 12.5px; line-height: 1.5; font-weight: 700; color: var(--text-bright); }
+.ketLen { color: var(--win); }
+.ketXuong { color: var(--lose); }
+.nhung { padding: 10px; background: linear-gradient(178deg, #0a1524, #060c17); box-shadow: 3px 3px 0 rgba(10, 6, 24, .7), inset 0 1px 0 rgba(255, 255, 255, .06); }
+.nhungDau { font-size: 9.5px; font-weight: 800; letter-spacing: .14em; color: var(--text-muted); }
+.nhung p { margin: 6px 0 0; font-size: 12.5px; line-height: 1.55; color: var(--text-body); }
+
+.chuyen { padding: 10px; background: linear-gradient(178deg, #0a1524, #060c17); box-shadow: 3px 3px 0 rgba(10, 6, 24, .7), inset 0 1px 0 rgba(255, 255, 255, .06); }
+.chuyenDau { display: flex; align-items: baseline; gap: 8px; }
+.chuyenDau b { font-size: 16px; color: var(--text-bright); }
+.chuyenDau span { font-size: 9.5px; letter-spacing: .14em; color: var(--text-dim); }
+.chuyen p { margin: 6px 0 0; font-size: 12.5px; line-height: 1.55; color: var(--text-body); }
+.chuyenSo { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; font-size: 11px; color: var(--text-muted); }
+
+.dsCap { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.cap { position: relative; display: flex; flex-direction: column; gap: 6px; padding: 10px; background: var(--surface-inset); box-shadow: inset 0 2px 7px rgba(0, 0, 0, .7); }
+.theCap { align-self: flex-start; padding: 1px 6px; font-size: 8.5px; letter-spacing: .12em; color: var(--text-muted); background: rgba(255, 255, 255, .06); }
+.veDoi, .veBan { display: grid; grid-template-columns: 34px 1fr; gap: 6px; font-size: 12px; line-height: 1.5; }
+.veDoi { color: var(--text-muted); }
+.veBan { color: var(--text-bright); }
+.nhanVe { font-size: 9px; font-weight: 800; letter-spacing: .14em; padding-top: 3px; color: var(--violet); }
+.veBan .nhanVe { color: var(--text-dim); }
+
+.bangSo { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+.bangSo td { padding: 6px 0; vertical-align: top; box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .05); }
+.bangSo td:first-child { color: var(--text-muted); padding-right: 10px; }
+.bangSo td:last-child { text-align: right; color: var(--text-bright); font-weight: 700; }
+
+.lienQuan { display: flex; flex-wrap: wrap; gap: 6px; }
+.chipLq {
+  display: inline-flex; align-items: center; gap: 6px; border: 0; cursor: pointer; padding: 5px 9px; font: inherit; font-size: 10.5px;
+  color: var(--accent); background: rgba(34, 211, 238, .07); box-shadow: inset 0 0 0 1px rgba(34, 211, 238, .32);
+}
+.giaoTrinh { margin: 0; font-size: 10.5px; line-height: 1.6; color: var(--text-muted); }
+
+.tu {
+  display: inline; border: 0; padding: 0; background: none; cursor: pointer; font: inherit; color: var(--accent);
+  box-shadow: inset 0 -1px 0 rgba(34, 211, 238, .45);
+}
+
+@media (max-width: 360px) {
+  .haiCot { grid-template-columns: 1fr; }
+}
+
+/* ── CỬA "CÁCH BẠN MẤT TIỀN" (D352) ─────────────────────────────────────────
+ * Một GIẾNG LÕM chứa mười tấm NỔI — cùng ngữ pháp chiều sâu với phần còn lại của trang:
+ * chỗ đọc thì lõm, thứ chạm được thì nổi và lún khi bấm.
+ * ⚠ Luật màu: lam CHỈ cho thứ chạm được. Ở đây tên mục là lam (chạm được), câu tả là chữ
+ *   thường — KHÔNG tô đỏ. Đỏ trong trang này dành riêng cho "giảm/yếu"; một danh sách nhan đề
+ *   "cách bạn mất tiền" mà tô đỏ toàn bộ thì đỏ hết nghĩa.
+ * ⚠ Không `animation` (luật của trang), chỉ `steps()` cho cú lún — nhịp máy, đúng ranh A11.18. */
+.matTien {
+  display: flex; flex-direction: column; gap: 7px; padding: 11px 10px 10px;
+  background: var(--surface-inset); box-shadow: inset 0 2px 7px rgba(0, 0, 0, .7);
+}
+.matTienDau { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: .12em; color: var(--text-bright); }
+.matTienDan { margin: 0; font-size: 10px; line-height: 1.45; color: var(--text-muted); }
+.matTienDs { display: flex; flex-direction: column; gap: 4px; margin: 2px 0 0; padding: 0; list-style: none; }
+.matTienHang {
+  display: flex; gap: 8px; align-items: flex-start; width: 100%; padding: 7px 8px; border: 0; cursor: pointer;
+  text-align: left; font: inherit; color: var(--text-muted);
+  background: linear-gradient(178deg, #0a1524, #060c17);
+  box-shadow: 2px 2px 0 rgba(10, 6, 24, .7), inset 0 1px 0 rgba(255, 255, 255, .05);
+  transition: transform .12s steps(2, end), box-shadow .12s steps(2, end);
+}
+.matTienHang:active { transform: translate(2px, 2px); box-shadow: 0 0 0 rgba(10, 6, 24, .7), inset 0 1px 0 rgba(255, 255, 255, .05); }
+.matTienIcon { flex: 0 0 auto; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+.matTienChu { font-size: 10px; line-height: 1.5; }
+.matTienChu b { color: var(--accent); font-weight: 800; letter-spacing: .04em; }

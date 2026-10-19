@@ -1,0 +1,66 @@
+/* THỬ THÁCH HÔM NAY — card sảnh + khối màn kết. §XI: khấc, không bo, bóng cứng. */
+.the {
+  composes: khungNoi from '@/styles/pixel.module.css';
+  display: block;
+  width: 100%;
+  margin-bottom: 9px;
+  padding: 13px 15px;
+  border: 1.5px solid rgba(251, 191, 36, 0.45);
+  background: rgba(251, 191, 36, 0.05);
+  box-shadow: var(--px-vien-trong), var(--px-bong);
+  color: var(--text-body);
+  text-align: left;
+  cursor: pointer;
+}
+.the:hover:not(:disabled) {
+  transform: translateY(calc(-1 * var(--px-do-day)));
+  border-color: var(--gold-amber, #fbbf24);
+  box-shadow: var(--px-vien-trong), var(--px-bong-cao), 0 0 26px rgba(251, 191, 36, 0.22);
+}
+.the:active:not(:disabled) { transform: translate(var(--px-do-day), var(--px-do-day)); box-shadow: var(--px-vien-trong); }
+.the:disabled { opacity: 0.6; cursor: default; }
+/* `.theXong` GỠ 23/08 — card BIẾN MẤT khi đã chơi xong (founder), nên không còn
+   trạng thái "xong" nào để tô. Thêm lại được nếu có ngày muốn giữ một dòng gọn
+   thay vì ẩn hẳn. */
+.tieuDe { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 15px; font-weight: 800; letter-spacing: 0.1em; }
+.moRong { color: var(--gold-amber, #fbbf24); }
+.icon { vertical-align: -3px; }
+.phu { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-muted); white-space: nowrap; }
+/* `.moTa` · `.dem` GỠ 15/09 (D336 lượt 2) — card sảnh thôi có đoạn mô tả (founder: "thu gọn"). */
+.nutGia {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--gold-amber, #fbbf24);
+  color: var(--gold-amber, #fbbf24);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+/* Khối màn kết */
+.ket {
+  composes: khungNoi from '@/styles/pixel.module.css';
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 1.5px solid rgba(251, 191, 36, 0.45);
+  box-shadow: var(--px-vien-trong), var(--px-bong);
+  background: rgba(0, 0, 0, 0.35);
+}
+.ketDau { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.nhan { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; color: var(--gold-amber, #fbbf24); }
+.ketDau .phu { margin-left: auto; }
+.ketSo { display: flex; align-items: baseline; gap: 10px; }
+.ketTo {}
+.ketChu { font-size: 11px; color: var(--text-dim); }
+.chan { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.nut {
+  composes: nut from '@/styles/pixel.module.css';
+  padding: 9px;
+  border-color: var(--gold-amber, #fbbf24);
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--gold-amber, #fbbf24);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+.chu { font-size: 10px; color: var(--text-muted); line-height: 1.5; }

@@ -1,0 +1,67 @@
+/*
+ * CHỢ TRAIT — v55 (D409 → D422 → D430 → D432). CHÉP mặt nỉ casino của trang demo đã chốt `docs/ui-ux/demo/the-trait.html`
+ * (A11.25): tiêu đề + ví xu, hai hàng thẻ (TÀI / TẬT), cái cân; khay ĐANG MANG là khối riêng bên dưới. Token màu ở `.bm` của
+ * `TheTrait.module.css` (gắn cùng gốc). Mọi @keyframes nằm cùng tệp (lint:css-anim).
+ *
+ * D430 từng thay mặt nỉ bằng áo mục của shop (chữ 9–11px, thẻ gọn) để chợ vừa khoang hàng lõi. D432 đưa chợ lên MÀN CHỌN
+ * riêng và founder chê *"Chợ trait ko đẹp bằng demo"* ⇒ mặt nỉ về nguyên số đo của demo (bản D422). Nút CUỘN LẠI và XONG
+ * của demo rời khỏi chân chợ: ĐỔI LẠI xuống đáy màn chọn (founder 27/09), XONG thành nút chính của màn chọn.
+ */
+.boc { display: flex; flex-direction: column; gap: 12px; }
+.cho {
+  padding: 14px 12px 16px;
+  border: 2px solid var(--t-ni-vien);
+  background: radial-gradient(120% 80% at 50% 0%, rgba(255, 255, 255, 0.05), transparent 60%), var(--t-ni);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5), 0 6px 0 0 #03150b;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--t-chu);
+  font-size: 16px;
+  line-height: 1.35;
+}
+.choDau { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.choTen { font-size: 20px; font-weight: 800; letter-spacing: 0.1em; }
+.vi {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 2px solid var(--t-xu);
+  color: var(--t-xu-sang); font-weight: 800; letter-spacing: 0.08em; font-size: 17px; background: rgba(0, 0, 0, 0.35);
+}
+.vi b { font-size: 20px; font-variant-numeric: tabular-nums; }
+.dongxu {
+  width: 14px; height: 14px; display: inline-block; background: var(--t-xu);
+  box-shadow: inset -3px -3px 0 0 #b7791f, inset 3px 3px 0 0 var(--t-xu-sang);
+}
+.hang { display: flex; flex-direction: column; gap: 6px; }
+.nhanHang { font-weight: 800; letter-spacing: 0.18em; font-size: 14px; }
+.hang[data-hang='tai'] .nhanHang { color: var(--tai-4); }
+.hang[data-hang='tat'] .nhanHang { color: var(--tat-4); }
+.theHang { display: grid; grid-template-columns: repeat(3, minmax(0, 150px)); gap: 10px; }
+.choChan { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.can { font-weight: 800; letter-spacing: 0.1em; font-size: 17px; padding: 3px 10px; border: 2px solid currentColor; display: inline-block; }
+.canDung { color: var(--tai-4); }
+.canLech { color: var(--tat-4); }
+.canRung { animation: rung 300ms steps(6, end); }
+@keyframes rung {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+/* Nút ĐỔI LẠI chợ (`NutCuonTrait`) — đứng ở ĐÁY màn chọn cạnh nút chính, cùng áo nút đổi lõi (một nguồn với shop). */
+/* D526 — nút ĐỔI TRAIT cùng một áo với ĐỔI LÕI (`nutDoi`: tấm nổi viền lam, giá là mẩu đồng xu vàng) — founder: "lạc quẻ". */
+.cuon { composes: nutDoi from './ShopManHinh.module.css'; flex: none; }
+.cuonXoay { composes: nutDoiXoay from './ShopManHinh.module.css'; }
+.cuonGia { composes: nutDoiGia from './ShopManHinh.module.css'; }
+.cuonXu { composes: nutDoiXu from './ShopManHinh.module.css'; }
+/* D526 — cột phải đầu chợ: ô XU, nút ĐỔI TRAIT ngay dưới, cùng bề ngang (founder: "Đổi trait ở dưới xu"). */
+.viCot { display: flex; flex-direction: column; align-items: stretch; gap: 8px; flex: none; margin-left: auto; }
+/* Cột XU + ĐỔI giữ nguyên hàng với tiêu đề: tiêu đề tự xuống dòng thay vì đẩy cột xuống dưới. Nút trong cột gọn hơn nút đổi lõi. */
+.choDau { flex-wrap: nowrap; align-items: flex-start; }
+.choTen { flex: 1 1 0; min-width: 0; text-wrap: balance; line-height: 1.15; }
+.viCot .cuon { min-height: 34px; padding: 4px 8px; gap: 6px; font-size: 12px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .canRung { animation: none !important; }
+}

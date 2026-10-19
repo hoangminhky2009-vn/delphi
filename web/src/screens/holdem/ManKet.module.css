@@ -1,0 +1,156 @@
+/*
+ * MÀN KẾT — BENTO KHÔNG CUỘN (SPEC `alpha-draft-tang-khong-gian` phần A; demo CHỐT `docs/ui-ux/demo/alpha-draft-tang-khong-gian.html`).
+ * Luật ba lớp ở docs/ui-ux/09-tang-khong-gian.md. Màn kết thuộc route TOÀN TÂM (không header, không BottomNav, không Oracle) nên khung
+ * chỉ trừ ĐẦU 20 px của vỏ + vùng an toàn (xem `AppShell.module.css` `.shell` / `.shellToanMan`): KHÔNG thanh cuộn ở 390×812 và 360×640.
+ * Màu chỉ token; không `border-radius` (§XI pixel).
+ */
+.ket { position: relative; }
+
+/* LỚP NỀN: vignette (cùng token với Hub/sảnh). Màn kết không có BottomNav nên chỉ cần phủ lên ô. */
+.nen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-vignette);
+  pointer-events: none;
+  box-shadow: var(--nen-vignette);
+}
+
+.khung {
+  position: relative;
+  width: 100%;
+  max-width: var(--shell-width);
+  margin: 0 auto;
+  justify-self: center;
+  /* Vỏ toàn tâm: padding đầu 20 px, đáy chỉ vùng an toàn. `min-height` chống khung lùn đến mức ô chồng nhau trên máy cực thấp.
+     Trừ thêm 8 px đáy: chân nút VỀ SẢNH dày 4 px + bóng cứng — không có khoảng thở thì chân nút dính mép màn. */
+  height: calc(100dvh - 20px - 8px - env(safe-area-inset-bottom, 0px));
+  min-height: 456px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1;
+  line-height: normal;
+  font-size: 16px;
+}
+
+/* ── lưới: ô của mình + PHONG CÁCH (lớn nhất) + bốn ô nhỏ ── */
+.luoi {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 10px;
+}
+.luoi .oToi {
+  grid-column: 1 / 5;
+  flex-direction: row;
+  gap: 12px;
+  align-items: stretch;
+  border-color: var(--border-gold);
+}
+.luoi .oPc {
+  grid-column: 1 / 5;
+  justify-content: center;
+  border-color: color-mix(in srgb, var(--violet-soft) 55%, transparent);
+  overflow: hidden;
+}
+.luoi .oNho {
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 4px;
+  text-align: center;
+}
+.tenNho { font-size: var(--tk-label); letter-spacing: 0.1em; color: var(--text-title); font-weight: 600; }
+.phuNho { font-size: var(--tk-micro); color: var(--text-muted); }
+
+.nhan { font-size: var(--tk-label); letter-spacing: 0.16em; color: var(--violet-soft); }
+.duoi { font-size: var(--tk-label); color: var(--text-muted); }
+.khongPc { display: flex; flex-direction: column; gap: 6px; }
+.dauKy { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* ── ô của mình ── */
+.cotTrai { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.cotPhai { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.hangTo {
+  /* Số TO: nét liền (cùng lý do `.soTo` của Hub — ở 52 px `--elsh` 1 + `--elgr` 1,4 của cả app làm số trông như bị rây). */
+  --elsh: 2;
+  --elgr: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 52px;
+  line-height: 0.85;
+  color: var(--text-title);
+  font-variant-numeric: tabular-nums;
+}
+.hangTo small { font-size: var(--tk-body); color: var(--text-muted); }
+.thang { color: var(--gold); }
+.von { display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; }
+.von b { font-size: 24px; color: var(--gold); font-weight: 600; }
+.von i { font-style: normal; font-size: var(--tk-title); }
+.lai { color: var(--win); }
+.lo { color: var(--lose); }
+.tay { display: flex; flex-wrap: wrap; gap: 4px; }
+.laTrong { font-size: var(--tk-label); color: var(--text-muted); }
+.dongChip { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px;
+  font-size: var(--tk-label);
+  letter-spacing: 0.08em;
+  border: 1px solid var(--border-idle);
+  color: var(--text-muted);
+}
+.chipVang { border-color: var(--border-gold); color: var(--gold-amber); }
+.chipChay { border-color: var(--lose-soft); color: var(--lose); background: color-mix(in srgb, var(--lose) 12%, transparent); }
+
+/* ── ruột lớp trượt ── */
+.dongLa { display: flex; align-items: center; gap: 8px; }
+.gheLat { display: flex; flex-direction: column; gap: 4px; }
+.gheTen { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.gheTen b { color: var(--accent); font-weight: 600; }
+.bac { margin-left: 6px; font-style: normal; font-size: var(--tk-micro); color: var(--text-muted); }
+.hangLa { display: flex; flex-wrap: wrap; gap: 4px; padding-left: 4px; }
+
+.banDo { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.oMap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  min-height: 48px;
+  padding: 4px 4px 12px;
+  background: color-mix(in srgb, black 55%, var(--bg-page));
+  box-shadow: var(--o-vien);
+  font-size: var(--tk-micro);
+  color: var(--text-muted);
+}
+.oMapSk { box-shadow: inset 0 0 0 1px var(--gold-amber); }
+.oMapSo { color: var(--text-title); font-weight: 600; font-size: var(--tk-label); }
+.oMapTen { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.oMapGia { box-shadow: inset 0 0 0 1px var(--lose); }
+.oMapDau {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  background: var(--lose);
+  color: var(--bg-page);
+}
+.theDangGiu { margin: 0; font-size: var(--tk-body); color: var(--text-muted); line-height: 1.35; }
+
+/* Máy thấp (≤ 700 px, vd 360×640): khoảng cách gọn lại để vẫn không cuộn. */
+@media (max-height: 700px) {
+  .khung { gap: 8px; }
+  .luoi { gap: 8px; }
+  .hangTo { font-size: 44px; }
+  .von b { font-size: 20px; }
+}

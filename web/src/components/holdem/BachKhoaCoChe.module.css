@@ -1,0 +1,112 @@
+/*
+ * BÁCH KHOA CƠ CHẾ — trang tra cứu NGUỘI, nên nó cố tình KHÔNG giống bàn chơi:
+ * không nỉ, không quầng, không nhịp. Nền panel + chữ xám, đúng tầng "thứ để đọc"
+ * của luật màu 13/09 (lam chỉ dành cho thứ bấm được, xanh/đỏ cho lời/lỗ).
+ * ⚠ Không `animation` ở file này. Một trang tra cứu mà nhấp nháy là một trang
+ * không ai đọc hết.
+ */
+.khoi {
+  margin-top: 8px;
+  padding: 10px;
+  background: var(--surface-panel);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.gon { padding: 8px; }
+.dau {
+  margin-bottom: 8px;
+  color: var(--text-muted);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+}
+
+.muc { padding: 8px 0; box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.05); }
+.muc:last-child { box-shadow: none; }
+.ten {
+  margin: 0 0 6px;
+  color: var(--text-bright);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+.than {
+  margin: 6px 0 0;
+  color: var(--text-dim);
+  font-size: 10px;
+  line-height: 1.55;
+}
+.than b { color: var(--text-bright); font-weight: 700; }
+
+/* ── SƠ ĐỒ: dựng bằng chính khối của bàn, không phải ảnh ───────────────────── */
+.soDo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+.o {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-end;
+  width: 62px;
+  height: 40px;
+  padding: 3px 4px;
+  background: #0a0f1c;
+  box-shadow: 2px 2px 0 rgba(10, 6, 24, 0.7);
+  color: var(--text-muted);
+  font-size: 7.5px;
+  line-height: 1.2;
+}
+/* Ô "đáng lẽ là" — mờ và gạch ngang: nó đã không xảy ra. */
+.oMo { opacity: 0.45; text-decoration: line-through; }
+/* Ô thật sự lật — viền sáng như ô đang lật trên bản đồ. */
+.oThat { box-shadow: 2px 2px 0 rgba(10, 6, 24, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.18); }
+/* Ô còn úp — gạch chân tím: đúng dấu "tin trước nghiêng về phía này" trên bản đồ. */
+.oUp {
+  align-items: center;
+  justify-content: center;
+  border-bottom: 3px solid var(--violet);
+  color: rgba(147, 170, 200, 0.5);
+  font-size: 16px;
+}
+.doi { color: var(--text-bright); font-size: 13px; }
+.noi {
+  width: 18px;
+  height: 3px;
+  background: repeating-linear-gradient(90deg, var(--violet) 0 3px, transparent 3px 6px);
+}
+
+/* Hàng ghế của sơ đồ 1: sáu trên tám chấm nghiêng cùng phía = hình dạng gây ra cú bẻ. */
+.ghe { display: flex; flex: 1 1 100%; gap: 3px; }
+.cham {
+  width: 7px;
+  height: 7px;
+  background: rgba(93, 114, 144, 0.4);
+}
+.chamDon { background: var(--lose); }
+
+/* Sơ đồ 2: cột lệnh to dần, phần ĐỎ ở đỉnh là phần khớp ở giá xấu hơn. */
+.cot { display: flex; gap: 6px; align-items: flex-end; height: 66px; }
+.thanh {
+  position: relative;
+  display: block;
+  width: 14px;
+  background: var(--surface-inset);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.07), inset -1px -1px 0 rgba(0, 0, 0, 0.5);
+}
+.truot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: block;
+  background: var(--lose);
+}
+.chuHinh {
+  flex: 1 1 100%;
+  color: var(--text-muted);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}

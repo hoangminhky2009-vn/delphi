@@ -1,0 +1,68 @@
+// Deploy frontend "Dự báo" lên Cloudflare Workers (static assets + proxy /api).
+// Chạy từ web/: npx wrangler deploy
+// URL: https://dubao.<subdomain>.workers.dev
+//
+// ⚠ ĐỔI `name` LÀ ĐỔI TÊN MIỀN. Danh sách việc kèm theo nằm ngay trên dòng
+// `"name"` phía dưới — đọc ở đó, đừng đọc ở đây.
+//
+// ⚠ ĐÍNH CHÍNH 08/09: bản chú thích trước ở chỗ này nói đổi tên thì phải sửa
+// `ALLOWED_ORIGIN` không thì "đăng nhập chết". SAI. Worker proxy /api SAME-ORIGIN
+// (xem đầu `worker/index.js`), nên trình duyệt chỉ nói chuyện với đúng một tên
+// miền và CORS của API không nằm trên đường đó. Chỗ thật sự gãy là hai SECRET của
+// worker. Ghi lại cả lời sai để lần sau không ai đi chẩn đoán lại từ đầu.
+{
+  // ⚠⚠ VẪN LÀ `dubao` — ĐỔI SANG `delphi` LÀ VIỆC CỦA FOUNDER, KHÔNG PHẢI CỦA AGENT.
+  //
+  // Đêm 08/09 tôi đã đổi thành "delphi" theo yêu cầu, rồi ĐẢO LẠI trước khi deploy.
+  // Lý do đảo, đo được chứ không phải thận trọng suông: đổi `name` là dựng một
+  // worker MỚI, và worker mới KHÔNG có secret nào. Hai secret đang gánh việc thật:
+  //   · `PROXY_SHARED_SECRET` — thiếu thì API thôi tin `x-delphi-client-ip`, rơi về
+  //     `x-forwarded-for` = IP edge Cloudflare ⇒ **mọi người chung một PoP dùng
+  //     CHUNG một bucket rate-limit đăng ký**. Đúng lỗ đã xảy ra 18/07.
+  //   · `CONG_BI_MAT` — thiếu thì cổng hàng chờ tự tắt (fail-open, chấp nhận được,
+  //     nhưng founder đã chốt 06/09 là GIỮ BẬT).
+  // Cộng thêm URL mapping của Discord Activity trỏ tên cũ.
+  // ⇒ Deploy tên mới lúc founder đang ngủ = mở một lỗ lạm dụng không ai canh.
+  //
+  // ĐỔI TÊN THÌ LÀM ĐỦ BỐN BƯỚC, THEO THỨ TỰ:
+  //   1. đổi dòng dưới thành "delphi";
+  //   2. `cd web && npx wrangler deploy`;
+  //   3. `npx wrangler secret put CONG_BI_MAT` + `npx wrangler secret put PROXY_SHARED_SECRET`
+  //      trên worker MỚI (giá trị lấy từ chỗ founder đang giữ — agent không đọc được);
+  //   4. đổi URL mapping Discord Activity.
+  // Worker `dubao` cũ không tự mất; xoá tay sau khi bản mới đã xanh.
+  "name": "dubao",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-06-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // SPA: đường dẫn không khớp file → trả index.html (route client-side)
+    "not_found_handling": "single-page-application",
+    // /api + /admin luôn vào worker (proxy), không bao giờ bị tầng asset nuốt
+    "run_worker_first": ["/api/*", "/admin", "/admin/*"]
+  },
+
+  // ── CỔNG HÀNG CHỜ (D207) ───────────────────────────────────────────────
+  //
+  // Sổ hàng chờ phải có MỘT điểm nối tiếp toàn cầu, nếu không thì mỗi isolate
+  // đếm một sổ và trần thật = trần × số isolate. Lý do loại KV/Cache API ghi ở
+  // đầu `worker/cua.js`.
+  //
+  // ⚠ NẾU `wrangler deploy` BÁO DURABLE OBJECTS KHÔNG DÙNG ĐƯỢC TRÊN GÓI NÀY:
+  // chú thích HAI khối dưới đây rồi deploy lại. Worker chạy y như cũ —
+  // `worker/index.js` thấy thiếu `env.CUA` là tự TẮT CỔNG (fail-open). Mất
+  // hàng chờ, KHÔNG mất trang web. Ghi ra để không phải đoán giữa lúc deploy
+  // hỏng.
+  //
+  // ⚠ Cổng chỉ thật sự bật khi CÓ CẢ secret: `npx wrangler secret put CONG_BI_MAT`
+  // (chuỗi ngẫu nhiên dài, dùng để ký vé thông hành). Thiếu secret ⇒ cũng tắt.
+  "durable_objects": {
+    "bindings": [{ "name": "CUA", "class_name": "CuaHang" }]
+  },
+  "migrations": [
+    // SQLite-backed DO — bản chạy được trên gói free. Sổ nằm trong bộ nhớ nên
+    // không dùng tới storage, nhưng khai đúng lớp là điều kiện để deploy qua.
+    { "tag": "v1", "new_sqlite_classes": ["CuaHang"] }
+  ]
+}

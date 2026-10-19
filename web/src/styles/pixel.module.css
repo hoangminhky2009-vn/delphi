@@ -1,0 +1,446 @@
+/*
+ * NGUYÊN THUỶ PIXEL UI — thực thi §XI cho khung / nút / chuyển động.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * §XI đòi năm thứ: pixel icon · pixel card · **pixel frame** · **pixel button** ·
+ * **pixel animation**. Hai thứ đầu đã xong (`PixelIcon`, art thẻ 80×60 Hi-Bit).
+ * File này là ba thứ còn lại.
+ *
+ * SÁU LUẬT. Ba luật đầu nói CÁCH làm cứng, và cả ba đều là thứ tách "modern
+ * pixel" khỏi "web bo góc thông thường":
+ *
+ *  1. KHÔNG `border-radius`. Góc bo là góc có ĐƯỜNG CONG, mà lưới pixel không có
+ *     đường cong — nó có BẬC. Nên góc ở đây là góc KHẤC: cắt vát đúng một đơn vị
+ *     pixel bằng `clip-path`, ra hình bát giác đều mà mắt đọc là "khung pixel".
+ *
+ *  2. BÓNG CỨNG, KHÔNG BLUR. `box-shadow` có `blur-radius` = 0. Bóng nhoè là đổ
+ *     bóng của vật thể cong dưới ánh sáng mềm; pixel art đổ bóng bằng một khối
+ *     đặc dịch đi vài pixel. Đây cũng là thứ làm nút "dày" lên và bấm xuống được.
+ *
+ *  3. `steps()`, KHÔNG `cubic-bezier`. Chuyển động pixel nhảy theo nấc chứ không
+ *     trượt mượt. Một nút bấm trượt 200ms mượt mà trên khung pixel trông như hai
+ *     hệ thiết kế dán vào nhau.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Ba luật trên nói CÁCH làm cứng. Ba luật dưới nói KHI NÀO — thêm 26/07/2026 sau
+ * khi khảo sát cả bốn mặt (bóng · gradient · chuyển động · icon) và đo ra rằng
+ * chúng KHÔNG cần bốn luật rời: chúng là bốn câu trả lời của CÙNG MỘT câu hỏi.
+ *
+ *  4. VẬT hay ÁNH SÁNG. Đây là luật gốc; ba luật đầu chỉ là hệ quả của nó.
+ *
+ *     VẬT = thứ có CẠNH chỉ được bằng ngón tay: khung, nút, thẻ, thanh, núm kéo,
+ *     ô LED, chữ, icon. Hình của nó, bề mặt của nó, độ dày của nó, và nó đang
+ *     đứng ở đâu tại mỗi khung hình.
+ *     ÁNH SÁNG = thứ vật hắt ra không gian quanh nó và TỰ NÓ KHÔNG CÓ CẠNH:
+ *     quầng neon, bloom, scanline, nền toả sáng.
+ *
+ *     VẬT thì CỨNG. ÁNH SÁNG thì được MỀM. Câu hỏi phân định, hỏi đúng một lần:
+ *
+ *         XOÁ LỚP NÀY ĐI THÌ VẬT CÓ ĐỔI HÌNH KHÔNG?
+ *         Đổi hình / đổi cạnh / đổi bề mặt / đổi chỗ đứng → VẬT      → cứng.
+ *         Chỉ tối cảnh đi, vật vẫn nguyên hình            → ÁNH SÁNG → được mềm.
+ *
+ *     Bốn mặt, một câu hỏi:
+ *
+ *     · BÓNG. Có offset (`3px 3px 0`) là bóng ĐỔ — nó nói vật DÀY bao nhiêu →
+ *       VẬT, blur phải bằng 0. Offset 0 (`0 0 26px`) là quầng toả đều — nó nói
+ *       vật đang BẬT → ÁNH SÁNG, giữ nguyên blur. Phép thử máy móc: nhìn offset.
+ *     · GRADIENT. Gradient TÔ VẬT (mặt nút, núm kéo, thanh nhỏ, chấm) là bề mặt
+ *       của vật → điểm dừng phải CỨNG, hoặc màu phẳng cộng vát `inset`. Gradient
+ *       LÀ ÁNH SÁNG (radial trên nền màn, hắt góc panel, mask) → giữ nguyên.
+ *       "Cứng" KHÔNG có nghĩa là xoá từ khoá gradient: `linear-gradient(90deg,
+ *       A 0 45%, B 45%)` vẫn là gradient, nhưng nó vẽ ra hai dải phẳng — đúng
+ *       cách pixel art tô khối.
+ *     · CHUYỂN ĐỘNG. Cái đang đổi là HÌNH / VỊ TRÍ / MÀU của vật → `steps()`.
+ *       Cái đang đổi là ĐỘ MẠNH của ánh sáng (thở, bùng, âm ỉ) → giữ mượt, giữ
+ *       `ease-in-out infinite`. `steps()` trên nhịp thở 2,6s không ra phong cách,
+ *       nó ra strobe — và mắt đọc strobe là LỖI RENDER.
+ *     · ICON. Icon là VẬT nhỏ nhất trên màn → phải nằm trên lưới của mình
+ *       (`components/ui/PixelIcon.tsx`). Emoji sai không phải vì nó màu, mà vì
+ *       nó là vật do FONT HỆ ĐIỀU HÀNH vẽ: cùng ký tự cảnh báo U+26A0 ra tam
+ *       giác đơn sắc trên Windows và ra tam giác MÀU trên iPhone — tức người
+ *       chơi thấy một màn khác màn người dựng đang kiểm. Vật mà mình không kiểm
+ *       soát được hình thì không phải vật của mình. Ký tự HÌNH HỌC (▶ ↻ ✕ ✓ ▲ ▼)
+ *       là chuyện khác: chúng vẽ bằng chính JetBrains Mono, một màu, đúng hệ —
+ *       GIỮ, và "dọn cho sạch" nhóm đó là phá đúng thứ đang đúng.
+ *
+ *  5. ÁNH SÁNG PHẢI ĐỦ RỘNG MỚI CÒN LÀ ÁNH SÁNG. Luật 4 nói "mềm được"; luật này
+ *     là cái thước để chữ "được" đó không bị lạm dụng.
+ *
+ *     Một chuyển sắc hay vệt nhoè chỉ đọc ra là ánh sáng khi nó TRẢI ≥ 4 đơn vị
+ *     khấc (12px) trên một vật rộng hơn thế. Dưới ngưỡng, mắt không thấy "có
+ *     nguồn sáng", mắt thấy "cạnh bị nhoè" → rơi về VẬT → cứng.
+ *
+ *     Đo được 26/07: lá bài úp 4×8px chỉ có 32 điểm ảnh mà mang một dải 160° →
+ *     sinh 32 màu khác nhau, tức nhiễu chứ không phải hình. Chấm 12×12 sau khi
+ *     `border-radius` về 0 thành một Ô VUÔNG chứa một ĐỐM TRÒN mờ — hình tròn
+ *     duy nhất còn sót trên thanh. Ngược lại: hào quang 132px sau linh vật, nền
+ *     1000×560, chữ 150px — ánh sáng thật, đừng đụng.
+ *
+ *  6. MỘT KHAI BÁO, ĐỦ CÁC VAI, ĐÚNG THỨ TỰ.
+ *
+ *     Luật 4 chia mỗi vật làm hai vai, nhưng CSS bắt cả hai đi chung một thuộc
+ *     tính `box-shadow` — mà `box-shadow` KHÔNG CỘNG DỒN: khai lại là thay trọn.
+ *     Nên thứ tự lớp trong một khai báo là CỐ ĐỊNH:
+ *
+ *         1. vát `inset`            (bề mặt vật)
+ *         2. viền cứng `0 0 0 Npx`  (nếu có)
+ *         3. bóng cứng có offset    (độ dày vật)
+ *         4. quầng `0 0 Npx`        (ánh sáng)
+ *
+ *     ⚠ `composes` RỒI KHAI LẠI CÙNG THUỘC TÍNH = GHI ĐÈ IM LẶNG. Đã dính bốn
+ *     lần, không lần nào build đỏ: `.mode:hover` xoá vát vừa `composes` từ
+ *     `khungNoi`; `.card:hover` và `.sel` bóc vát mặt thẻ đúng lúc người chơi
+ *     trỏ vào và đúng lúc thẻ được chọn; núm kéo trạng thái cháy trả lại
+ *     `radial-gradient` mà đoạn ngay phía trên nó vừa gỡ. Style INLINE trong
+ *     `.tsx` cũng thắng `composes` y hệt — và ở đó không lint nào quét.
+ *
+ *     Vì vậy: còn cần thêm quầng thì ĐỪNG `composes` lớp bóng — hãy gọi BIẾN
+ *     (`var(--px-bong)`, `var(--px-vien-trong)`) bên trong khai báo của mình.
+ *     Biến ghép được, lớp thì không.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * ⚠ @keyframes PHẢI Ở TRONG FILE NÀY, và nơi dùng phải `composes` lớp từ đây —
+ * KHÔNG viết `animation: <tên>` trong module khác. CSS Modules đổi tên keyframe
+ * theo file, nên gọi tên từ file khác là animation CHẾT CÂM: build xanh, không
+ * cảnh báo, chỉ là không có gì chuyển động. `scripts/lint_css_anim.ts` canh.
+ */
+
+/* Đơn vị khấc — 3px ở màn 390px là vừa đủ đọc ra "bậc" mà không thành hình thoi. */
+:root {
+  --px-notch: 3px;
+  --px-do-day: 3px;
+
+  /*
+   * BỐN GIÁ TRỊ VAI — luật 6 đòi các vai đi chung MỘT khai báo `box-shadow`, nên
+   * chúng phải là BIẾN chứ không chỉ là lớp: biến ghép được với quầng, lớp thì
+   * `composes` xong bị khai đè là mất trắng.
+   *
+   *   box-shadow: var(--px-vien-trong), var(--px-bong), 0 0 26px var(--gl);
+   *               └ vát (vật) ────────┘ └ dày (vật) ─┘ └ quầng (ánh sáng) ┘
+   */
+  --px-vien-trong:
+    inset 1px 1px 0 rgba(248, 250, 252, 0.22),
+    inset -1px -1px 0 rgba(10, 6, 24, 0.55);
+  /* Bản 2px cho VẬT NHỎ ĐẶC (núm kéo, chấm, ô LED): ở 12–20px thì vát 1px mảnh
+     quá, mắt không đọc ra khối — đo trên núm 18×18 của thanh mức cam kết. */
+  --px-vien-trong-day:
+    inset 2px 2px 0 rgba(248, 250, 252, 0.3),
+    inset -2px -2px 0 rgba(10, 6, 24, 0.65);
+  --px-bong: var(--px-do-day) var(--px-do-day) 0 rgba(10, 6, 24, 0.7);
+  /* Vật ĐANG ĐƯỢC NHẤC (hover): dày gấp đôi. Dưới mức này mắt không đọc ra là
+     "nhấc lên", chỉ đọc ra là "bóng hơi khác" — nên 2× chứ không 1,5×. */
+  --px-bong-cao:
+    calc(var(--px-do-day) * 2) calc(var(--px-do-day) * 2) 0 rgba(10, 6, 24, 0.7);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   @layer pixel — TẦNG NỀN. MỌI LỚP DƯỚI ĐÂY LÀ MẶC ĐỊNH, KHÔNG PHẢI PHÁN QUYẾT.
+   ══════════════════════════════════════════════════════════════════════════
+
+   ⚠⚠ ĐỪNG GỠ `@layer`. Nó là lời giải cho một lỗi đã chạy trên prod (19/09), và
+   lỗi ấy im lặng tuyệt đối: CSS hợp lệ, tsc xanh, lint xanh, class trong DOM
+   đúng y như React nghĩ — chỉ computed style là sai.
+
+   ─── LỖI LÀ GÌ ──────────────────────────────────────────────────────────────
+   `composes: nut from '@/styles/pixel.module.css'` KHÔNG tạo ra thứ hạng nào.
+   Nó chỉ DÁN THÊM tên lớp vào element. Nên `.nut` và lớp của nơi dùng đều
+   (0,1,0) — ngang điểm — và người thắng là **người đứng SAU trong tệp gộp**.
+
+   Mà tệp này bị nạp gần CUỐI. Đo trên bản build prod 19/09 (`index-*.css`,
+   292 KB): `._chip_` ở byte 51.797 · `._active_` ở 51.920 · `._nut_` ở
+   **271.932**. Tức `.nut` đè mọi nơi dùng, không trừ ai. Bản dev còn tệ hơn:
+   Vite chèn một BẢN SAO tệp này vào từng module `composes` nó (~40 bản), bản
+   cuối cùng thắng — và "bản cuối" đổi theo thứ tự import, tức đổi theo phiên.
+
+   Đo được ngày 19/09: **38 lớp ở 22 tệp** tự `composes` rồi khai lại chính
+   thuộc tính tệp này khai ⇒ khai báo chết câm (nặng nhất: `NeonButton .cta` —
+   nền gradient + viền accent của nút chính 17 màn), cộng **16 lớp "đang chọn"**
+   đứng cạnh một lớp `composes` trên cùng element ⇒ trạng thái chọn vô hình.
+   Triệu chứng founder báo: ở màn lập hồ sơ, chọn câu 1 rồi chọn câu 2 thì câu 1
+   "mất dấu" — thực ra nó chưa bao giờ CÓ dấu; thứ sáng lên chỉ là `.nut:hover`
+   dưới con trỏ.
+
+   ─── VÌ SAO LÀ `@layer` CHỨ KHÔNG PHẢI CÁCH KHÁC ────────────────────────────
+   Rule trong layer LUÔN thua rule không-layer, bất kể specificity và bất kể thứ
+   tự. Thế là đúng nghĩa của `composes`: tệp này cho MẶC ĐỊNH TỐT, nơi dùng có
+   quyền nói khác — và quyền ấy không còn phụ thuộc vào việc bundler xếp ai
+   trước ai. Ba cách còn lại đều tệ hơn:
+     · ép thứ tự nạp → phụ thuộc đồ thị import của Rollup, một lần refactor là
+       hỏng lại, mà hỏng thì im lặng y như cũ;
+     · `:where(.nut)` (0,0,0) → thua luôn cả selector thẻ (`button{…}`), tức đẻ
+       một lớp bẫy mới;
+     · ghép lớp ở 52 chỗ (`.x.x`, `.base.state`) → 52 bản vá phải nhớ, và chỗ
+       thứ 53 viết sau sẽ quên.
+
+   ⚠ NẰM NGOÀI LAYER, CỐ Ý: khối `:root` (biến không tranh chấp với ai) và khối
+   `@media (prefers-reduced-motion)` ở cuối tệp — nó PHẢI thắng cả `.lat`/`.hat`
+   trong layer lẫn mọi nơi dùng, nên không được xuống tầng.
+
+   ⚠ Ai viết `composes` mới: cứ khai đè thoải mái, nó CHẠY. Không cần `.x.x`,
+   không cần `!important`.
+
+   ─── GIÁ ĐÃ TRẢ, ĐỪNG "TỐI ƯU" NÓ ĐI ────────────────────────────────────────
+   `composes` làm Vite chèn nguyên tệp này vào từng module dùng nó (38 bản).
+   Trước đây minifier của esbuild gom 38 bản trùng thành MỘT — và chính cú gom
+   ấy đẻ ra lỗi, vì bản còn lại là bản CUỐI. Bọc `@layer` thì esbuild không dám
+   gom nữa (thứ tự layer có thể đổi nghĩa), nên bundle giữ đủ 38 bản.
+   Đo 19/09: **raw 292 KB → 374 KB, gzip 72,5 KB → 74,9 KB (+2,4 KB)**. Trả
+   2,4 KB để một họ lỗi câm biến mất là rẻ — đừng gỡ layer để lấy lại chỗ ấy.
+   ══════════════════════════════════════════════════════════════════════════ */
+@layer pixel {
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PIXEL FRAME — khung có góc khấc
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.khung {
+  border-radius: 0;
+  /* Bát giác: cắt đúng một đơn vị khấc ở cả bốn góc. */
+  clip-path: polygon(
+    var(--px-notch) 0%, calc(100% - var(--px-notch)) 0%,
+    100% var(--px-notch), 100% calc(100% - var(--px-notch)),
+    calc(100% - var(--px-notch)) 100%, var(--px-notch) 100%,
+    0% calc(100% - var(--px-notch)), 0% var(--px-notch)
+  );
+}
+
+/*
+ * Khung có VIỀN SÁNG hai cạnh trên-trái — cùng quy ước nguồn sáng trên-trái với
+ * art thẻ 80×60. Không có nó thì khung phẳng lì và không ăn nhập với thẻ.
+ *
+ * Dùng `inset` shadow chứ không `border`: border cộng vào kích thước và làm lệch
+ * `clip-path`, còn inset shadow vẽ bên trong nên góc khấc vẫn khớp.
+ */
+.khungNoi {
+  composes: khung;
+  box-shadow: var(--px-vien-trong);
+}
+
+/*
+ * KHỐI ĐẶC — vật NHỎ mà đặc: núm kéo, chấm trạng thái, ô LED, viên đánh dấu.
+ *
+ * Đây là lời giải của luật 5 cho nhóm dưới ngưỡng 12px: nền phải là MÀU PHẲNG
+ * (nơi dùng tự khai), khối nổi lên bằng vát 2px chứ KHÔNG bằng `radial-gradient`
+ * — một quả cầu sáng mềm 18×18 là vật duy nhất trên màn có đường cong.
+ * Cần thêm quầng thì đừng `composes` lớp này, hãy tự khai một `box-shadow` gồm
+ * `var(--px-vien-trong-day), var(--px-bong), 0 0 22px <màu>` (luật 6).
+ */
+.khoi {
+  composes: khung;
+  box-shadow: var(--px-vien-trong-day), var(--px-bong);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BÓNG CẤU TRÚC vs QUẦNG KHÍ QUYỂN — hai vai của luật 4, hai lớp rời
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Bóng ĐỔ: vật dày bao nhiêu. Blur 0, lệch xuống-phải theo nguồn sáng trên-trái. */
+.bong {
+  box-shadow: var(--px-bong);
+}
+
+/* Vật đang được nhấc lên khỏi mặt bàn (hover, đang chọn). */
+.bongCao {
+  box-shadow: var(--px-bong-cao);
+}
+
+/*
+ * MÉP CHE — dải tối cứng ở mép TRÊN, cho thanh dán đáy màn (điều hướng, tờ giải
+ * thích, hộp xác nhận).
+ *
+ * Cố ý NGƯỢC hướng nguồn sáng, và đó không phải ngoại lệ: đây không phải bóng
+ * đổ mà là MÉP của một tấm che nằm đè lên nội dung cuộn phía dưới. Bóng xuống-
+ * phải ở đây rơi ra ngoài viewport, tức trả tiền vẽ một thứ vô hình.
+ */
+.mepChe {
+  box-shadow: 0 calc(-1 * var(--px-do-day)) 0 rgba(2, 1, 8, 0.8);
+}
+
+/*
+ * QUẦNG NEON — vai ÁNH SÁNG của luật 4. Đây là chỗ blur ĐƯỢC PHÉP và PHẢI có:
+ * xoá nó đi là phá đúng bản sắc Terminal × Neon founder đã duyệt.
+ * Điều khiển bằng `--px-quang-mau` / `--px-quang-r` ở nơi dùng.
+ */
+.quang {
+  box-shadow: 0 0 var(--px-quang-r, 18px) var(--px-quang-mau, rgba(34, 211, 238, 0.55));
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PIXEL BUTTON — góc khấc + bóng cứng + bấm theo nấc
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.nut {
+  composes: khung;
+  position: relative;
+  /*
+   * ⚠⚠ BA BIẾN MA ĐÃ VÁ (D183) — `--line`, `--surface-2`, `--cyan` KHÔNG TỒN TẠI
+   * ở đâu trong repo. Biến ma làm trình duyệt NUỐT TRỌN CẢ KHAI BÁO, nên suốt từ
+   * D106 tới nay: `border-style` rơi về `none` (mọi nút pixel KHÔNG CÓ VIỀN), nền
+   * rơi về trong suốt, và hover chỉ còn đổi mỗi màu chữ. ~40 chỗ `composes: nut`
+   * trên 19 file — hỏng IM LẶNG: CSS hợp lệ, tsc xanh, lint xanh.
+   * Đây là một nửa lý do "nút bấm đứng im vô cảm"; dán glow/hạt lên một khối
+   * không cạnh không nền thì hiệu ứng trôi trên nền trống.
+   * ⇒ Nay trỏ vào token CÓ THẬT trong `tokens.css`. Đổi token = đổi diện mạo mọi
+   * nút, nên nó đi một commit RIÊNG, không lẫn vào commit tính năng.
+   */
+  border: 1px solid var(--border-idle-strong);
+  background: var(--surface-inset);
+  color: var(--text-dim);
+  font-family: inherit;
+  cursor: pointer;
+  /*
+   * Bóng CỨNG: khối đặc dịch xuống-phải, blur = 0. Đây là thứ làm nút "dày".
+   * `transition` dùng steps(2) — nút pixel nhảy hai nấc, không trượt.
+   */
+  box-shadow: var(--px-bong);
+  transform: translate(0, 0);
+  transition:
+    transform 90ms steps(2, end),
+    box-shadow 90ms steps(2, end),
+    color 90ms steps(2, end);
+}
+
+.nut:hover:not(:disabled) {
+  /* ⚠ `--text` cũng là biến ma (token thật là `--text-bright`) — vá cùng lượt. */
+  color: var(--text-bright);
+  border-color: var(--accent);
+}
+
+/*
+ * BẤM XUỐNG = nút dịch vào đúng bằng độ dày bóng, và bóng biến mất.
+ * Đây là cả trò của nút pixel: khối thật sự lún xuống mặt bàn, không phải mờ đi.
+ */
+.nut:active:not(:disabled) {
+  transform: translate(var(--px-do-day), var(--px-do-day));
+  box-shadow: 0 0 0 rgba(10, 6, 24, 0);
+}
+
+.nut:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: 1px 1px 0 rgba(10, 6, 24, 0.5);
+}
+
+/* Nút chính — cùng hình khối, khác màu. */
+.nutChinh {
+  composes: nut;
+  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.14);
+  color: var(--text-bright);
+}
+
+.nutCanh {
+  composes: nut;
+  border-color: var(--amber);
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--amber);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PIXEL ANIMATION — mọi thứ nhảy theo nấc
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/*
+ * ĐỔI TRẠNG THÁI MÀU — hai nấc, không hoà sắc.
+ *
+ * Vai trò của lớp này là DẸP MỘT THANG THỨ HAI. Đo được 26/07: 15 chỗ tự gõ
+ * `transition: border-color .2s` với bốn thời lượng khác nhau cho cùng một việc
+ * (viền ô nhập sáng lên, chip lọc bật, tab pool đổi, hàng danh sách hover).
+ * Đổi trạng thái là NHỊ PHÂN — bật hoặc tắt, không có trạng thái nửa sáng — nên
+ * nó phải nhảy, và mọi chỗ phải nhảy CÙNG nhịp.
+ */
+.doiMau {
+  transition:
+    color 120ms steps(2, end),
+    border-color 120ms steps(2, end),
+    background-color 120ms steps(2, end);
+}
+
+/*
+ * NHẤC LÊN KHI TRỎ VÀO — cử chỉ chung của MỌI thẻ bấm được (sảnh dự báo, Hub,
+ * lịch sử Đấu trường, thẻ preset).
+ *
+ * 3 nấc chứ 2: cần một khung ở GIỮA thì mắt mới đọc ra hướng đi lên; 2 nấc thì
+ * thẻ chỉ "xuất hiện ở chỗ mới". Quãng nhấc đúng bằng một đơn vị độ dày, để cử
+ * chỉ này và cú LÚN của `.nut` là hai đầu của cùng một thang, không phải hai
+ * thang rời.
+ */
+.nhac {
+  transition:
+    transform 120ms steps(3, end),
+    box-shadow 120ms steps(2, end),
+    border-color 120ms steps(2, end);
+}
+
+/* 13/09 — nhấc chỉ khi có chuột: trên màn chạm `:hover` DÍNH sau cú chạm, vật
+   đứng nguyên tư thế nhấc tới khi chạm chỗ khác (founder: "cứ gượng"). Xem
+   GameCard.module.css cùng ngày. */
+@media (hover: hover) and (pointer: fine) {
+  .nhac:hover:not(:disabled) {
+    transform: translate(0, calc(-1 * var(--px-do-day)));
+  }
+}
+
+/*
+ * LẬT THẺ (§XII "Prediction Submitted → card flip").
+ *
+ * 8 nấc chứ không mượt: thẻ pixel lật thì mỗi khung hình là một bề rộng rời rạc,
+ * đúng như sprite animation. Lật mượt trên thẻ pixel trông như ảnh 3D dán lên.
+ */
+@keyframes pxLat {
+  0% { transform: scaleX(1); }
+  50% { transform: scaleX(0.06); }
+  100% { transform: scaleX(1); }
+}
+
+.lat {
+  animation: pxLat 320ms steps(8, end) 1;
+}
+
+/*
+ * HẠT RƠI — confetti pixel (§XII "confetti nếu thắng").
+ *
+ * Hạt là Ô VUÔNG, không phải hình tròn hay dải giấy: hạt tròn trên nền pixel là
+ * thứ duy nhất trong khung hình có đường cong, và mắt bắt ngay.
+ * `steps(12)` cho rơi giật từng nấc như sprite.
+ */
+@keyframes pxRoi {
+  0% { transform: translateY(-8px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(320px) rotate(180deg); opacity: 0; }
+}
+
+.hat {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  animation: pxRoi 1400ms steps(12, end) 1 forwards;
+}
+
+}
+/* ── hết `@layer pixel` ─────────────────────────────────────────────────────
+   Từ đây trở xuống KHÔNG nằm trong layer: những gì viết dưới đây phải thắng cả
+   tệp này lẫn mọi nơi dùng. Đúng một khối, và nó là lưới an toàn chuyển động. */
+
+
+/*
+ * TIẾT KIỆM CHUYỂN ĐỘNG — lưới an toàn tầng CSS.
+ *
+ * File này khai animation nhưng tới 31/08 KHÔNG có khối này: nó được che bằng
+ * guard JS ở từng nơi dùng: `holdem/PhaoGiay.tsx:48` và `holdem/GameCard.tsx:120`
+ * đều `if (… || itMotion) return`.
+ * ⚠ Nhưng KHÔNG phải nơi nào cũng có: `holdem/KyNgo.tsx:194` dán `px.lat` mà
+ * không hỏi cờ — tức lỗ đã mở sẵn, không phải phòng xa. Và người viết code hiếm
+ * khi bật cờ này nên chỗ sót thì không ai thấy.
+ *
+ * ⚠ HAI LỚP XỬ LÝ KHÁC NHAU, và đây là chỗ dễ làm sai:
+ *   `.lat` mở và đóng ở CÙNG một trạng thái (scaleX(1)) ⇒ tắt là an toàn.
+ *   `.hat` kết ở `opacity: 0` kèm `forwards` ⇒ tắt animation là đóng băng nó ở
+ *   khung ĐẦU: một đám ô vuông đứng im vĩnh viễn trên màn, tệ hơn hẳn cú rơi.
+ *   Confetti không chở tin nào (lời "bạn thắng" nằm ở chữ), nên ẩn hẳn mới
+ *   đúng — D116 bảo giữ TIN, không bảo giữ hạt giấy.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .lat { animation: none; }
+  .hat { display: none; }
+}

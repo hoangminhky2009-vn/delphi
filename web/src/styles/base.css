@@ -1,0 +1,248 @@
+/** Reset + nền + kiểu chữ mặc định (Terminal × Neon — tokens.css là nguồn màu duy nhất). */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-page);
+  background-image: var(--bg-page-glow);
+  background-repeat: no-repeat;
+  /* Neo cho lớp nền động ở `body::before` — xem khối dưới. */
+  position: relative;
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: var(--font-dam);
+  line-height: 1.5;
+  font-variation-settings: 'ELSH' var(--elsh), 'ELGR' var(--elgr);
+  /*
+   * `antialiased` — đã soi CẢ HAI trên stack (31/08). `none` cho cạnh cứng hơn
+   * một chút, đúng chất pixel hơn, nhưng nó bỏ vệ xám mà nét mảnh cần ở màn
+   * dpr 1,0 — đúng loại màn founder dùng. Đổi lấy một chút cạnh cứng bằng rủi
+   * ro chữ mờ trên máy người chơi là đổi sai chiều.
+   */
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/*
+ * ⚠⚠ NHẮC LẠI TRÊN `*` — KHÔNG THỪA, VÀ ĐÂY LÀ MỘT LỖI ĐÃ TRẢ GIÁ.
+ *
+ * `font-variation-settings` CÓ kế thừa, nhưng thuộc tính RÚT GỌN `font` RESET
+ * nó về `normal` — kể cả `font: inherit`. Repo có **46 chỗ trên 21 file** viết
+ * `font: inherit` (khuôn reset nút/ô nhập), tức gần như MỌI nút và nhãn.
+ * Đo được: một nhãn 9px trả về `font-variation-settings: normal` trong khi
+ * tokens.css khai đầy đủ. Nên khi founder báo "chữ hơi mảnh" và tôi vặn
+ * `--elgr` ở `body`, con số đó chưa bao giờ tới nơi — vặn vào hư không.
+ */
+*,
+*::before,
+*::after {
+  font-variation-settings: 'ELSH' var(--elsh), 'ELGR' var(--elgr);
+}
+
+a {
+  color: var(--accent);
+}
+a:hover {
+  color: var(--accent-bright);
+}
+
+button {
+  font-family: inherit;
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.35);
+  color: var(--text-max);
+}
+
+/* Điều hướng bàn phím — viền neon rõ ràng (a11y) */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 0;
+}
+
+/* Skeleton sweep dùng chung mọi màn (đặt height tại chỗ dùng) */
+.skeleton {
+  border-radius: 0;
+  border: 1px solid var(--border-idle-soft);
+  background:
+    linear-gradient(100deg, rgba(255, 255, 255, 0.02) 40%, rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0.02) 60%)
+    var(--surface-card);
+  background-size: 200% 100%;
+  animation: skeletonSweep 1.4s ease-in-out infinite;
+}
+
+@keyframes skeletonSweep {
+  0% { background-position: 120% 0; }
+  100% { background-position: -80% 0; }
+}
+
+/* ===== Lớp dùng chung tối thiểu (component thật ở GĐ5) ===== */
+
+/* Nhãn UPPERCASE giãn chữ — chữ ký của phong cách */
+.label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-idle);
+  border-radius: 0;
+  box-shadow: var(--shadow-card-sm);
+  padding: 14px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  border: 1px solid var(--border-idle-strong);
+  border-radius: 0;
+  padding: 2px 9px;
+  color: var(--text-muted);
+}
+.pill--accent {
+  color: var(--accent-bright);
+  background: rgba(34, 211, 238, 0.08);
+  border-color: var(--border-accent);
+  font-weight: 700;
+}
+
+.dashed-sep {
+  border: 0;
+  border-top: 1px dashed var(--border-idle);
+  margin: 0;
+}
+
+/* Ô nhập terminal */
+.input {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-bright);
+  background: var(--surface-inset);
+  border: 1px solid var(--border-idle);
+  border-radius: 0;
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input:focus {
+  border-color: var(--border-accent-strong);
+}
+
+/* Nút CTA chính (Mẫu E: "▶ CÔNG BỐ KẾT QUẢ") */
+.cta {
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+  padding: 13px;
+  border-radius: 0;
+  background: var(--grad-cta);
+  border: 1px solid var(--border-accent-strong);
+  color: var(--accent-soft);
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 2px;
+  transition: border-color 0.3s, color 0.3s;
+}
+.cta:hover:not(:disabled) {
+  border-color: rgba(103, 232, 249, 0.9);
+  color: var(--accent-peak);
+}
+.cta:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * NỀN SỐNG — lớp trôi rất chậm phía sau mọi thứ.
+ *
+ * Founder 26/07: "nền app hơi trống nếu không có tương tác... cho đỡ chán mắt".
+ * Đúng: mọi chuyển động hiện có đều do NGƯỜI CHƠI kích hoạt, nên lúc đứng yên
+ * màn hình chết hẳn — mà phần lớn thời gian trong một trận là đứng yên đọc bài.
+ *
+ * BỐN RÀNG BUỘC TỰ ĐẶT, vì nền động rất dễ thành nền phiền:
+ *
+ *  1. KHÔNG ĐƯỢC TRANH SỰ CHÚ Ý. Đây là nền, không phải hiệu ứng. Biên độ nhỏ,
+ *     chu kỳ dài (48s và 72s), độ mờ rất thấp. Nếu người chơi NHẬN RA nó đang
+ *     chuyển động thì nó đã quá tay.
+ *  2. NHẢY THEO NẤC (§XI luật 3). Lưới terminal trôi mượt sẽ là vật duy nhất
+ *     trên màn còn trượt liên tục, giữa một giao diện đã nhảy nấc toàn bộ.
+ *     `steps()` cũng khiến lưới pixel không bao giờ rơi vào giữa hai ô.
+ *  3. CHỈ transform/opacity. Không animate background-position hay filter —
+ *     hai thứ đó bắt trình duyệt vẽ lại mỗi khung hình, và đây là lớp CHẠY
+ *     SUỐT, khác hẳn hiệu ứng bật một lần. Trên điện thoại tầm thấp (C2) một
+ *     lớp full-screen repaint vô hạn là tự đốt pin.
+ *  4. reduced-motion TẮT HẲN. Nền động thuần trang trí, không mang thông tin —
+ *     tắt là mất đúng số không.
+ *
+ * `pointer-events: none` để nó không bao giờ nuốt cú chạm nào.
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes nenTroi {
+  from { transform: translate3d(0, 0, 0); }
+  /* Trôi đúng MỘT ô lưới rồi lặp — hết chu kỳ là khớp lại y hệt, không giật. */
+  to   { transform: translate3d(-32px, -32px, 0); }
+}
+
+@keyframes nenTho {
+  0%, 100% { opacity: 0.30; }
+  50%      { opacity: 0.55; }
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  /* Rộng hơn màn hình: lưới trôi chéo nên phải chừa biên, không thì lộ mép. */
+  inset: -40px;
+  z-index: 0;
+  pointer-events: none;
+  /*
+   * Lưới terminal 32px, nét 1px cực mờ. Đây là background-image TĨNH — phần
+   * chuyển động là `transform` của cả lớp, nên GPU chỉ dịch một texture đã
+   * vẽ sẵn thay vì vẽ lại lưới mỗi khung hình.
+   */
+  background-image:
+    linear-gradient(rgba(103, 232, 249, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(103, 232, 249, 0.045) 1px, transparent 1px);
+  background-size: 32px 32px;
+  animation:
+    nenTroi 48s steps(16, end) infinite,
+    nenTho 72s steps(12, end) infinite;
+}
+
+/*
+ * Mọi thứ khác phải nằm TRÊN lớp nền. Không có dòng này thì lưới phủ lên nội
+ * dung — nền z-index 0 mà nội dung không có stacking context nào thì thứ tự
+ * quyết định bởi thứ tự DOM, và `::before` đứng trước.
+ */
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+}
+
+/* D443 — `<b>` / `<strong>` MỘT nét: trình duyệt cho `bolder` trên nét thân 600 ra 900 — nét thứ tư trên màn (đo màn trận
+   28/09: chỉ `<b>` mới ra 900). Nhấn trong app là 800 (founder: "phải đồng bộ font chữ"). */
+b, strong { font-weight: 800; }

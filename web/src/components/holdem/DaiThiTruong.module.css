@@ -1,0 +1,297 @@
+/*
+ * DẢI THỊ TRƯỜNG — sáu mã cùng nhích sau chốt (12/09, Q3). Xem DaiThiTruong.tsx.
+ *
+ * A11.18 / docs/ui-ux/01-vfx-game-feel.md:
+ *  · LÁ là VẬT ⇒ nhích bằng `steps()` (ba nấc rời, không trượt).
+ *  · HUY HIỆU cái kéo là ÁNH SÁNG ⇒ `ease-in-out`.
+ *  · Chỉ `transform` / `opacity`. Một phần tử một chủ `animation`: `.la` giữ
+ *    nhích, `.keo` giữ sáng — hai hộp khác nhau.
+ *  · `@keyframes` ở CÙNG FILE (lint:css-anim — CSS Modules đổi tên keyframe).
+ *  · `prefers-reduced-motion`: cùng thời lượng, nháy mờ thay vì nhích; mặt nạ
+ *    màu (tĩnh) vẫn nói chiều.
+ *  · Thời lượng đọc từ biến `--nhip-*` (lib/nhip.ts) — không gõ số ở đây.
+ */
+
+.dai {
+  display: flex;
+  /* Canh ĐỈNH: hàng chân chỉ mọc ở lá đang cầm (12/09), nên canh đáy là lá không
+     chip tụt 9px so với lá có chip. Canh đỉnh thì hình + tên thẳng hàng, cọc chip
+     TREO dưới lá mình cầm — đúng nghĩa tiền đặt dưới lá bài. */
+  align-items: flex-start;
+  gap: 4px;
+  /* ⭐ 13/09 tối — DẢI SÁU MÃ NẰM TRÊN CÙNG MẶT NỈ VỚI BẢN ĐỒ, dính liền, ngăn nhau bằng
+     một chỉ tối 1px. Trước đó nó cách bản đồ 8px và tự kẻ một nẹp ĐỨT màu tím — tức ba thứ
+     cùng nói "đây là chỗ khác": khoảng cách, nẹp, và màu. Founder gạch đúng kiểu chia màn
+     ấy. Ô vừa lật ở trên và sáu mã bị nó kéo ở dưới là MỘT câu chuyện, nên phải là một mặt.
+     ⚠ Nỉ ở đây là mặt bàn thứ ba (luật 31/08). Đo lại tương phản trên đúng màu chữ đang
+     chạy: `--text-muted` #93aac8 trên đỉnh nỉ = 5,2:1 · trên đáy #072b17 = 5,6:1; `--win`
+     và `--lose` còn cao hơn. Qua ngưỡng AA cho chữ thường. */
+  padding: 7px 9px 8px;
+  /* D442 (founder 27/09 tối: *"màu xanh hiện tại hơi lạc quẻ"*) — dải sáu mã về MẶT TRUNG TÍNH xám kim loại, để nền
+     môi trường của bàn thẻ ngay trên (đổi theo xu hướng) là chỗ DUY NHẤT mang màu chu kỳ. Đo lại trên mặt mới:
+     `--text-muted` 7,20 ở đỉnh / 7,77 ở đáy; `--lose` 6,19 / 6,68 (tokens.css, khối D442). */
+  background: var(--mat-trung-mat);
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* ── CÁI KÉO — huy hiệu tính chất của ô vừa lật, tối khi chưa chốt ── */
+.keo {
+  flex: 0 0 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  margin-top: 4px;                /* tâm huy hiệu ≈ tâm hình lá (2px đệm + (25,5−22)/2) */
+  background: rgba(6, 4, 16, 0.82);
+  box-shadow: var(--px-bong);
+  opacity: 0.35;
+}
+.keoSang {
+  animation: keoSang var(--nhip-tho, 1500ms) ease-in-out both;
+}
+@keyframes keoSang {
+  0% { opacity: 0.35; }
+  45% { opacity: 1; }
+  100% { opacity: 1; }
+}
+.keoTrong {
+  display: block;
+  width: 6px;
+  height: 6px;
+  background: var(--text-muted);
+  opacity: 0.5;
+}
+
+/* ── LÁ — một mã ── */
+.la {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 0 4px;
+}
+/* Vạch dưới lá: MÀU CỦA CÁI KÉO — chỉ hiện ở lá đã động vòng này, và CHỈ khi vòng
+   có cái kéo thật (ô sự kiện). Ô giai đoạn không đặt `--keo-mau` ⇒ trong suốt ⇒
+   không vẽ thêm một vạch xám vô nghĩa (12/09: founder xin bớt chi tiết). */
+.la::after {
+  content: '';
+  position: absolute;
+  right: 8%;
+  bottom: 0;
+  left: 8%;
+  height: 3px;
+  background: var(--keo-mau, transparent);
+  opacity: 0;
+}
+.dong::after { opacity: 1; }
+
+/*
+ * ⭐ 12/09 — CHIỀU TÁC ĐỘNG = MẶT NẠ MÀU TRÊN CHÍNH LÁ, không phải mũi tên dưới
+ * chân. Founder: *"thay vì phải thêm mũi tên xanh/đỏ tăng giảm ở dưới, tại sao
+ * không tiết kiệm diện tích phần đó và cho mặt nạ hoặc hiệu ứng xanh/đỏ cho loại
+ * asset đó?"*. Đổi lại được ba thứ: bớt một hàng 9px mỗi lá · mắt đọc MÀU nhanh
+ * hơn đọc hình mũi tên 6px · và màu nằm ĐÚNG trên vật bị tác động, nên "cái gì
+ * động" với "động chiều nào" là MỘT vật, không phải hai.
+ * `screen` chứ không `multiply`: art pixel nền tối, nhân vào thì đen thui.
+ */
+.hinh {
+  position: relative;
+  width: 100%;
+  max-width: 34px;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  /* 13/09 — lá là VẬT đặt trên kệ: nền tối riêng + bóng pixel 2px (lá nhỏ, 3px là quá tay). */
+  background: var(--bg-page);
+  box-shadow: 2px 2px 0 rgba(10, 6, 24, 0.7);
+  opacity: 0.62;
+}
+.hinh > svg { display: block; width: 100%; height: 100%; }
+.cam .hinh { opacity: 1; }
+
+.la { --huong-mau: transparent; }
+.len { --huong-mau: var(--win); }
+.xuong { --huong-mau: var(--lose); }
+.hinh::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--huong-mau);
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.len .hinh::after,
+.xuong .hinh::after {
+  opacity: 0.34;
+  box-shadow: inset 0 0 0 1px var(--huong-mau);
+}
+
+/* 10/10 (D570: tên dài kiểu "Trái phiếu chính phủ"; bộ tên ngắn sau đó vẫn có "Stablecoin" 10 ký tự) — tên XUỐNG HAI DÒNG thay vì bị cắt,
+   cùng cách quầy shop (D432). Mọi ô giữ cao HAI dòng kể cả tên ngắn ⇒ sáu hình thẳng hàng, dải không đổi
+   cao giữa hai lần vẽ. */
+.ten {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  max-width: 100%;
+  min-height: calc(2em * 1.1);
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--fs-micro);
+  line-height: 1.1;
+  letter-spacing: var(--ls-nut);
+  text-align: center;
+  text-transform: uppercase;
+}
+.cam .ten { color: var(--text-body); }
+
+.chan {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 9px;
+}
+
+/* Cọc chip nằm ngang — cùng ngữ nghĩa TayBai (một lát = một chip dày). */
+.coc {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 9px;
+}
+.chip {
+  display: block;
+  width: 3px;
+  height: 9px;
+  background: var(--gold-amber);
+  border: 1px solid rgba(10, 6, 24, 0.75);
+}
+
+/*
+ * ═══ D395 — THƯỚC THANH KHOẢN (founder 24/09: "co dãn theo thẻ sự kiện đang được lật") ═══
+ * Một hàng vạch pin dưới tên lá: số vạch = số nấc của thang (năm ở v54, ba ở bản cũ). Vạch là VẬT ⇒
+ * bật/tắt bằng `steps()`; đoạn biên độ của mã đầu cơ là ÁNH SÁNG không chắc ⇒ thở ease-in-out.
+ * Màu: vạch sáng = accent (cùng thanh pin Bảng điện tử) · vạch vừa thêm = win · vạch vừa mất = lose rồi tối.
+ * Chỉ `transform`/`opacity` animate; màu nền của từng lớp là tĩnh.
+ */
+.thuoc {
+  display: flex;
+  justify-content: center;
+  gap: 1px;
+  height: 3px;
+  margin-top: 1px;
+}
+.vach {
+  display: block;
+  width: 4px;
+  height: 3px;
+  background: rgba(93, 114, 144, 0.35);
+}
+.sang { background: var(--accent); }
+.gian {
+  background: var(--win);
+  animation: vachBat 360ms steps(3, end) both;
+  animation-delay: var(--nhip-nhich-la, 360ms);
+}
+.co {
+  background: var(--lose);
+  animation: vachTat 520ms steps(4, end) both;
+  animation-delay: var(--nhip-nhich-la, 360ms);
+}
+.mo {
+  background: var(--accent);
+  animation: vachTho 1400ms ease-in-out infinite;
+}
+@keyframes vachBat {
+  0% { transform: scaleY(0); }
+  60% { transform: scaleY(1.8); }
+  100% { transform: scaleY(1); }
+}
+@keyframes vachTat {
+  0% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+@keyframes vachTho {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.7; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gian, .mo { animation: none; }
+  .co { animation: none; opacity: 0.3; }
+  .mo { opacity: 0.5; }
+}
+
+/* ── D398 — LÁ ĐỨNG YÊN (founder 24/09: "cho nó đứng im đi chứ cứ lên xuống rối mắt quá") ──
+   Bỏ hẳn cú nhích 5/10/16px lên/xuống (13/09). Độ mạnh giờ là SỐ MŨI TÊN trên huy hiệu
+   (`.dauChieu`), chiều là mũi tên + mặt nạ màu — cả hai đứng yên trên vật. Thứ duy nhất
+   còn động là huy hiệu BẬT RA một nhịp `steps(3)` (vật) rồi đứng; nhóm ngược chiều chính
+   bật nhịp thứ hai (`.dauSau`) — "trú ẩn ngược dòng" vẫn đọc được mà không lá nào chạy. */
+
+/* GIẢM NHÁY: cùng thời lượng đọc — nháy mờ một nhịp thay cho sáng dần của cái kéo. */
+@keyframes giamNhay {
+  0% { opacity: 1; }
+  50% { opacity: 0.55; }
+  100% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .keoSang { animation-name: giamNhay; opacity: 1; }
+}
+
+/* ═══ 13/09 — LIÊN KẾT PHẢI ĐỌC RA ĐƯỢC (founder: "cặp tài sản tương quan hiển thị sự
+   liên kết / chịu tác động chưa rõ lắm, hiệu ứng chưa đủ rõ ràng"). Ba nước, đều
+   mã hoá lên chính vật, không thêm chữ:
+   · TÊN lá bị ô kéo nhuộm đúng MÀU Ô (cùng màu vạch dưới chân) — "lá nào bị kéo"
+     đọc bằng màu tên, không phải bằng cách đoán từ 2px nhích.
+   · Mặt nạ chiều đậm theo NẤC: nấc 1 giữ 0,34, nấc 2 0,42, nấc 3 0,52 — lá ăn đòn
+     nặng nhìn nặng hơn.
+   · Vạch đứt tách hai phe RỦI RO | PHÒNG THỦ: cặp ngược chiều đứng hai bên vạch,
+     mắt đọc ra "một bên xuống thì bên kia lên" mà không cần nhãn. ═══ */
+.dong .ten { color: var(--keo-mau, var(--text-muted)); }
+.nac2 .hinh::after { opacity: 0.42; }
+.nac3 .hinh::after { opacity: 0.52; }
+/* con 1 = huy hiệu kéo, 2–4 = rủi ro, 5–7 = phòng thủ */
+.dai > .la:nth-child(5) {
+  margin-left: 4px;
+  padding-left: 5px;
+  border-left: 1px dashed rgba(255, 255, 255, 0.16);
+}
+
+/* ── HUY HIỆU CHIỀU (13/09) — icon pixel ở góc lá ─────────────────────────────
+   Đứng NGOÀI `.hinh` (không nằm dưới mặt nạ): mặt nạ phủ `screen` lên toàn bộ
+   trong hình, icon nằm dưới nó sẽ bị nhuộm và mất tương phản đúng lúc lá ăn đòn
+   nặng nhất — tức mất ở đúng ca cần đọc nhất. Bệ tối cùng công thức với số ô
+   bản đồ (`MarketMap .so`) để icon đọc được trên mọi nền art.
+   D398 — lá thôi là chủ của cú nhích, nên huy hiệu được làm chủ MỘT cú bật `steps(3)`
+   (vật) lúc hiện ra rồi đứng yên. Hai mũi tên = mạnh, một = nhẹ, "=" = đứng giá. */
+.dauChieu {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 1px;
+  display: flex;
+  padding: 1px;
+  background: rgba(6, 4, 16, 0.82);
+  line-height: 0;
+  animation: dauHien var(--nhip-nhich-la, 360ms) steps(3, end) both;
+}
+/* Nhóm ngược chiều chính bật NHỊP THỨ HAI — longhand, không đè shorthand của `.dauChieu`. */
+.dauSau { animation-delay: var(--nhip-nhich-la, 360ms); }
+/* "=" đứng giá: xám, không bệ tối đậm — nói "không có gì" thì đừng to hơn thứ có gì. */
+.dauDung {
+  padding: 0 2px;
+  color: var(--text-muted);
+  font-size: var(--fs-micro);
+  line-height: 1;
+  background: rgba(6, 4, 16, 0.55);
+}
+@keyframes dauHien {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dauChieu { animation: none; }
+}

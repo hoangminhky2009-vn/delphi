@@ -1,0 +1,109 @@
+.track {
+  position: relative;
+  height: 9px;
+  border-radius: 0;
+  background: var(--surface-track);
+}
+
+/*
+ * MẶT THANH = bề mặt của vật → điểm dừng cứng (luật 4, "thanh nhỏ" gọi tên).
+ *
+ * Hai lớp nền, cả hai đều hard-stop:
+ *  · lưới vạch 6px sáng / 2px tối — vốn đã cứng sẵn, chỉ dời từ inline vào đây
+ *    vì nó là HẰNG SỐ, không có lý do gì phải dựng lại chuỗi mỗi khung hình;
+ *  · dải màu theo tone, 5 bậc phẳng thay cho dải nội suy vô hạn cấp của
+ *    `--grad-bar-*`. Hai đầu màu giữ y nguyên; ba bậc giữa nội suy tuyến tính.
+ *    Cùng lưới vạch 8px, mắt đọc ra một cột LED đổi vùng màu — đúng thứ thanh
+ *    này vốn đang giả làm.
+ */
+.fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 0;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(5, 10, 20, 0) 0 6px,
+      rgba(5, 10, 20, 0.55) 6px 8px
+    ),
+    var(--seg-mau, var(--grad-bar-neutral));
+  /* Mẫu E chỉ chuyển tiếp `background` — CỐ Ý. Xem .fillSmooth. */
+  transition: background 120ms steps(2, end);
+}
+
+.toneNeutral {
+  --seg-mau: linear-gradient(
+    90deg,
+    rgb(34, 211, 238) 0 20%,
+    rgb(60, 181, 240) 20% 40%,
+    rgb(87, 152, 242) 40% 60%,
+    rgb(113, 122, 244) 60% 80%,
+    rgb(139, 92, 246) 80%
+  );
+}
+
+.toneWin {
+  --seg-mau: linear-gradient(
+    90deg,
+    rgb(34, 211, 238) 0 20%,
+    rgb(44, 214, 210) 20% 40%,
+    rgb(54, 217, 183) 40% 60%,
+    rgb(64, 219, 155) 60% 80%,
+    rgb(74, 222, 128) 80%
+  );
+}
+
+/* Tone thua: hai đầu màu cách nhau đúng 16/5/6 điểm RGB — chia 5 bậc là bịa ra
+   bốn đường kẻ không ai thấy, nên để hai dải. */
+.toneLose {
+  --seg-mau: linear-gradient(90deg, rgb(127, 69, 80) 0 50%, rgb(143, 74, 74) 50%);
+}
+
+/*
+ * Chỉ dùng khi width đổi RỜI RẠC (màn chi tiết: server trả phân bố mới).
+ * TUYỆT ĐỐI không bật khi lễ công bố đang chạy: ở đó width được rAF đặt lại
+ * mỗi khung hình, thêm transition 0.45s là hai bộ nội suy đánh nhau — thanh
+ * chạy trễ ~0,45s, sai hẳn đường ease-out bậc 3 của mẫu, và cờ "đã đậu"
+ * (|w−pct|<0,4) bật trước khi thanh vẽ xong nên nhãn % tắt sáng quá sớm.
+ *
+ * ⚠ Khai lại `transition` ở đây là THAY TRỌN khai báo của `.fill`, nên phải
+ * chép cả vế `background` — bỏ sót là mất nhịp đổi tone mà không ai báo.
+ * Width là bề rộng của VẬT → quét theo nấc, 10 nấc (thang quét/rơi).
+ */
+.fillSmooth {
+  transition: background 120ms steps(2, end), width 450ms steps(10, end);
+}
+
+.sweep {
+  composes: sweepBar from '../../styles/motion.module.css';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 30%;
+  background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+}
+
+/*
+ * ĐẦU THANH — vật nhỏ đặc 12×12, đúng ca luật 5 nêu tên: `radial-gradient` cũ
+ * biến nó thành một Ô VUÔNG chứa một ĐỐM TRÒN mờ, hình tròn duy nhất còn sót
+ * trên thanh sau khi `border-radius` về 0. Nay nền MÀU PHẲNG, khối nổi bằng vát
+ * 2px của `.khoi` (12px thì vát 1px mảnh quá, mắt không đọc ra khối).
+ *
+ * ⚠ `.khoi` đã đặt `box-shadow` (vát + bóng) — KHÔNG khai lại ở đây.
+ */
+.dot {
+  composes: khoi from '@/styles/pixel.module.css';
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  background: var(--accent);
+  /* Hiện/ẩn là nhị phân → nhảy, chung nhịp 120ms với `.doiMau`. */
+  transition: opacity 120ms steps(2, end);
+  pointer-events: none;
+}

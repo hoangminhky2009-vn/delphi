@@ -1,0 +1,10 @@
+{
+  // BẢN DEMO "KHÁCH NÂNG CAO" (link pitch deck, 28/09) — Worker TĨNH, không có đường /api: máy chủ chạy trong trang
+  // (src/demo/may_chu.worker.ts). Tách hẳn khỏi `dubao` (app thật) — deploy demo không bao giờ chạm bản tester.
+  "name": "dubao-demo",
+  "compatibility_date": "2026-06-01",
+  "assets": {
+    "directory": "./dist-demo",
+    "not_found_handling": "single-page-application"
+  }
+}

@@ -1,0 +1,22 @@
+/*
+ * Luật chuyển động TOÀN CỤC.
+ *
+ * ⚠ @keyframes KHÔNG còn ở đây — đã chuyển sang `motion.module.css`.
+ * Lý do đầy đủ ghi ở đầu file đó: keyframe toàn cục mà gọi tên từ *.module.css
+ * thì CSS Modules đổi tên → animation chết câm, build vẫn xanh, không cảnh báo.
+ * Đừng mang chúng ngược lại đây, và đừng viết `animation: <tên> ...` trong file
+ * module — hãy `composes` lớp từ `motion.module.css`.
+ */
+
+/* Tôn trọng người dùng chóng mặt/tiết kiệm pin — luật bắt buộc của khung (doc mục 7.4).
+ * Chỉ tắt CHUYỂN ĐỘNG. Trình tự lễ công bố vẫn chạy đủ nhịp bằng JS
+ * (MarketResult: RM_SCALE) — reduced-motion không được nuốt THÔNG TIN. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

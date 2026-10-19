@@ -1,0 +1,164 @@
+/*
+ * KHỐI PHONG CÁCH Ở MÀN KẾT. §XI pixel: không bo góc, không blur, không gradient
+ * mượt. Chỉ animate transform/opacity (tập giao web · Discord Activity · native).
+ */
+
+/*
+ * 13/09 — khung theo vai màu của MÀN KẾT (không mã mới): viền tím 32% như `.ketGapNut` của
+ * `AlphaDraftMatch.module.css` ngay trên, nền tím-đen của cùng các nếp ấy, thêm quầng tím từ trên
+ * xuống cho CHIỀU SÂU (founder: "phải có đổ bóng, cặp màu… tạo chiều sâu"). Bảng xám cũ
+ * (`--vien`/`--nen-2`/`--mo`) không phải token nào trong `tokens.css` — nó rơi về mã dự phòng.
+ */
+.khoi {
+  border: 1px solid color-mix(in srgb, var(--violet) 32%, transparent);
+  background:
+    radial-gradient(130% 240px at 50% -60px, color-mix(in srgb, var(--violet) 13%, transparent), transparent 60%),
+    rgba(13, 10, 32, 0.72);
+  padding: 12px 10px 10px;
+  margin: 10px 0;
+  --pc-mau: var(--text-muted);
+}
+
+.dau {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.nhan {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--violet-soft);
+}
+
+.chuoi { font-size: 10px; color: var(--pc-mau); font-weight: 700; }
+
+.than {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Hạng là thứ to nhất khối — nó là KẾT QUẢ, ba trục chỉ giải thích nó. */
+/* Hạng CẢ TRẬN — glyph pixel (founder 23/08), màu vẫn do `--pc-mau` lái. */
+.hangTo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pc-mau);
+  min-width: 92px;
+}
+
+.phai { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.diem { font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+.truc { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 5px; }
+
+.mot {
+  display: grid;
+  grid-template-columns: 74px 1fr 40px;
+  grid-template-areas: 'ten thanh so' 'y y y';
+  align-items: center;
+  gap: 3px 8px;
+}
+
+.trucTen { grid-area: ten; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+.trucSo {
+  grid-area: so;
+  font-size: 11px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-bright);
+}
+.trucY { grid-area: y; font-size: 10px; color: var(--text-muted); }
+
+.trucThanh {
+  grid-area: thanh;
+  position: relative;
+  height: 6px;
+  border: 1px solid color-mix(in srgb, var(--violet) 32%, transparent);
+  background: var(--surface-track);
+  overflow: hidden;
+}
+
+.trucDay {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background: var(--pc-mau);
+}
+
+/*
+ * ⚠⚠ BẢNG MÀU 5 BẬC ĐÃ GỠ 23/08 — MÀU NAY DO `mau_hang.ts` CẤP, một nguồn.
+ *
+ * Bảng cũ nằm đây từng TRÙNG từng mã hex với thanh trong trận, và chú thích cũ
+ * khai đúng thế. Nhưng khi thanh chuyển sang thang nội suy liên tục thì chỉ MỘT
+ * bên được sửa, và bản sao còn lại trôi ngay trong cùng một màn hình: hạng SSS
+ * ra chữ pixel HỒNG `#ff5d8f` đứng cạnh cái thanh VÀNG `#ffe066`, SS ra hồng
+ * cạnh cam. Hai bậc lệch nặng nhất lại đúng là hai bậc người chơi mang đi khoe.
+ * Đúng lớp D61 — bản thứ hai không sai lúc viết, nó sai lúc bên kia đổi.
+ *
+ * ⇒ `PhongCachKet.tsx` nay bơm `--pc-mau` bằng chính `mauTheoDiem(pc.diem)`.
+ * Ở lại đây chỉ còn phần KHÔNG phải màu: từ bậc S thì cả khối bắt sáng viền —
+ * đó là một NGƯỠNG, không phải một dải, nên nó vẫn là lớp CSS.
+ */
+.sieu, .toi_thuong { border-color: var(--pc-mau); }
+
+/* SS/SSS: chữ hạng nhấp nháy nhẹ — đây là màn KẾT, người chơi đang ngồi xem,
+   nên hiệu ứng được phép rõ hơn thanh trong trận. */
+.toi_thuong .hangTo { animation: pcKetNhay 900ms steps(6, end) infinite; }
+
+@keyframes pcKetNhay {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.06); opacity: 0.85; }
+}
+
+/* Màn ngang (Discord Activity trên desktop): khối rộng ra thì hạng và ba trục
+   xếp cạnh nhau thay vì chồng lên — không để một cột chữ dài 1200px. */
+@media (min-width: 900px) {
+  .khoi { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; align-items: center; }
+  .dau { grid-column: 1 / -1; margin-bottom: 0; }
+  .truc { margin-top: 0; }
+  /* Dải GHI VÀO THẺ (children) trải hết bề ngang, dưới cả hạng lẫn ba trục. */
+  .khoi > [data-testid='ghi-vao-the'] { grid-column: 1 / -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toi_thuong .hangTo { animation: none; }
+}
+
+/*
+ * BẢN GỌN (`gon`, ô PHONG CÁCH của màn kết bento — ô LỚN NHẤT màn, founder 13/09: "phong cách cá nhân phải là nổi bật nhất để flex"):
+ * ô bao ngoài đã là khung ⇒ bỏ viền/nền/lề của khối; hạng chữ pixel to hơn (px 7 — `PhongCachKet.tsx`), thanh chấm điểm (`ThanhPhongCach`)
+ * và ba trục GIÃN đều theo chiều cao ô (không để một lỗ trống giữa ô). Dòng giải nghĩa từng trục (`.trucY`) không được vẽ ở bản gọn
+ * (chuyển vào lớp trượt PHONG CÁCH — bản đầy đủ, `gon` tắt).
+ */
+.gon {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}
+.gon .dau { margin-bottom: 0; }
+.gon .truc { margin-top: 0; gap: 8px; }
+.gon .mot { grid-template-areas: 'ten thanh so'; }
+.gon .trucThanh { height: 8px; }
+
+/* Bản gọn: hạng TO ở giữa trên, thanh chấm điểm rộng hết ô bên dưới, ba trục chữ to hơn — ô PHONG CÁCH là thứ nổi bật nhất màn. */
+.gon .than { flex-direction: column; align-items: stretch; gap: 8px; }
+.gon .hangTo { align-self: center; min-width: 0; }
+.gon .truc { gap: 10px; }
+.gon .trucTen { font-size: var(--tk-label); }
+.gon .trucSo { font-size: var(--tk-body); }
+.gon .trucThanh { height: 10px; }
+.gon .nhan { font-size: var(--tk-label); }
+.gon .chuoi { font-size: var(--tk-label); }
+.gon .diem { font-size: var(--tk-label); }

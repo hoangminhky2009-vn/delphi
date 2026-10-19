@@ -1,0 +1,42 @@
+.mascot {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Hào quang sau linh vật: offset 0, trải 10–22px → ÁNH SÁNG (luật 4 + 5).
+   Đây là chỗ blur ĐƯỢC PHÉP và phải có — xoá là tắt đúng thứ Terminal × Neon
+   sống bằng. */
+.glow {
+  filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.65)) drop-shadow(0 0 22px rgba(34, 211, 238, 0.28));
+}
+
+/*
+ * Bồng bềnh = VỊ TRÍ của vật đổi → phải nhảy theo nấc.
+ *
+ * `steps(3, end)` áp cho TỪNG khoảng keyframe (0→50% và 50→100%), mà quãng
+ * đúng 3px, nên mỗi nấc dịch tròn 1 pixel: 0 → −1 → −2 → −3 → −2 → −1. Sáu
+ * khung hình trên lưới, đúng nhịp idle của sprite, thay vì trượt qua toạ độ
+ * lẻ và làm linh vật pixel nhoè đi từng khung.
+ */
+.float {
+  animation: mascotFloat 3.6s steps(3, end) infinite;
+}
+
+@keyframes mascotFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/*
+ * BAY — dáng Oracle của trợ lý hướng dẫn (trôi chéo + nghiêng nhẹ). Từng nằm riêng ở CoachTap (`coachBay`); D538 dời về đây để màn minigame bay
+ * CÙNG một nhịp (founder 06/10: "Cho delphi trong màn hướng dẫn của minigame chuyển động như phần hướng dẫn bên ngoài").
+ */
+.bay { animation: mascotBay 3.2s ease-in-out infinite; }
+@keyframes mascotBay {
+  0%   { transform: translate(0, 0) rotate(-3deg); }
+  25%  { transform: translate(4px, -6px) rotate(2deg); }
+  50%  { transform: translate(9px, -2px) rotate(4deg); }
+  75%  { transform: translate(3px, -8px) rotate(-1deg); }
+  100% { transform: translate(0, 0) rotate(-3deg); }
+}
+@media (prefers-reduced-motion: reduce) { .bay { animation: none; } }

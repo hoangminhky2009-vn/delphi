@@ -1,0 +1,217 @@
+/*
+ * KHỐI ĐỊNH HƯỚNG (D429) — thẻ BẢN TIN + thẻ PHONG CÁCH ở đầu GƯƠNG. Mặt thẻ, thanh chia, ô số, chú giải DÙNG LẠI
+ * `BieuDo.module.css` (D426); nhãn nguồn SỔ · NÓI dùng lại `BaMat.module.css`; nút (?) · lời giải · nút pixel dùng lại
+ * `Guong.module.css`. Tệp này chỉ khai phần RIÊNG của hai thẻ.
+ *
+ * ⚠ MÀU: chỉ tên công năng (quy tắc 1–2 `pfm_token.css`). Họ XANH (`--c-3`) = tiền đã TIÊU · họ VÀNG (`--gold`, `--v-3`) =
+ *   để dành / mốc NGƯỜI DÙNG đặt — cùng nghĩa với ba thẻ biểu đồ. Không `--win`/`--lose`: "trễ 1 tháng", "qua mức" là
+ *   con số, không phải lời phán (A10 🔒).
+ * ⚠ CHỮ ≥ 12px. CHUYỂN ĐỘNG chỉ `transform`/`opacity` (§XI): dòng bản tin + bước dựng trượt vào so le theo `--nhip-pfm-led`
+ *   bằng back-ease-out cùng đường cong với cột/khúc D426 (không đẻ easing thứ hai); tên khung "đóng dấu" khi đổi khung;
+ *   nút lún "cạch" bằng `steps(2, end)` (VẬT & nhịp máy — `01-vfx-game-feel.md`). `@keyframes` nằm cùng tệp (lint:css-anim).
+ * ⚠ Tệp tự reset nút (repo không reset `<button>` toàn cục — xem đầu `Guong.module.css`).
+ */
+
+.khoi { margin-bottom: 4px; }
+.the { padding-bottom: 11px; }
+
+/* ── nhãn phần: ĐÁNG CHÚ Ý · ĐANG ĐI VỀ ĐÂU · VÌ SAO HỢP… — chữ + một vạch kéo hết hàng ──────────────── */
+.muc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 11px 0 1px;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+}
+.muc::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+/* ── MỘT DÒNG BẢN TIN — số lớn trái · hai dòng chữ · (?) phải; chạm cả dòng để đọc cách tính ─────────────── */
+.dong {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 0 7px;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-top: 1px dashed var(--line);
+  border-radius: 0;
+  cursor: pointer;
+  animation: dhVao var(--nhip-nd-day, 620ms) cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(var(--i, 0) * var(--nhip-pfm-led, 60ms));
+}
+.muc + .dong { border-top: 0; }
+@keyframes dhVao { from { transform: translateX(-12px); opacity: 0; } }
+
+.lon {
+  flex: none;
+  width: 68px;
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  transition: transform 90ms steps(2, end);
+}
+.lon > b { font-size: 19px; font-weight: 800; line-height: 1.15; letter-spacing: -.2px; }
+.lon > small { font-size: 12px; color: var(--text-muted); }
+.lonTieu > b { color: var(--c-3); }
+.lonDe > b { color: var(--gold); }
+.dong:active .lon { transform: translateY(var(--px-day)); }
+
+.noi { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.tieuDong { font-size: 13px; line-height: 1.35; color: var(--text-bright); }
+.phuDong { font-size: 12px; line-height: 1.45; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.giaiDong { display: block; margin-top: 6px; }
+.hoiDong { flex: none; width: 21px; height: 21px; display: grid; place-items: center; margin-top: 1px; }
+
+.chan { margin: 9px 0 0; font-size: 12px; line-height: 1.5; color: var(--chu-mo); }
+
+/* ── BA THẺ KHUNG — chọn khung để XEM (không ghi gì); ô vuông vàng góc = khung app gợi ý ─────────────────── */
+.tab { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 7px; }
+.oTab {
+  position: relative;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  background: var(--surface-inset);
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  box-shadow: var(--px-bong);
+  cursor: pointer;
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.oTab:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+.oTab > small {
+  min-width: 18px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--mat-phim-phu);
+}
+.oTabChon { color: var(--gold); border-color: var(--gold); }
+.oTabChon > small { color: var(--text-bright); }
+.oTabGoiY::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, .45);
+}
+
+/* ── TÊN KHUNG — "đóng dấu" mỗi lần đổi khung (khối mang `key` = khung) ───────────────────────────────── */
+.tenKhung { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; margin-top: 11px; }
+.tenKhung > b {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  color: var(--text-bright);
+  transform-origin: left center;
+  animation: dhDau 380ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+@keyframes dhDau { from { transform: scale(1.3); opacity: 0; } }
+.nhanKhung {
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  color: var(--gold);
+  box-shadow: inset 0 0 0 1px var(--gold);
+}
+.nhanDung { color: var(--accent-bright); box-shadow: inset 0 0 0 1px var(--accent); }
+.cach { margin: 4px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--chu-than); }
+
+.dauHieu { list-style: none; margin: 0; padding: 0; }
+
+/* ── TRÊN SỔ CỦA BẠN · 50/30/20 — khúc theo họ màu của D426 (biến `--bd-*` khai ở `.the` của `BieuDo.module.css`) ── */
+.khucThietYeu { background: var(--bd-chi-1); }
+.khucMuon { background: var(--bd-chi-3); }
+.khucDeDanh { background: var(--bd-de-1); }
+/* Vạch của công thức khung (50 · 80) — CHỈ khi người dùng đã chọn khung (P3). Cùng hình vạch mốc của thanh D426. */
+.vachKhung {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--gold);
+  z-index: 2;
+}
+.nhap {
+  margin: 7px 0 0;
+  padding: 7px 9px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--gold);
+  background: var(--surface-inset);
+  border-left: 2px solid var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── TRÊN SỔ CỦA BẠN · kakeibo — bốn câu ──────────────────────────────────────────────────────────── */
+.bonCau { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 5px; }
+.bonCau > li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 8px;
+  background: var(--surface-inset);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.cauKq { font-size: 12px; letter-spacing: .8px; color: var(--text-muted); }
+.dapKq { font-size: 12.5px; text-align: right; color: var(--text-bright); font-variant-numeric: tabular-nums; }
+
+/* ── BƯỚC DỰNG — mỗi bước một khay: chữ trái, nút phải; trượt vào so le ───────────────────────────────── */
+.buoc {
+  margin-top: 7px;
+  padding: 8px 9px;
+  background: var(--surface-inset);
+  box-shadow: inset 0 0 0 1px var(--line);
+  animation: dhVao var(--nhip-nd-day, 620ms) cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(var(--i, 0) * var(--nhip-pfm-led, 60ms));
+}
+.hangBuoc { display: flex; align-items: center; gap: 9px; }
+.nutBuoc { flex: none; min-width: 0; width: auto; height: 40px; padding: 0 10px; }
+
+.phanLoai { display: grid; gap: 5px; margin-top: 8px; }
+.hangLoai { display: flex; align-items: center; gap: 6px; }
+.tenLoai { flex: 1; min-width: 0; font-size: 12.5px; color: var(--text-bright); }
+.chipLoai {
+  height: 36px;
+  padding: 0 9px;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: .8px;
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  cursor: pointer;
+  transition: transform 90ms steps(2, end);
+}
+.chipLoai:active { transform: translateY(var(--px-day)); }
+.chipChon { color: var(--accent-bright); border-color: var(--accent); background: var(--mat-phim-phu); }
+
+.loi { margin: 9px 0 0; padding-left: 8px; font-size: 12.5px; color: var(--text-bright); border-left: 2px solid var(--gold); }
+.nutDung { height: 44px; margin-top: 12px; font-size: 13px; letter-spacing: 1.5px; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* ⚠ ĐÚNG các selector đã khai `animation` ở trên — rút gọn là thua độ ưu tiên và hoạt ảnh lọt lưới (A11.18). */
+  .dong, .buoc, .tenKhung > b { animation: none; }
+}

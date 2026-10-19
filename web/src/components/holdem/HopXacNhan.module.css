@@ -1,0 +1,119 @@
+/*
+ * HỘP QUYẾT ĐỊNH KHÔNG QUAY LẠI ĐƯỢC.
+ *
+ * Khác mọi lớp phủ khác trong trận: cái này CÓ bắt sự kiện chuột và CÓ nền mờ
+ * chặn. Cố ý — đây là hai chỗ duy nhất trong trận mà bấm nhầm là mất cả ván,
+ * nên không được phép lỡ tay bấm xuyên xuống nút phía dưới.
+ */
+
+.lop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(2, 1, 8, 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.hop {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  width: 100%;
+  max-width: 420px;
+  padding: 16px;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 0;
+  background: #0b0818;
+  /* Bóng ĐỔ (có offset) → nói hộp này dày bao nhiêu → vật → blur 0. Bản cũ nhoè
+     70px, tức không phải bóng của một tấm mà là một vũng tối vô hình dạng. Dùng
+     mức "đang được nhấc" vì hộp này nổi trên cả màn. */
+  box-shadow: var(--px-bong-cao);
+}
+
+.tieuDe {
+  color: var(--gold-amber, #fbbf24);
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+}
+
+.canhBao {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.9);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* Ba nhánh chỉ đổi nền khi trỏ vào — nhị phân, nên nhảy hai nấc cùng nhịp với
+   mọi chỗ đổi trạng thái khác thay vì hoà sắc riêng một kiểu. */
+.nhanh {
+  composes: doiMau from '@/styles/pixel.module.css';
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 13px;
+  border: 1px solid;
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.4);
+  /*
+   * ⚠ BUTTON KHÔNG KẾ THỪA MÀU CHỮ — thiếu dòng này là trình duyệt rơi về
+   * `buttontext` ĐEN trên nền tối (founder chụp được 08/08: hộp thoát trận
+   * chữ đen). Mọi button tự chế đều phải tự khai màu.
+   */
+  color: var(--text-body);
+  text-align: left;
+  cursor: pointer;
+}
+
+.nhanhGiu { border-color: rgba(34, 211, 238, 0.55); }
+.nhanhGiu:hover { background: rgba(34, 211, 238, 0.1); }
+.nhanhBo { border-color: rgba(239, 68, 68, 0.55); }
+.nhanhBo:hover { background: rgba(239, 68, 68, 0.1); }
+
+.nhanhTen {
+  font-weight: 800;
+  font-size: 13.5px;
+  letter-spacing: 0.02em;
+}
+
+.nhanhMo {
+  color: rgba(148, 163, 184, 0.95);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.nhanhMo b { color: rgba(226, 232, 240, 0.98); }
+
+.huy {
+  padding: 9px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(148, 163, 184, 0.9);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.huy:hover { color: rgba(226, 232, 240, 1); }
+
+/* Nhánh CẮT LỖ — nước đi chiến thuật, không phải bỏ cuộc. Màu trung tính-ấm để
+   nó không đọc thành "nút nguy hiểm" như Đầu hàng, cũng không thành "an toàn"
+   như Giữ: nó CÓ giá, và giá đó in ngay trên nút. */
+.nhanhCatLo {
+  border-color: var(--amber);
+}
+
+.nhanhCatLo:hover:not(:disabled) {
+  background: rgba(251, 191, 36, .1);
+}
+
+.nhanhCatLo:disabled {
+  border-color: var(--border-idle-strong);
+  color: var(--text-dim);
+  cursor: not-allowed;
+  opacity: .68;
+}

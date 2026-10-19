@@ -1,0 +1,334 @@
+/*
+ * Màn SỔ — CHÉP TỪ DEMO ĐÃ CHỐT (A11.25). Bản trước tôi dựng từ văn bản kế hoạch §B3
+ * trong khi demo đã chốt nằm sẵn đó; đây là bản làm lại theo demo.
+ *
+ * ⚠ Không `cubic-bezier` ở tệp dùng lớp `pixel.module.css`… trừ ĐÚNG một chỗ demo đã
+ *   chốt: `@keyframes dap` của dòng vừa ghi. Đó là CHUYỂN ĐỘNG VẬT (dòng rơi xuống rồi
+ *   nảy), đúng vế `cubic-bezier` của ranh D182, và nó nằm cùng tệp với lớp dùng nó.
+ * ⚠ Tên lớp: `.dong` ở đây là "DÒNG" (hàng sổ) — đúng như demo. Hậu tố tiền dùng
+ *   `.dvTien`, không phải `.dong`: tiếng Việt rụng dấu thì "đồng" và "dòng" trùng nhau,
+ *   và cú va ấy đã tốn một lượt soi (D275).
+ */
+
+.canhBao {
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--chu-than);
+  border: 1px solid var(--gold);
+  background: var(--surface-inset);
+}
+.viSao { color: var(--chu-mo); }
+
+/* ── TỔNG: MỘT con số, không phải hai ô ─────────────────────────────────────
+   Demo: `.tong b` là tổng CHI của tháng, `.tong span` là dòng phụ. Bản trước tôi dựng
+   hai ô CHI/THU cạnh nhau — không có trong demo. */
+.tong { padding: 6px 0 10px; }
+.tong b {
+  display: block;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--chu-sang);
+}
+.tong span {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--chu-phu);
+  letter-spacing: .5px;
+}
+/* D453 — nhãn HÔM NAY trên số to · tổng tháng trong dòng phụ đậm hơn chữ quanh nó (một con số, không phải một câu). */
+.tong .tongNhan { margin: 0 0 4px; font-size: 12px; letter-spacing: 2px; color: var(--gold); }
+.tong span .tongThang { display: inline; margin: 0; font-size: 13px; color: var(--chu-than); font-variant-numeric: tabular-nums; }
+
+/* ── MỐC NGÀY trong danh sách (D453) — tên ngày · số khoản · tổng chi ngày; dính đầu khi cuộn ─────────────────── */
+.mocNgay {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 10px 0 2px;
+  padding: 6px 2px 5px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--chu-phu);
+  background: var(--nen-trang);
+  border-bottom: 1px solid var(--line-2);
+}
+.mocNgay:first-child { margin-top: 0; }
+.tenNgay { color: var(--chu-than); letter-spacing: 1.5px; }
+.demNgay { flex: 1; color: var(--chu-mo); }
+.tongNgay { font-size: 13px; font-weight: 700; color: var(--chu-sang); font-variant-numeric: tabular-nums; }
+
+/* ── HŨ ngay trên màn SỔ ───────────────────────────────────────────────────── */
+.hus { display: flex; gap: 6px; margin-bottom: 10px; }
+/*
+ * ⚠ THẺ HŨ ĐẦY LÀ MỘT `<button>` THẬT (thẻ chưa đầy vẫn là `<div>`). Demo là JS thuần nên
+ * nó nghe `click` trên `.hus` rồi bỏ qua thẻ chưa đầy — cùng một hành vi, nhưng ở đó thẻ
+ * là `<div>` nên bàn phím và trình đọc màn hình KHÔNG tới được nó. Nút thật là cách nói
+ * đúng hơn của cùng luật ("chạm thẻ đã đầy ⇒ ba lựa chọn"), đúng nếp đã dùng cho lưới
+ * đích của bàn tiền.
+ * ⚠ Repo không có reset toàn cục cho `<button>`, và khối reset ở dưới đứng SAU khối này —
+ *   nên `.hu` phải tự khai `font/color/text-align`, không nhét được vào reset ấy (nó sẽ
+ *   đè mất `padding`/`border`/`background` của chính `.hu`).
+ */
+.hu {
+  position: relative;
+  flex: 1;
+  padding: 6px 7px;
+  border: 1px solid var(--line);
+  background: var(--surface-card);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  border-radius: 0;
+  /* Chỉ thẻ ĐẦY mới bấm được — `.huDay` bật lại `cursor:pointer`. */
+  cursor: default;
+}
+.hu i {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  font-style: normal;
+  font-size: 11.5px;
+  letter-spacing: 1px;
+  color: var(--chu-phu);
+}
+.hu i em {
+  margin-left: auto;
+  font-style: normal;
+  font-size: 12.5px;
+  letter-spacing: .2px;
+  font-variant-numeric: tabular-nums;
+  color: var(--nac);
+}
+.hu b {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+/* ── HŨ ĐẦY ────────────────────────────────────────────────────────────────
+ * ⚠⚠ LỚP SỐNG LÀ `.huDay`, KHÔNG PHẢI `.xong`. Demo khai CẢ HAI (`.hu.xong` vàng và
+ * `.hu.huDay` xanh `--win`) nhưng JS của nó chỉ bao giờ bật `huDay` — `.hu.xong` là CODE
+ * CHẾT trong demo, cùng họ với `.csTop .v.thieuMau` vừa dọn 06/09. Bản thi công trước
+ * chép nhầm đúng cái chết ấy, nên màn SỔ tô hũ đầy màu VÀNG trong khi demo chạy ra XANH.
+ * Giữ cả hai thì hai luật cùng đặt `border-color` và luật đứng sau thắng — một trạng thái
+ * hai lớp là đúng cú trôi D61. ⇒ bỏ `.xong`, giữ `.huDay`.
+ *
+ * ⚠ QUẦNG LÀ MỘT VẬT (`<span class="quang">`), không phải `box-shadow` blur — chép luật
+ * của thanh E–SSS: bản native sau này không map được blur, và game pixel vốn làm hào
+ * quang bằng mảng màu. Nội dung phải nâng lên TRÊN quầng, không thì quầng phủ lên chữ.
+ */
+.hu > * { position: relative; z-index: 1; }
+.quang {
+  position: absolute;
+  inset: -3px;
+  background: var(--win);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.huDay { border-color: var(--win); transform: scale(1.02); cursor: pointer; }
+/* ⚠ `ease-in-out`, KHÔNG `steps()`: ranh D182/A11.18 xếp ÁNH SÁNG THỞ vào cubic — `steps()`
+   trên nhịp thở thì mắt đọc ra strobe, tức đọc ra một lỗi render. */
+.huDay .quang { animation: huTho 1500ms ease-in-out infinite; }
+/* Cú NẢY là chuyển động của VẬT ⇒ `steps()` (cùng ranh D182). */
+.huDay.nay { animation: huNay 620ms steps(7, end) 1; }
+.huDay i, .huDay i em { color: var(--win); }
+.nhanDay {
+  display: none;
+  margin-top: 5px;
+  font-size: 10.5px;
+  letter-spacing: 1.1px;
+  color: var(--win);
+}
+.huDay .nhanDay { display: block; }
+@keyframes huTho { 0%, 100% { opacity: .12 } 50% { opacity: .32 } }
+@keyframes huNay {
+  0% { transform: scale(1) translateY(0); }
+  28% { transform: scale(1.11) translateY(-3px); }
+  52% { transform: scale(.985) translateY(0); }
+  74% { transform: scale(1.05); }
+  100% { transform: scale(1.02); }
+}
+
+/* ── Ba lựa chọn khi chạm một hũ đã đầy ─────────────────────────────────────
+   ⚠⚠ RESET NÚT KHAI NGAY TẠI ĐÂY, không nối vào khối `.dong, .sua button` ở dưới: khối ấy
+   đứng SAU trong tệp và có CÙNG độ đặc hiệu (0,1,1), nên nối vào là nó ĐÈ NGƯỢC lại
+   `color`/`background` của chính ba nút này — nút chính mất luôn nền `--win`. Repo không
+   có reset toàn cục cho `<button>`, thiếu reset thì ba nút thành ba thanh TRẮNG trên nền
+   tối (đúng cú đã trả giá ở `.dong`, D275). */
+.huChon {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin: 0 0 6px;
+}
+.huChon button {
+  height: 36px;
+  padding: 0;
+  font: inherit;
+  font-size: 11.5px;
+  letter-spacing: .7px;
+  color: var(--chu-sang);
+  background: var(--mat-phim);
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: var(--px-vien), inset 0 0 0 1px var(--n-6);
+}
+/* Nút CHÍNH tô sẵn — founder chốt 06/09 (phương án A): một chạm là xong, nhưng người bấm
+   vẫn là NGƯỜI DÙNG. */
+.huChon button.chinh {
+  color: var(--nen-trang);
+  background: var(--win);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .30);
+}
+/* (Luật `button:disabled` cũ đã bỏ: RESET mở từ phương án A, không nút nào trong hàng này
+   còn tắt — giữ lại là một luật không ai bật, và demo cũng không có nó.) */
+.huChonPhu { margin: 0 0 10px; font-size: 11px; line-height: 1.4; color: var(--chu-mo); }
+
+/* ── Danh sách ─────────────────────────────────────────────────────────────── */
+.ds { border-top: 1px dashed var(--line); }
+
+/*
+ * ⚠⚠ RESET NÚT — DEMO CÓ, TÔI QUÊN, VÀ MẮT BẮT ĐƯỢC NGAY. Demo khai
+ * `button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}`
+ * ở khối reset của nó. Repo không có reset toàn cục cho `button` (mọi nút khác đều đi
+ * qua `.nut` của `pixel.module.css`, vốn tự reset), nên `.dong` ăn style MẶC ĐỊNH CỦA
+ * TRÌNH DUYỆT: nền `rgb(240,240,240)`, chữ đen, viền `2px outset`.
+ * ⇒ Trên nền tối, mỗi dòng sổ thành một thanh TRẮNG. `tsc` sạch, 15 bài test xanh (chúng
+ *   tìm chữ, mà chữ vẫn ở đó) — lại đúng lớp lỗi BỐ CỤC chỉ mắt mới thấy (D275).
+ */
+.dong, .sua button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.dong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  width: 100%;
+  text-align: left;
+  border-bottom: 1px dashed rgba(93, 114, 144, .16);
+  font-size: 14px;
+}
+.dong[aria-expanded='true'] { border-bottom-color: var(--accent); }
+.dong .o {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  letter-spacing: .5px;
+  padding-left: .5px;
+  border: 1px solid var(--line-2);
+  color: var(--chu-phu);
+}
+.dong .ten { flex: 1; color: var(--chu-than); overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; }
+.dong .so { font-variant-numeric: tabular-nums; }
+.dvTien { margin-left: 1px; }
+
+.thu .o { border-color: rgba(74, 222, 128, .5); color: var(--win); }
+.thu .so { color: var(--win); }
+
+/* Dòng VỪA GHI rơi xuống rồi nảy — chuyển động VẬT, nên cubic-bezier (ranh D182). */
+.moi { animation: dap 340ms cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes dap {
+  0% { transform: translateY(-14px) scale(1.05); opacity: 0; }
+  60% { transform: translateY(2px) scale(.99); opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+
+/* Sửa/xoá nở ra TẠI CHỖ dưới dòng — không tấm mới, không che gì. */
+.sua { display: flex; gap: 5px; padding: 7px 0 9px; }
+.sua button {
+  flex: 1;
+  height: 38px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding-left: 1px;
+  color: var(--chu-than);
+  border: 1px solid var(--line-2);
+  box-shadow: var(--px-bong);
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.sua button:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+.xoaD { border-color: rgba(248, 113, 113, .5); color: var(--lose); }
+
+.vidu { padding: 9px 0 0; font-size: 12px; color: var(--chu-mo); }
+
+/*
+ * ⚠ Chừa chỗ cho BottomNav cố định + bàn tiền ghim đáy, không thì dòng sổ cuối cùng nằm
+ * khuất sau chúng và người dùng không biết là còn.
+ */
+.chuaDay {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  transition: opacity 160ms steps(2, end);
+}
+
+/*
+ * ⚠ D410 — lớp mờ "tay đang cầm tiền" (`[data-cam=co]`) đã BỎ: hai đích CHI/THU nằm yên trong bàn tiền nên không còn
+ * đích nào để dồn mắt vào, và mờ cả màn làm cú chạm tờ đầu tiên trông như sang màn khác (founder 26/09).
+ */
+
+/* ── D410: lối sang khay phân bổ + dòng CHỜ ─────────────────────────────────────── */
+.loiPhanBo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 9px 11px;
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  color: var(--gold);
+  text-decoration: none;
+  border: 1px solid rgba(253, 224, 71, .45);
+  background: rgba(253, 224, 71, .06);
+  box-shadow: var(--px-bong);
+}
+.loiPhanBo:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+.loiChu { flex: 1; }
+/* Chấm sáng THỞ — ánh sáng ⇒ `ease-in-out` (ranh D182), chỉ `opacity`. */
+.chamSang {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  background: var(--gold);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, .45);
+  animation: chamTho var(--nhip-nd-tho, 2600ms) ease-in-out infinite;
+}
+@keyframes chamTho { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+/* D420 — dòng CHUYỂN vào hũ (khoản phân bổ): ô và mũi tên ánh vàng — tiền đổi chỗ, không mất. */
+.dong.chuyen .o { color: var(--gold); border-color: rgba(253, 224, 71, .45); }
+.dong.chuyen .so { color: var(--gold); }
+
+/*
+ * ⚠⚠ THÊM `animation` Ở ĐÂU THÌ THÊM ĐÚNG SELECTOR ẤY VÀO ĐÂY — bài học ThanhPhongCach:
+ * rút gọn về lớp đơn là thua độ đặc hiệu, hoạt ảnh vô hạn lọt lưới và không ai biết.
+ * ⚠ TẮT CHUYỂN ĐỘNG, KHÔNG TẮT THÔNG TIN: quầng giữ một mức tĩnh để "đang đầy" vẫn đọc
+ *   được bằng mắt khi người dùng đã tắt chuyển động ở hệ điều hành.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .moi,
+  .huDay .quang,
+  .huDay.nay,
+  .chamSang { animation: none; }
+  .huDay .quang { opacity: .12; }
+}

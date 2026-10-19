@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend — typecheck, lints, tests (embedded PostgreSQL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      # `npm ci` pulls a real PostgreSQL binary (embedded-postgres). It must not run as root;
+      # GitHub-hosted runners use an unprivileged user, so nothing extra is needed.
+      - run: npm ci
+      - run: npm run typecheck
+      # Dead CSS animations: keyframe names renamed by CSS Modules silently stop running.
+      - run: npm run lint:css-anim
+      # Pool self-lock: asking for a second connection while holding one deadlocks when the pool max is 1 (production).
+      - run: npm run lint:pool-lock
+      # SQL that truncates days by the session time zone behaves differently on UTC servers.
+      - run: npm run lint:mui-gio
+      - run: npm run lint:pixel-art
+      # Generated documents must match the code and the migrations.
+      - run: npm run route:kiem
+      - run: npm run erd:kiem
+      - run: npm test
+
+  web:
+    name: Frontend — typecheck, tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      # Some web tests import server code (the in-browser demo runs the real server), so the root dependencies are needed too.
+      - run: npm ci
+      - run: npm ci
+        working-directory: web
+      - run: npm run typecheck
+        working-directory: web
+      - run: npm test
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+
+  audit:
+    name: Dependency audit (production, high and above)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm audit --omit=dev --audit-level=high
+        working-directory: web

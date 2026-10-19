@@ -1,0 +1,625 @@
+/*
+ * Màn HŨ — CHÉP TỪ DEMO ĐÃ CHỐT (A11.25), `docs/ui-ux/demo/pfm-ban-tien.html`.
+ *
+ * ⚠⚠ HAI CHỖ TIMING-FUNCTION LỆCH DEMO CÓ CHỦ Ý — xem chi tiết ở đúng hai khối dưới đây
+ * (`.quang`/`huTho` và `.nay`/`huNay`). Demo dùng `steps()` cho cả hai, nhưng A11.18 +
+ * ràng buộc #4 của việc này nói RÕ: ánh sáng THỞ dùng `ease-in-out` (steps trên nhịp thở
+ * = strobe = mắt đọc là lỗi render), còn nảy là CHUYỂN ĐỘNG VẬT LÝ nên `cubic-bezier`
+ * (đúng ranh D182, đúng cách `So.module.css` `.moi`/`dap` đã làm cho một cú nảy khác).
+ * Đây là RÀNG BUỘC CỨNG của việc này, đứng trên chữ demo — khai ở `lechDemo`.
+ *
+ * ⚠ Không `composes` từ `pixel.module.css` (giống `So.module.css`/`BanTien.module.css`):
+ * tệp tự reset nút của mình, nên `cubic-bezier` ở `.nay` không phạm ranh D182.
+ */
+
+/* ── KHỐI THẺ DÙNG CHUNG (khoi2/hang2/ten2/so2/phu2s/pctHu/dauMuc/roi/xong) ────────── */
+.tieu {
+  margin: 13px 0 8px;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  padding-left: 1.5px;
+  color: var(--text-muted);
+}
+.tieuForm { margin: 11px 0 6px; }
+
+.khoi2 {
+  position: relative;
+  border: 1px solid var(--line);
+  background: var(--surface-card);
+  padding: 12px;
+  margin-bottom: 9px;
+  /*
+   * Demo: `.khoi2 .tt{height:13px}` — thanh ở màn HŨ DÀY hơn thanh mini của màn SỔ (8px).
+   * ⚠ Đặt bằng biến kế thừa xuống `ThanhTienDo`, không fork component: xem chú thích
+   * `--tt-cao` ở `ThanhTienDo.module.css`.
+   */
+  --tt-cao: 13px;
+}
+/* Nội dung phải nâng lên TRÊN quầng — quầng là vật `position:absolute` cùng cấp. */
+.ruot { position: relative; z-index: 1; }
+
+.hang2 { display: flex; align-items: baseline; gap: 8px; }
+.hangHoi { margin-top: 9px; }
+
+/* Dòng tên+pill LÀ nút bấm mở/đóng thẻ — HTML không lồng được <button> trong <button>,
+   nên nút hành động (TẠM DỪNG/…) nằm NGOÀI, ở khối `.ruot` mở ra bên dưới, không lồng
+   vào đây. Diện tích chạm coi như tương đương: dòng tên là phần nổi bật nhất của thẻ. */
+.nutReset {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.ten2 { flex: 1; font-size: 15px; color: var(--text-bright); display: flex; align-items: center; }
+.phu2s { font-size: 12px; color: var(--text-muted); }
+.so2 { font-size: 21px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-bright); }
+.chuThich { margin: 7px 0 0; font-size: 12px; line-height: 1.55; color: var(--chu-mo); }
+
+.pctHu { color: var(--chu-sang); }
+/* ĐÃ HOÀN THÀNH: xám nhẹ đi bằng OPACITY (transform/opacity), không bằng filter — filter
+   không map được sang native (RN/Flutter). */
+.roi { opacity: .62; }
+.roi .ten2 { color: var(--chu-phu); }
+.dauMuc { margin: 13px 0 7px; font-size: 11px; letter-spacing: 1.6px; color: var(--chu-mo); }
+
+/* HŨ ĐẦY (100% mức, còn `dang_chay`) đổi màu CẢ HŨ — mốc cuối phải khác hẳn mốc giữa. */
+.xong { box-shadow: var(--px-vien), inset 0 0 0 1px var(--win); }
+.xong .ten2 { color: var(--win); }
+
+/* ⚠⚠ QUẦNG LÀ MỘT VẬT, không phải box-shadow blur (không map được sang native — game
+   pixel vốn làm hào quang bằng mảng màu). */
+.huDay { border-color: var(--win); transform: scale(1.02); }
+.quang {
+  position: absolute;
+  inset: -3px;
+  background: var(--win);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+  /*
+   * ⚠⚠ LỆCH DEMO CÓ CHỦ Ý: demo viết `steps(6,end)`. Ánh sáng THỞ dùng `ease-in-out`
+   * (A11.18 + ràng buộc #4 việc này) — `steps()` ở đây đọc ra STROBE, mắt đọc thành lỗi
+   * render chứ không thành "đang thở".
+   */
+  animation: huTho 1500ms ease-in-out infinite;
+}
+@keyframes huTho { 0%, 100% { opacity: .12; } 50% { opacity: .32; } }
+
+.nhanDay {
+  display: block;
+  margin-top: 5px;
+  font-size: 10.5px;
+  letter-spacing: 1.1px;
+  color: var(--win);
+}
+
+/* Nảy CHỈ ở khoảnh khắc VỪA đầy (component gỡ lớp này ở `onAnimationEnd`), không lặp. */
+.nay {
+  /*
+   * ⚠⚠ LỆCH DEMO CÓ CHỦ Ý: demo viết `steps(7,end)`. Đây là CHUYỂN ĐỘNG VẬT LÝ (nảy có
+   * quán tính), đúng ranh `cubic-bezier` (D182) — cùng đường cong `So.module.css` `.moi`
+   * (`dap`) đã dùng cho một cú nảy khác trong cùng PFM.
+   */
+  animation: huNay 620ms cubic-bezier(.2, 1.4, .4, 1) 1;
+}
+@keyframes huNay {
+  0%   { transform: scale(1) translateY(0); }
+  28%  { transform: scale(1.11) translateY(-3px); }
+  52%  { transform: scale(.985) translateY(0); }
+  74%  { transform: scale(1.05); }
+  100% { transform: scale(1.02); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quang { animation: none; opacity: .12; }
+  .nay { animation: none; }
+}
+
+/* ── PILL TRẠNG THÁI ─────────────────────────────────────────────────────────────── */
+.pill {
+  display: inline-block;
+  padding: 3px 7px 3px 8px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  border: 1px solid var(--line-2);
+  color: var(--text-muted);
+  margin-left: auto;
+  white-space: nowrap;
+}
+/* ⚠ Không có quy tắc riêng cho `bo_do` — demo cũng không có `.pill.bo`: hũ đã bỏ dùng
+   đúng màu trung tính mặc định ở trên, không mã màu riêng. */
+.pill[data-tt='dang_chay'] { border-color: var(--accent); color: var(--accent); }
+.pill[data-tt='tam_dung'] { border-color: var(--gold); color: var(--gold); }
+.pill[data-tt='xong'] { border-color: var(--win); color: var(--win); }
+
+/* ── NÚT HÀNH ĐỘNG ───────────────────────────────────────────────────────────────── */
+.nutHang { display: flex; gap: 5px; margin-top: 9px; flex-wrap: wrap; }
+.nut2 {
+  flex: 1;
+  min-width: 74px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding-left: 1px;
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  box-shadow: var(--px-bong);
+  cursor: pointer;
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.nut2:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+.nut2.chinh { border-color: var(--accent); color: var(--accent-bright); background: rgba(34, 211, 238, .10); }
+.nut2.canh { border-color: rgba(248, 113, 113, .5); color: var(--lose); }
+.nut2.vang { border-color: rgba(253, 224, 71, .5); color: var(--gold); }
+.rong100 { width: 100%; flex: none; }
+
+/* ── NÚT (?) — mỗi chữ lạ có một cửa hỏi ngay cạnh nó ─────────────────────────────── */
+.hoi {
+  flex: none;
+  width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  cursor: pointer;
+}
+.hoi[aria-expanded='true'] { border-color: var(--accent); color: var(--accent); }
+.giai {
+  margin: 7px 0 0;
+  padding: 9px 10px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  background: var(--surface-inset);
+  border-left: 2px solid var(--accent);
+}
+
+/* ── ★ SAO LÀ DẤU CỦA NGƯỜI DÙNG — sprite pixel, chép nguyên từ demo ──────────────── */
+.sao {
+  position: relative;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  flex: none;
+}
+.sao::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--o);
+  height: var(--o);
+  --o: 2px;
+  background: transparent;
+  box-shadow:
+    calc(var(--o)*4) 0 0 var(--v-3),
+    calc(var(--o)*3) calc(var(--o)*1) 0 var(--v-3),
+    calc(var(--o)*4) calc(var(--o)*1) 0 var(--v-3),
+    calc(var(--o)*5) calc(var(--o)*1) 0 var(--v-3),
+    calc(var(--o)*3) calc(var(--o)*2) 0 var(--v-3),
+    calc(var(--o)*4) calc(var(--o)*2) 0 var(--v-3),
+    calc(var(--o)*5) calc(var(--o)*2) 0 var(--v-3),
+    0 calc(var(--o)*3) 0 var(--v-3),
+    calc(var(--o)*1) calc(var(--o)*3) 0 var(--v-3),
+    calc(var(--o)*2) calc(var(--o)*3) 0 var(--v-3),
+    calc(var(--o)*3) calc(var(--o)*3) 0 var(--v-3),
+    calc(var(--o)*4) calc(var(--o)*3) 0 var(--v-3),
+    calc(var(--o)*5) calc(var(--o)*3) 0 var(--v-3),
+    calc(var(--o)*6) calc(var(--o)*3) 0 var(--v-3),
+    calc(var(--o)*7) calc(var(--o)*3) 0 var(--v-3),
+    calc(var(--o)*8) calc(var(--o)*3) 0 var(--v-3),
+    calc(var(--o)*1) calc(var(--o)*4) 0 var(--v-3),
+    calc(var(--o)*2) calc(var(--o)*4) 0 var(--v-3),
+    calc(var(--o)*3) calc(var(--o)*4) 0 var(--v-3),
+    calc(var(--o)*4) calc(var(--o)*4) 0 var(--v-3),
+    calc(var(--o)*5) calc(var(--o)*4) 0 var(--v-3),
+    calc(var(--o)*6) calc(var(--o)*4) 0 var(--v-3),
+    calc(var(--o)*7) calc(var(--o)*4) 0 var(--v-3),
+    calc(var(--o)*2) calc(var(--o)*5) 0 var(--v-3),
+    calc(var(--o)*3) calc(var(--o)*5) 0 var(--v-3),
+    calc(var(--o)*4) calc(var(--o)*5) 0 var(--v-3),
+    calc(var(--o)*5) calc(var(--o)*5) 0 var(--v-3),
+    calc(var(--o)*6) calc(var(--o)*5) 0 var(--v-3),
+    calc(var(--o)*2) calc(var(--o)*6) 0 var(--v-3),
+    calc(var(--o)*3) calc(var(--o)*6) 0 var(--v-3),
+    calc(var(--o)*4) calc(var(--o)*6) 0 var(--v-3),
+    calc(var(--o)*5) calc(var(--o)*6) 0 var(--v-3),
+    calc(var(--o)*6) calc(var(--o)*6) 0 var(--v-3),
+    calc(var(--o)*1) calc(var(--o)*7) 0 var(--v-3),
+    calc(var(--o)*2) calc(var(--o)*7) 0 var(--v-3),
+    calc(var(--o)*3) calc(var(--o)*7) 0 var(--v-3),
+    calc(var(--o)*5) calc(var(--o)*7) 0 var(--v-3),
+    calc(var(--o)*6) calc(var(--o)*7) 0 var(--v-3),
+    calc(var(--o)*7) calc(var(--o)*7) 0 var(--v-3),
+    0 calc(var(--o)*8) 0 var(--v-3),
+    calc(var(--o)*1) calc(var(--o)*8) 0 var(--v-3),
+    calc(var(--o)*7) calc(var(--o)*8) 0 var(--v-3),
+    calc(var(--o)*8) calc(var(--o)*8) 0 var(--v-3);
+}
+
+/* ── FORM TẠO HŨ ─────────────────────────────────────────────────────────────────── */
+.oNhap {
+  width: 100%;
+  height: 42px;
+  margin-top: 8px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text-bright);
+  background: var(--surface-inset);
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  outline: none;
+}
+.oNhap::placeholder { color: var(--chu-mo); }
+.oNhap:focus { border-color: var(--accent); }
+.oNhap.loi { border-color: var(--lose); }
+
+.luoiNhan { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.o2 {
+  height: 38px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: .5px;
+  padding-left: .5px;
+  color: var(--text-dim);
+  background: var(--mat-phim);
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16),
+    inset 1px 0 0 rgba(255, 255, 255, .07),
+    inset -1px 0 0 rgba(0, 0, 0, .30),
+    var(--px-bong);
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end),
+    border-color 120ms steps(2, end), color 120ms steps(2, end);
+}
+.o2:active {
+  transform: translate(var(--px-day), var(--px-day));
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, .35), inset 0 -1px 0 rgba(255, 255, 255, .14);
+}
+.o2.dangChon { border: 1px solid var(--accent); color: var(--text-bright); background: rgba(34, 211, 238, .12); }
+
+/* ── MẪU CÓ SẴN ──────────────────────────────────────────────────────────────────── */
+.mauNut { justify-items: start; padding-left: 10px; margin-bottom: 5px; height: auto; min-height: 44px; display: grid; }
+.mauTen { display: block; }
+.mauViSao { font-size: 10px; }
+
+/* ── NÚT NEO ĐÁY: + TẠO HŨ MỚI / TẠO HŨ ──────────────────────────────────────────── */
+.day {
+  position: sticky;
+  bottom: calc(65px + env(safe-area-inset-bottom, 0px));
+  z-index: 4;
+  padding: 9px 0;
+  margin: 0 -10px;
+  border-top: 2px solid var(--mep-ban);
+  background: var(--mat-ban);
+}
+.nutChinh {
+  width: calc(100% - 20px);
+  margin: 0 10px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--accent-bright);
+  background: rgba(34, 211, 238, .10);
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  box-shadow: var(--px-bong);
+  cursor: pointer;
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.nutChinh:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+
+/*
+ * Ô GÕ MỨC MUỐN GOM — số đo chép nguyên `CamKet.module.css §.oMuc` để hai chỗ nhập tiền
+ * trong PFM nhìn giống nhau (A11.5: một ngôn ngữ, không hai bản tự chế).
+ * ⚠ Có từ 21/09: trước đó mức hũ CHỈ có nút chọn sẵn, người dùng không gõ được số của mình
+ *   — vừa bí (founder: *"nhỡ ko có lựa chọn phù hợp thì sao?"*) vừa ngược tinh thần P3.
+ */
+.oMuc {
+  font: inherit;
+  font-size: 14px;
+  width: 140px;
+  padding: 8px 10px;
+  color: var(--text-bright);
+  background: var(--mat-phim, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--gold);
+  border-radius: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.oMuc:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* ── VỊ THẾ (tệp 15 lát 1, bản 2 — founder 25/09: "PFM theo vị thế", chữ Alpha Draft) ───────────────────────
+ * Ba vật mới: DANH MỤC (thanh chia dòng tiền) · LÁ VỊ THẾ (thẻ hũ có nhãn + dòng cỡ) · bảng VÀO LỆNH (hộp CỠ hiện
+ * ngay khi gõ). Lá KẾT TOÁN lật ở `components/pfm/LaKetToan.module.css`.
+ * ⚠ Không mã hex rời — chỉ biến đã có (luật 5 `00-doc-truoc.md`); màu khúc danh mục là TÊN CÔNG NĂNG `--dm-*`
+ *   trỏ về nấc của hai họ `pfm_token.css` (quy tắc 1–2), khai đúng một chỗ ở `.danhMuc`.
+ * ⚠ Chuyển động: khối vào màn DÙNG LẠI `ndVaoLen`/`ndBat` (`motion.module.css`); keyframe riêng duy nhất là
+ *   `dmMoc` (khúc thanh mọc ra, cùng đường cong back-ease-out với `ndThanhDay`), thời lượng qua `lib/nhip.ts`.
+ */
+.vaoLoiDoan { composes: ndVaoLen from '../../styles/motion.module.css'; }
+
+/* DANH MỤC */
+.danhMuc {
+  --dm-1: var(--c-3);
+  --dm-2: var(--v-3);
+  --dm-3: var(--c-2b);
+  --dm-4: var(--v-2b);
+  --dm-5: var(--c-4);
+  border-color: var(--line-2);
+  box-shadow: var(--px-vien), var(--px-bong);
+}
+.danhMuc .ten2 { color: var(--gold); font-size: 13px; letter-spacing: 1.6px; }
+.danhMuc .hang2 + .hang2 { margin-top: 5px; }
+.soDongTien { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-bright); }
+
+.thanhDm {
+  display: flex;
+  height: 18px;
+  margin-top: 10px;
+  overflow: hidden;
+  background: var(--long-thanh);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .45), var(--px-bong);
+}
+/* Mỗi khúc MỌC ra từ mép trái, lần lượt (bậc so le = một nhịp LED) — vượt nhẹ rồi co về đúng bề rộng thật.
+   ⚠ Bề rộng thật nằm ở `style` inline (nguồn chân lý của con số); animation chỉ vẽ cú mọc ĐÈ lên rồi trả lại. */
+.thanhDm i {
+  flex: none;
+  height: 100%;
+  transform-origin: left center;
+  box-shadow: inset -2px 0 0 rgba(0, 0, 0, .5), inset 0 2px 0 rgba(255, 255, 255, .28);
+  animation: dmMoc var(--nhip-nd-day, 620ms) cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  animation-delay: calc(var(--i, 0) * var(--nhip-pfm-led, 60ms));
+}
+.thanhDm i.khucTrong {
+  flex: 1;
+  background: repeating-linear-gradient(135deg, var(--soc-thieu) 0 3px, transparent 3px 6px);
+  box-shadow: none;
+  animation: none;
+}
+@keyframes dmMoc { from { transform: scaleX(0); } }
+
+.chuGiaiDm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  margin-top: 9px;
+  font-size: 11.5px;
+  letter-spacing: .5px;
+  color: var(--chu-than);
+}
+.oChuGiai { display: inline-flex; align-items: center; gap: 5px; }
+.oChuGiai b { flex: none; width: 9px; height: 9px; box-shadow: 1px 1px 0 rgba(0, 0, 0, .5); }
+.oChuGiai b.oTrong {
+  background: repeating-linear-gradient(135deg, var(--n-6) 0 2px, transparent 2px 4px);
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.hangGom { margin-top: 11px; padding-top: 9px; border-top: 1px dashed var(--line-2); }
+.oracleDm { margin: 0 0 9px; }
+
+/* LÁ VỊ THẾ — thẻ hũ mang nhãn kiểu vị thế + dòng cỡ; trạng thái của vật nằm TRÊN vật. */
+.laViThe { border-color: var(--line-2); }
+.nhanViThe {
+  display: inline-block;
+  margin-bottom: 7px;
+  padding: 2px 6px 1px 7px;
+  font-size: 10.5px;
+  letter-spacing: 1.4px;
+  color: var(--gold);
+  border: 1px solid rgba(253, 224, 71, .45);
+  background: rgba(253, 224, 71, .06);
+}
+.dongCo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 8px;
+  font-size: 12.5px;
+  letter-spacing: .3px;
+  color: var(--chu-sang);
+}
+.soCo { color: var(--gold); font-weight: 700; font-variant-numeric: tabular-nums; }
+/* Dấu vị thế: khối pixel vuông, không glyph (font pixel không có ◆ — rơi về font vector là "thập cẩm" §7). */
+.dauDoan {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  background: var(--gold);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, .45);
+}
+.dauTat { background: var(--n-6); }
+.dongDoan {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+  padding-left: 14px;
+  font-size: 12px;
+  letter-spacing: .3px;
+  color: var(--chu-phu);
+}
+.chipChac {
+  flex: none;
+  margin-left: 8px;
+  padding: 1px 6px 0 7px;
+  font-size: 11px;
+  letter-spacing: .8px;
+  white-space: nowrap;
+  color: var(--gold);
+  border: 1px solid rgba(253, 224, 71, .55);
+}
+.dongDoan .chipChac { margin-left: auto; }
+
+/* BIỂU TƯỢNG trên lá (D410) — sprite pixel của hũ, đứng trước tên. */
+.iconLa { flex: none; margin-right: 7px; }
+
+/* LÁ ĐANG DỰNG (D410) — chính lá vị thế, không nhận chạm; nhãn nhỏ phía trên nói nó là bản xem trước. */
+.xemTruoc { margin: 10px 0 4px; }
+.xemTruoc .khoi2 { margin-bottom: 0; }
+.nhanXemTruoc { display: block; margin: 0 0 5px; font-size: 10.5px; letter-spacing: 1.4px; color: var(--chu-mo); }
+
+/* Ô chọn BIỂU TƯỢNG — tám cột ở 375px (hai hàng cho 15 biểu tượng), cùng chất liệu phím. */
+.luoiIcon { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
+.oIcon {
+  height: 40px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font: inherit;
+  background: var(--mat-phim);
+  border: 1px solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), var(--px-bong);
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.oIcon:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+.oIcon.dangChon { border-color: var(--gold); background: rgba(253, 224, 71, .12); }
+
+/* BẢNG VÀO LỆNH */
+.bangLenh { border-color: rgba(253, 224, 71, .55); box-shadow: var(--px-vien), var(--px-bong); }
+.tenLenh { color: var(--gold); font-size: 14px; letter-spacing: 1.3px; }
+.hangTieu { display: flex; align-items: center; gap: 8px; }
+.hangTieu > span { flex: 1; }
+
+/* Bốn chip tháng + NGÀY KHÁC trên một hàng 375px. */
+.luoiHan { display: grid; grid-template-columns: repeat(4, 1fr) 1.35fr; gap: 5px; }
+.oNgay {
+  font: inherit;
+  font-size: 14px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  color: var(--text-bright);
+  background: var(--mat-phim, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  color-scheme: dark;
+}
+.oNgay:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Hộp CỠ VỊ THẾ — bật ra khi đủ mức + kỳ hạn; số to, đơn vị nhỏ (nhấn bằng CỠ, không bằng chữ). */
+.hopCo {
+  composes: ndBat from '../../styles/motion.module.css';
+  margin-top: 11px;
+  padding: 9px 12px 10px;
+  border: 1px solid var(--gold);
+  background: rgba(253, 224, 71, .06);
+  box-shadow: var(--px-bong);
+}
+.hopCo .nhanViThe { margin-bottom: 4px; border: 0; background: none; padding: 0; }
+.hangCo { display: flex; align-items: baseline; gap: 8px; margin-top: 2px; }
+.soCoTo {
+  min-width: 104px;
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+}
+
+/* Độ chắc: ba mức + BỎ QUA cùng CỠ ô (D369 §8 — bỏ qua là một lựa chọn cùng trọng lượng, không phải chỗ trống). */
+.luoiChac { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+/* D420 — MỖI NGÀY · % TIỀN VÀO: hai ô ngang nhau, cùng nếp lưới kỳ hạn / độ chắc (không ô nào sáng = tắt). */
+.luoiTuDong { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; }
+/* D420 — dòng quy tắc tự chia trên lá: cùng khuôn dòng cỡ, chữ vàng — tiền tự chảy vào, không phải một cỡ phải góp. */
+.dongTuDong { color: var(--gold); }
+.dauTuDong { background: var(--gold); }
+
+/* ── D421: HAI LOẠI HŨ — vàng là TIỀN (tích lũy), xanh là PHIẾU (tiêu dùng); không đỏ (A10: tiêu không phải lỗi) ── */
+.luoiNhom { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.oNhom {
+  min-height: 58px;
+  padding: 8px 9px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  font: inherit;
+  text-align: left;
+  color: var(--text-dim);
+  background: var(--mat-phim);
+  border: 1px solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16),
+    inset 1px 0 0 rgba(255, 255, 255, .07),
+    inset -1px 0 0 rgba(0, 0, 0, .30),
+    var(--px-bong);
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end),
+    border-color 120ms steps(2, end), color 120ms steps(2, end);
+}
+.oNhom:active {
+  transform: translate(var(--px-day), var(--px-day));
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, .35), inset 0 -1px 0 rgba(255, 255, 255, .14);
+}
+.oNhom b { font-size: 13px; font-weight: 400; letter-spacing: 1.2px; color: var(--chu-sang); }
+.oNhom span { font-size: 11px; line-height: 1.35; color: var(--chu-phu); }
+.oNhom[data-nhom='tich_luy'].dangChon { border-color: var(--gold); background: rgba(253, 224, 71, .10); }
+.oNhom[data-nhom='tieu_dung'].dangChon { border-color: var(--accent); background: rgba(34, 211, 238, .12); }
+/* Lá hũ tiêu dùng: nhãn + chấm xanh; vạch xanh đặc ở mép trái là một VẬT (không đổi bề rộng lá). */
+.laTieu { position: relative; }
+.laTieu::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  left: -1px;
+  width: 3px;
+  background: var(--c-2);
+  pointer-events: none;
+}
+.nhanTieu { color: var(--c-3); border-color: rgba(34, 211, 238, .45); background: rgba(34, 211, 238, .06); }
+.dauTieu { background: var(--c-3); }
+.dauMucTieu { color: var(--c-3); }
+.chacSo { height: 46px; font-size: 18px; letter-spacing: 0; }
+.chacBoQua { font-size: 13px; letter-spacing: 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .thanhDm i { animation: none; }
+}
+
+/* ── D453 — NÚT ĐẶT HẠN / ĐẶT MỨC ngay trên lá hũ (thay dòng chữ chết "chưa có kỳ hạn") ─────────────────────────── */
+.nutDat {
+  margin-left: auto;
+  flex: none;
+  height: 32px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--accent-bright);
+  background: rgba(34, 211, 238, .08);
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  box-shadow: var(--px-bong);
+  cursor: pointer;
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.nutDat:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+/* Khối danh mục GỌN — một hàng, không thành một thẻ lớn giữa màn. */
+.danhMucGon { padding-top: 8px; padding-bottom: 8px; }
+.danhMucGon .hangGom { margin-top: 0; }

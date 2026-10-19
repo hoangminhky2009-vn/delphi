@@ -1,0 +1,243 @@
+/*
+ * SẢNH ĐẤU TRƯỜNG — BENTO KHÔNG CUỘN (SPEC `alpha-draft-tang-khong-gian` phần A; demo CHỐT `docs/ui-ux/demo/alpha-draft-tang-khong-gian.html`).
+ * Luật ba lớp ở docs/ui-ux/09-tang-khong-gian.md: NỀN (vignette) → Ô NỔI (`OBento`, bóng pixel cứng) → LỚP TRƯỢT (`TamTruot`).
+ * Chiều cao khung = đúng khoảng giữa mép trên và thanh đáy: KHÔNG thanh cuộn ở 390×812 và 360×640 (cùng phép trừ với Hub — xem
+ * `AppShell.module.css` `.shell[data-dau-sanh]`: đầu 12 px + đáy 74 px + vùng an toàn; đổi ở một nơi là phải đổi ở nơi kia).
+ * Màu chỉ token; không `border-radius` (§XI pixel).
+ */
+.sanh { position: relative; }
+
+/* LỚP NỀN: tối dần ra mép, phủ lên ô (z 52 — trên BottomNav 50, dưới Oracle 55 và lớp trượt 60). Không bắt chạm. */
+.nen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-vignette);
+  pointer-events: none;
+  box-shadow: var(--nen-vignette);
+}
+
+.khung {
+  position: relative;
+  width: 100%;
+  max-width: var(--shell-width);
+  margin: 0 auto;
+  justify-self: center;
+  height: calc(100dvh - 12px - env(safe-area-inset-top, 0px) - 74px - env(safe-area-inset-bottom, 0px));
+  min-height: 456px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1;
+  /* Demo CHỐT dựng với `line-height: normal`; `body` của app là 1,5 — mỗi dòng nhãn cao thêm ~6 px và khung không-cuộn hết chỗ. */
+  line-height: normal;
+  font-size: 16px;
+}
+
+/* ── đầu sảnh: tên bên trái · Bách khoa · ô giữ sẵn cho Oracle (mép phải, luôn cuối hàng) ── */
+.dau { display: flex; align-items: center; gap: 10px; min-height: 44px; flex: 0 0 auto; }
+.tenKhoi { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.ten { margin: 0; font-size: 22px; letter-spacing: 0.2em; color: var(--text-title); font-weight: 600; line-height: 1; white-space: nowrap; }
+.phu { font-size: var(--tk-micro); letter-spacing: 0.14em; color: var(--violet-soft); white-space: nowrap; }
+.nutSach {
+  composes: hubNay from '@/styles/motion.module.css';
+  position: relative;
+  margin-left: auto;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  color: var(--accent-bright);
+  text-decoration: none;
+  background: var(--surface-card);
+  border: 1px solid var(--border-accent);
+  box-shadow: var(--o-vien), var(--px-bong);
+  -webkit-tap-highlight-color: transparent;
+}
+.nutSach:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+/* Nhấn = lún (cùng luật ô: tức thì, KHÔNG transition). `:active` đến muộn trên màn chạm nhưng nút này chỉ là một link nhỏ ở góc. */
+.nutSach:active { transition: none; transform: translate(var(--px-do-day), var(--px-do-day)); box-shadow: var(--o-vien), 0 0 0 transparent; }
+/* D544 — Delphi đang chỉ cuốn sách: viền vàng THỞ (ánh sáng ⇒ chỉ `opacity`, ease-in-out; tắt khi giảm chuyển động). */
+.nutSachChi::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid var(--gold-amber);
+  pointer-events: none;
+  animation: sachTho 1.6s ease-in-out infinite;
+}
+@keyframes sachTho { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+/* Ô giữ sẵn cho avatar Oracle (đo bằng `[data-oracle-cho]`): cạnh khớp `CANH_ORACLE_NEO` (36). */
+.choOracle { flex: 0 0 36px; width: 36px; height: 36px; }
+
+/* Delphi chỉ Bách khoa (D544): ghi chú nổi — KHÔNG đẩy lưới (absolute), tự đóng bằng ĐỂ SAU / MỞ BÁCH KHOA. */
+.delphiSanh {
+  position: absolute;
+  top: 54px;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 1px solid var(--border-gold);
+  background: var(--surface-panel);
+  box-shadow: var(--px-bong);
+}
+.delphiSanhChu { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.delphiSanhChu p { margin: 0; font-size: var(--tk-body); font-weight: 500; line-height: 1.3; color: var(--text-body); }
+.delphiSanhNhan { font-size: var(--tk-micro); letter-spacing: 0.14em; color: var(--gold-amber); }
+.delphiSanhNut { display: flex; gap: 8px; align-items: center; }
+.delphiMo {
+  padding: 7px 12px;
+  background: var(--accent);
+  color: var(--bg-page);
+  font-size: var(--tk-label);
+  letter-spacing: 0.12em;
+  text-decoration: none;
+}
+.delphiSanhBo {
+  font: inherit;
+  font-size: var(--tk-label);
+  letter-spacing: 0.1em;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-idle);
+}
+
+/* ── lưới bento: ô chính cả hàng + bốn ô chế độ 2×2 ── */
+.luoi {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  gap: 10px;
+}
+.luoi .oChinh { grid-column: 1 / 3; cursor: default; border-color: var(--border-gold); }
+.oChinh > .chinhTrong { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.nhan { display: flex; align-items: center; gap: 6px; font-size: var(--tk-label); letter-spacing: 0.16em; color: var(--violet-soft); }
+.duoi { font-size: var(--tk-label); color: var(--text-muted); letter-spacing: 0.04em; line-height: 1.25; }
+
+/* Giếng bàn: nỉ + hàng ô úp. Chỗ GIỮ SẴN — cao theo ô chính (flex), nên đang tải/xong/dở cùng một khung, không khối nào nhảy. */
+.gieng {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 70px;
+  margin: 8px 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  overflow: hidden;
+  background: var(--felt-mat);
+  box-shadow: inset 0 6px 18px rgba(0, 0, 0, 0.7);
+}
+.giengChu { flex-direction: column; gap: 4px; }
+.heroXong {
+  /* Số TO: đặt lại hai biến để Handjet vẽ nét liền (cùng lý do `.soTo` của Hub). */
+  --elsh: 2;
+  --elgr: 1;
+  font-size: 46px;
+  font-weight: 600;
+  line-height: 0.9;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+.hangO { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; max-width: 260px; }
+.oBan {
+  display: block;
+  width: 24px;
+  aspect-ratio: 5 / 7;
+  background: color-mix(in srgb, var(--violet) 30%, var(--bg-page));
+  box-shadow: 0 0 0 1px var(--violet-soft), 1px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.dongChip { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-height: 26px; margin-bottom: 10px; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 7px;
+  font-size: var(--tk-label);
+  letter-spacing: 0.08em;
+  border: 1px solid var(--border-idle);
+  color: var(--text-muted);
+}
+.chipVang { border-color: var(--border-gold); color: var(--gold-amber); }
+.chipLam { border-color: var(--border-accent); color: var(--accent-bright); }
+.chipCho { color: var(--tk-dim); }
+.chipLoi { border-color: var(--lose-soft); color: var(--lose-soft); }
+
+/* ── bốn ô chế độ ── */
+.luoi .oChe {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  row-gap: 2px;
+  align-items: center;
+  padding: 10px 26px 10px 10px;
+  min-height: 86px;
+}
+.oChe .nhan { grid-column: 1 / 3; }
+.iconChe { grid-row: 2; display: grid; place-items: center; width: 40px; height: 40px; }
+.cheCot { grid-row: 2; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.tenChe { font-size: var(--tk-title); color: var(--text-title); letter-spacing: 0.08em; line-height: 1; }
+.mui { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); color: var(--accent-bright); font-size: var(--tk-title); }
+/* Bọc ô MÀN TẬP để có mốc `data-testid` mà không đụng linh kiện dùng chung — `display: contents`: hộp bọc không tồn tại trong bố cục. */
+.boc { display: contents; }
+
+.mienTru {
+  flex: 0 0 auto;
+  margin: 0;
+  font-size: var(--tk-micro);
+  color: var(--tk-dim);
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+/* ── ruột lớp trượt: chọn cỡ bàn (chỉ khi catalog còn nhiều hơn một cỡ) ── */
+.nhomNut { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.nutCo {
+  composes: doiMau from '@/styles/pixel.module.css';
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  padding: 8px;
+  background: color-mix(in srgb, black 55%, var(--bg-page));
+  box-shadow: var(--o-vien);
+  border: 1px solid transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.nutCo b { font-size: var(--tk-body); color: var(--text-title); font-weight: 600; letter-spacing: 0.06em; }
+.nutCo span { font-size: var(--tk-micro); color: var(--text-muted); }
+.nutCo[aria-pressed='true'] { border-color: var(--accent-bright); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+
+.dangDanVao {
+  padding: 48px 16px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+/* Máy thấp (≤ 700 px, vd 360×640): khoảng cách gọn lại để vẫn không cuộn. */
+@media (max-height: 700px) {
+  .khung { gap: 8px; }
+  .luoi { gap: 8px; }
+  .luoi .oChe { min-height: 74px; padding-block: 8px; }
+  .gieng { min-height: 56px; margin: 6px 0 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nutSachChi::after { animation: none; opacity: 1; }
+}

@@ -1,0 +1,45 @@
+/*
+ * BẢN XEM TRƯỚC PFM trong ô Tài chính khoá (founder 11/10). Cảnh chồng lên nhau, chỉ cảnh hiện có opacity 1 — chuyển MỜ cùng nhịp
+ * banner Đấu trường (`--nhip-hub-banner-mo`). Chỉ animate opacity (luật ba runtime). Giảm chuyển động: bỏ chuyển, giữ chữ.
+ */
+.khung {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: block;
+}
+.tag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: var(--tk-micro);
+  letter-spacing: 0.14em;
+  color: var(--gold-amber);
+}
+.canh {
+  position: absolute;
+  inset: 14px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity var(--nhip-hub-banner-mo, 900ms) ease-in-out;
+}
+.hien { opacity: 1; }
+.cau { display: grid; place-items: center; width: 64px; height: 64px; }
+.qcau {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  box-shadow:
+    inset -9px -7px 0 rgba(4, 7, 13, 0.5),
+    inset 6px 5px 0 rgba(255, 255, 255, 0.14);
+}
+.ten { font-size: var(--tk-label); letter-spacing: 0.12em; color: var(--text-title); }
+.mo { font-size: var(--tk-micro); line-height: 1.3; color: var(--text-muted); max-width: 24ch; }
+@media (prefers-reduced-motion: reduce) {
+  .canh { transition: none; }
+}

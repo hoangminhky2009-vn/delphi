@@ -1,0 +1,16 @@
+.box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid var(--border-accent-soft);
+  background: rgba(34, 211, 238, 0.05);
+  border-radius: 0;
+  padding: 16px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-body);
+}
+
+.prompt {
+  color: var(--accent);
+}

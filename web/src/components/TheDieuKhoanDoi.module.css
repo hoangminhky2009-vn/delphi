@@ -1,0 +1,67 @@
+/*
+ * THẺ ĐIỀU KHOẢN VỪA ĐỔI — nổi ở đáy, trên BottomNav (z 50) và dưới Oracle (z 55): thông báo, không phải lớp phủ.
+ * Kẹp theo cột app (D374 cách b: `left/right: 0` + `margin-inline: auto`), không căn theo viewport.
+ * §XI Pixel UI: radius 0, không gradient. Không hoạt ảnh — thẻ chữ cần đọc, không cần nhảy (01-vfx §2).
+ */
+.the {
+  position: fixed;
+  right: 0;
+  left: 0;
+  bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  z-index: 52;
+  margin-inline: auto;
+  width: calc(100% - 32px);
+  max-width: calc(var(--shell-width, 390px) - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: #070c16;
+  border: 1px solid var(--border-accent-soft);
+  border-radius: 0;
+  box-shadow: 0 0 24px rgba(34, 211, 238, 0.12);
+}
+
+.tieuDe {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--text-bright);
+}
+
+.than {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.nut {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.phu,
+.chinh {
+  font: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 7px 12px;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.phu {
+  color: var(--text-bright);
+  background: transparent;
+  border: 1px solid var(--border-accent-soft);
+}
+
+.chinh {
+  color: #04121a;
+  background: var(--accent, #22d3ee);
+  border: 1px solid var(--accent, #22d3ee);
+}

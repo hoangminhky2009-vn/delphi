@@ -1,0 +1,382 @@
+/*
+ * THẺ BÀI SƯU TẦM — không phải hình chữ nhật chứa chữ.
+ *
+ * Bảy lớp theo chỉ đạo founder: artwork · frame · rarity · gradient · glow ·
+ * texture · bevel. Artwork chiếm 70% chiều cao lá.
+ *
+ * ⚠ Mọi @keyframes `composes` từ styles/motion.module.css — CSS Modules đổi tên
+ * animation trong file module, gõ lại `animation: x` ở đây là chết câm (xem
+ * đầu file motion.module.css). Có lint CI chặn: npm run lint:css-anim.
+ */
+
+/*
+ * ⚠ `position: relative` ở ĐÂY là để neo nút (!) — và đây là lý do KHÔNG được
+ * bọc thẻ trong một div trung gian. `.wrap` là flex item của `.hangThe`
+ * (`flex: 1 1 0`) trong `.muc` cao CỨNG 172px; `.card` phải là con TRỰC TIẾP để
+ * co được trong hàng đó. Thêm một wrapper không có `flex`/`min-height` vào giữa
+ * làm thẻ tính chiều cao theo `aspect-ratio: 3/4` từ chiều rộng → tràn khỏi
+ * khung "trọn một khung hình, không cuộn". Đã dính đúng lỗi đó ngày 25/07.
+ */
+.wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/*
+ * Dấu (!) tròn ở góc trên-phải, position:absolute nên NGOÀI luồng flex.
+ * Là <button> RIÊNG chứ không lồng trong nút chọn thẻ: lồng button là HTML không
+ * hợp lệ, và bấm (!) mà mua luôn lá bài là mất Vốn vì đọc hướng dẫn.
+ */
+/*
+ * ⚠ KHÔNG `composes: nut` cho dấu (!): `.nut` composes `khung`, mà `clip-path`
+ * CẮT LUÔN box-shadow ngoài — tức quầng cyan của dấu này sẽ biến mất. Quầng mới
+ * là thứ khiến nó đọc ra "bấm được" ở cỡ 22px, nên ở đây giữ vật rời và chỉ làm
+ * cứng phần cần cứng.
+ *
+ * Bỏ hai cú `scale` (1.18 khi trỏ, 0.94 khi bấm): phóng một vật 22px lên 1,18 lần
+ * ra 25,96px — không nằm trên lưới nào, nên viền và dấu chấm than nhoè đúng một
+ * khung hình. Nay hover chỉ đổi ĐỘ MẠNH QUẦNG (ánh sáng → được mượt) và bấm thì
+ * LÚN xuống một đơn vị, cùng cử chỉ với mọi nút pixel khác.
+ */
+.hoi {
+  position: absolute;
+  z-index: 5;
+  top: -5px;
+  right: -5px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1.5px solid var(--border-accent);
+  border-radius: 0;
+  background: rgba(6, 12, 22, 0.94);
+  color: var(--accent-bright);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.35);
+  transition: box-shadow 160ms ease, color 120ms steps(2, end);
+}
+.hoi:hover {
+  color: var(--accent-peak);
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.65);
+}
+.hoi:active { transform: translate(1px, 1px); }
+
+/*
+ * ⚠ `--the-vat` LÀ BIẾN, KHÔNG PHẢI LỚP — và đó là cả lý do nó tồn tại.
+ *
+ * Luật 6 (styles/pixel.module.css) gọi đích danh lá bài này: `.card:hover` và
+ * `.sel` khai lại `box-shadow` để thêm quầng, và vì `box-shadow` KHÔNG cộng dồn,
+ * hai cặp `inset` dựng nên bề mặt dập nổi của lá bị bóc mất — đúng lúc người chơi
+ * trỏ vào và đúng lúc lá được chọn, tức đúng hai lúc mặt thẻ được nhìn kỹ nhất.
+ * Build xanh, không ai thấy, vì lá vẫn còn viền và vẫn còn quầng.
+ *
+ * Gói hai cặp `inset` thành một biến thì mọi khai báo phía dưới ghép lại được
+ * theo đúng thứ tự luật 6: vát → viền → bóng cứng → quầng.
+ */
+.card {
+  /* Cử chỉ nhấc-lên dùng chung với mọi thẻ bấm được (transform/box-shadow theo
+     nấc). ⚠ KHÔNG khai lại `transition` ở dưới — khai lại là ghi đè im lặng. */
+  composes: nhac from '@/styles/pixel.module.css';
+  --the-vat:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+    inset 0 -18px 26px -18px var(--bd);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: 3 / 4;
+  padding: 3px;
+  overflow: hidden;
+  border: 2px solid var(--bd);
+  border-radius: 0;
+  cursor: pointer;
+  /* BEVEL: sáng mép trên-trái, tối mép dưới-phải → cảm giác dập nổi.
+     Giữ chuyển sắc mềm: đây là NỀN của một vật 110×147, không phải mặt một núm
+     nhỏ — nó trải xa hơn ngưỡng 12px của luật 5 nên vẫn đọc ra là ánh sáng hắt. */
+  background:
+    linear-gradient(158deg, rgba(255, 255, 255, 0.13) 0%, transparent 26%,
+      transparent 74%, rgba(0, 0, 0, 0.5) 100%),
+    linear-gradient(168deg, var(--gl), rgba(6, 4, 16, 0.98));
+  box-shadow: var(--the-vat), var(--px-bong);
+}
+
+/* TEXTURE: lưới quét mảnh phủ toàn lá — chất "terminal", không phải giấy */
+.card::after {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  border-radius: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 3px);
+}
+
+/*
+ * ⚠ KHÔNG khai `transform` ở đây — cú nhấc do `composes: nhac` lo, đúng một đơn
+ * vị độ dày và theo nấc. Bản cũ nhấc 6px KÈM `rotate(-0.6deg) scale(1.03)`: xoay
+ * hơn nửa độ và phóng 3% khiến cả lá — viền, chữ, và ART PIXEL bên trong — rơi
+ * ra khỏi lưới điểm ảnh và nhoè trong suốt lúc trỏ vào. Nghiêng nhẹ là cử chỉ
+ * của thẻ giấy in offset, không phải của sprite.
+ */
+/*
+ * 13/09 — HOVER CHỈ KHI CÓ CHUỘT. Trên màn chạm, `:hover` DÍNH lại sau cú chạm: lá
+ * vừa bấm đứng nguyên tư thế phồng + glow tới khi chạm chỗ khác — founder: *"hiệu
+ * ứng thẻ bài khi được bấm… cứ gượng"*. Điện thoại là mặt trận chính (C6) nên mặc
+ * định KHÔNG có hover; máy có chuột mới được. `.nhac:hover` ở pixel.module.css
+ * cùng luật, cùng ngày.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    filter: saturate(1.25);
+    box-shadow: var(--the-vat), var(--px-bong-cao), 0 0 26px var(--gl);
+  }
+  /* Art KHÔNG phóng theo: lưới 80×60 nhân 1,09 ra số lẻ, ô vuông thành hình thang. */
+  .card:hover .ti { text-shadow: 0 0 18px var(--bd), 0 1px 2px #000; }
+}
+
+.card:disabled { cursor: not-allowed; opacity: 0.4; }
+.card:disabled:hover { transform: none; box-shadow: var(--the-vat); }
+
+/*
+ * CHỌN: viền dày hơn, glow mạnh, và lá ĐƯỢC CHIA XUỐNG ô — một lần, rồi đứng yên.
+ *
+ * ⚠⚠ TRƯỚC 12/08 chỗ này `composes: adLoLung` — lơ lửng VÔ HẠN. Hai cái hỏng:
+ *   · Bỏ chọn thì class bị gỡ GIỮA chu kỳ nên transform búng về vị trí gốc ⇒ cú
+ *     GIẬT founder báo. Mắt đọc cú búng đó là "app lỗi", không phải "đã bỏ chọn".
+ *   · Lơ lửng mãi nói sai nghĩa: nó đọc ra "đang treo, chưa đâu vào đâu", trong
+ *     khi thứ cần nói là "đã nằm xuống chỗ của nó rồi".
+ * `adChiaXuong` chạy một lần và kết thúc ĐÚNG ở transform gốc, nên gỡ class lúc
+ * nào cũng không có gì để búng.
+ */
+/*
+ * ⚠⚠ 23/08 — `adChonLa` THAY `adChiaXuong` + `px.sang`, và đây là sửa một lỗi
+ * làm HỒI SINH đúng cú GIẬT mà khối chú thích ngay trên vừa kể là đã chữa 12/08.
+ *
+ * Chuyện đã xảy ra: chạm một lá thì `chon` bật ⇒ `.sel` (rơi xuống) VÀ
+ * `px.sang` (loé sáng) cùng được dán — HAI LỚP cùng khai `animation` trên MỘT
+ * phần tử. `pixel.module.css` nằm cuối bundle nên `pxSang` thắng, nuốt cú rơi
+ * 260ms; rồi lúc lớp `sang` được gỡ, `animation-name` đổi lần nữa ⇒ lá RƠI LẠI
+ * (đo được: đổi sang `adTheVao`, tức BAY VÀO TỪ PHẢI) sau MỖI cú chạm — mỗi lần
+ * cầm lá, tức mỗi lệnh một lần.
+ *
+ * ⇒ Hai hoạt ảnh gộp vào MỘT danh sách trong motion.module.css. Hai khai báo
+ * `animation` không bao giờ hợp nhất; chỉ một danh sách trong MỘT rule mới làm
+ * được, nên đây không phải chuyện độ ưu tiên mà là chuyện gộp nguồn.
+ * ⚠ Và nó phải nằm ở motion chứ không phải ở đây: file này `composes` lớp pixel,
+ * mà `tests/pixelui` cấm mọi `cubic-bezier` trong file như thế (chống ghi đè
+ * `steps()` im lặng). Cú rơi là chuyển động VẬT LÝ nên nó cần cubic-bezier —
+ * chỗ đúng của nó là từ vựng chung, không phải file component.
+ */
+.sel {
+  composes: adChonLa from '../../styles/motion.module.css';
+  /* 13/09 — bớt kịch: viền 3→2, quầng 34→18. Lá đang chọn cần ĐỌC RA, không cần hét;
+     trên nỉ D321 sáu lá đứng sát nhau, quầng 34px của lá này đè lên lá bên cạnh. */
+  border-width: 2px;
+  /* Thứ tự luật 6: vát (bề mặt) → viền cứng → bóng cứng (độ dày) → quầng. */
+  box-shadow:
+    var(--the-vat),
+    0 0 0 2px var(--bd),
+    var(--px-bong),
+    0 0 18px var(--gl);
+}
+
+.tick {
+  position: absolute;
+  z-index: 4;
+  top: 5px;
+  right: 7px;
+  color: var(--bd);
+  font-size: 14px;
+}
+
+/*
+ * ĐƯỢC MỜI CHẠM (bàn cược 16/08): người chơi đang cầm chip / đòn bẩy trên tay,
+ * mọi lá đều là ô đặt được — viền vàng mảnh + quầng vàng nhẹ. Thứ tự luật 6:
+ * vát → viền cứng → bóng cứng → quầng.
+ */
+.duocMoi {
+  border-color: var(--gold-amber, #fbbf24);
+  box-shadow:
+    var(--the-vat),
+    0 0 0 1px var(--gold-amber, #fbbf24),
+    var(--px-bong),
+    0 0 18px rgba(251, 191, 36, 0.35);
+}
+
+/* Phụ kiện trong lá (bàn cược): dòng GIÁ TRỊ vị thế góc dưới-phải, badge ×2. */
+.giaTri {
+  position: absolute;
+  z-index: 4;
+  right: 6px;
+  bottom: 6px;
+  color: var(--text-dim, #bfd1e6);
+  font-size: 9px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 2px #000, 0 0 6px #000;
+}
+.giaTriLai { color: var(--win, #4ade80); }
+.giaTriLo { color: var(--lose, #f87171); }
+.badgeGan {
+  position: absolute;
+  z-index: 4;
+  top: 20px;
+  right: 3px;
+  padding: 1px 4px;
+  border: 1px solid #a855f7;
+  background: rgba(88, 28, 135, 0.85);
+  color: #e9d5ff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+/*
+ * RARITY: viên đá góc trái, sáng theo màu thẻ.
+ *
+ * Bản cũ là ô 9px `transform: rotate(45deg)` cho ra hình thoi. Trên lưới pixel
+ * thì đường chéo phải vẽ bằng BẬC THANG; xoay bằng CSS thì trình duyệt khử răng
+ * cưa, và viên đá thành vệt xám nhoè 12,7px — vật duy nhất trên lá không có cạnh
+ * sắc. Nay là khối vuông 8px (bội của đơn vị khấc), nổi bằng vát 2px thay vì
+ * bằng viền trắng mảnh, và giữ nguyên quầng vì quầng là ánh sáng.
+ */
+.gem {
+  position: absolute;
+  z-index: 4;
+  top: 5px;
+  left: 5px;
+  width: 8px;
+  height: 8px;
+  background: var(--bd);
+  box-shadow: var(--px-vien-trong-day), 0 0 10px var(--bd);
+}
+
+.ti {
+  position: relative;
+  z-index: 2;
+  padding-top: 3px;
+  color: var(--bd);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  line-height: 1.15;
+  text-align: center;
+  text-shadow: 0 0 10px var(--gl), 0 1px 2px #000;
+}
+.sub {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 2px;
+  color: var(--text-muted);
+  font-size: 7px;
+  letter-spacing: 0.16em;
+  text-align: center;
+  opacity: 0.75;
+}
+
+/* ARTWORK — 70% chiều cao lá, đúng chỉ đạo */
+.art {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 70%;
+  min-height: 0;
+  margin: 0 1px;
+  overflow: hidden;
+  border-radius: 0;
+  /* Quầng hắt sau tranh — ÁNH SÁNG (radial trên nền, không có cạnh), giữ mềm. */
+  background: radial-gradient(90% 70% at 50% 40%, var(--gl), transparent 72%);
+  /* Không còn `transition`: từ khi bỏ cú phóng khi hover thì `.art` không đổi
+     gì nữa, và một transition không có thuộc tính nào đổi là rác đọc nhầm được
+     thành "chỗ này có hoạt hình". */
+}
+.art > svg { display: block; width: 100%; height: 100%; }
+
+/*
+ * ĐÃ GỠ: `.lb` (dòng nhãn "BIẾN ĐỘNG" / mô tả chiến thuật) và `.st` (dãy sao).
+ *
+ * 25/07 founder chốt mặt thẻ chỉ còn TÊN + TRANH; mọi chú thích chuyển sang tờ
+ * giải thích mở bằng nút (!) — TheGiaiThich.tsx. Xoá CSS luôn chứ không để lại
+ * thành class chết: lần sau có người thấy `.st` rồi gắn sao trở lại lên mặt thẻ.
+ */
+
+/*
+ * Nút MUA — nay là nút pixel dùng chung.
+ *
+ * ⚠ KHÔNG khai lại `transition` / `transform` / `box-shadow` ở dưới: `composes`
+ * đặt lớp pixel vào TRƯỚC nên khai lại là ghi đè im lặng (bẫy đã dính ở BetBar).
+ * Bản cũ tự gõ `cubic-bezier(0.34, 1.56, …)` cộng `scale(0.93)` khi bấm — nút
+ * nhìn thì vuông mà nhịp vẫn nảy mượt, và co 7% làm chữ nhoè. Nay bấm là nút LÚN
+ * xuống đúng bằng độ dày bóng, cùng một cảm giác với mọi nút khác trong app.
+ */
+.buy {
+  composes: nut from '@/styles/pixel.module.css';
+  padding: 7px;
+  border-color: var(--violet);
+  background: rgba(139, 92, 246, 0.18);
+  color: #cbb8ff;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+}
+.buyOn {
+  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.28);
+  color: var(--text-max);
+}
+
+/* Trạng thái động khi mua / khảo sát lại */
+.bay { composes: adBay from '../../styles/motion.module.css'; pointer-events: none; }
+.ra { composes: adTheRa from '../../styles/motion.module.css'; }
+.vao { composes: adTheVao from '../../styles/motion.module.css'; }
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * `both` của adChiaXuong giữ lá ở khung 0% (opacity 0, dịch lên 26px) nếu
+   * animation bị tắt mà quên chỗ này — tức lá ĐÃ CHỌN thành TÀNG HÌNH. Đúng lớp
+   * lỗi đã dính với `.laVao`; ép về trạng thái cuối.
+   * Thứ bị tắt là CÚ RƠI, không phải cái viền — người bật tiết kiệm chuyển động
+   * vẫn phải thấy rõ lá nào đang được chọn.
+   */
+  /* `.sel.sang` phải có mặt: nó là selector HAI lớp (0,2,0) nên một dòng
+     `.sel` đơn (0,1,0) KHÔNG tắt nổi nó — đúng lỗ vừa vá ở ThanhPhongCach. */
+  .sel { animation: none; opacity: 1; transform: none; filter: none; }
+}
+
+/* v34 — DÒNG TIỀN THÔ (đặc quyền tổ chức): VẮNG / VỪA / ĐÔNG, góc trái dưới badge.
+   Thô có chủ ý (D67): đủ để suy luận, không đủ để sao chép — không hiện số. */
+.badgeDong {
+  position: absolute;
+  z-index: 4;
+  top: 20px;
+  left: 3px;
+  padding: 1px 4px;
+  border: 1px solid currentColor;
+  background: rgba(2, 6, 23, 0.85);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.dongVang { color: #94a3b8; }
+.dongVua { color: var(--gold-amber); }
+.dongDong { color: var(--lose); }
+/* v55 (D422) — ĐI SAU: cả bàn đang mua/bán mã này (mũi tên, không số). Đứng dưới huy hiệu dòng tiền để hai thứ không đè. */
+.badgeLenh {
+  position: absolute;
+  z-index: 4;
+  top: 34px;
+  left: 3px;
+  padding: 1px 4px;
+  border: 1px solid currentColor;
+  background: rgba(2, 6, 23, 0.85);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+.lenhMua { color: var(--win); }
+.lenhBan { color: var(--lose); }
+.lenhIm { color: #94a3b8; }

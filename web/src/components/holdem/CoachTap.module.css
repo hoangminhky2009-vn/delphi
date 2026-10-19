@@ -1,0 +1,296 @@
+/* SPOTLIGHT MÀN TẬP — làm mờ đen cả màn, khoét sáng đúng chức năng đang dạy.
+ *
+ * Lớp phủ gốc `pointer-events: none` TOÀN PHẦN: người chơi bấm thẳng vào phần
+ * tử thật đang sáng (cầm tay chỉ việc). Chỉ tấm thẻ chữ nhận chạm.
+ * z-index 80 — trên shop (70) và thanh hành động (45). */
+
+.phuTap {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+}
+
+/* Lỗ khoét: ô trong suốt đặt đúng khung phần tử đích; bóng 200vmax nhuộm đen
+ * phần còn lại của màn. Viền vàng là "ngón tay chỉ". */
+.lo {
+  position: fixed;
+  box-shadow: 0 0 0 200vmax rgba(3, 2, 12, 0.82);
+  outline: 2px solid var(--gold-amber, #fbbf24);
+  outline-offset: 2px;
+  /*
+   * ⚠⚠ 24/08 — THÊM `steps(5)`. Đây là chỗ DUY NHẤT trong repo animate thuộc
+   * tính BỐ CỤC mà không hãm số lần, và nó nằm trên phần tử tệ nhất có thể:
+   * `box-shadow: 0 0 0 200vmax` nghĩa là vùng phải vẽ lại MỖI KHUNG HÌNH đúng
+   * bằng CẢ MÀN HÌNH. Bốn thuộc tính × ~15 khung hình = 60 lượt tính lại bố cục
+   * kèm 15 lượt tô lại toàn màn, mỗi lần coach đổi bước.
+   * `steps(5)` cắt còn 5 — và nó còn ĐÚNG PHONG CÁCH hơn: §XI luật 3 nói chuyển
+   * động pixel nhảy theo nấc, một cái đèn rọi TRƯỢT mượt là ngôn ngữ của vector.
+   * Không đổi được sang `transform`: cú rọi vừa DI CHUYỂN vừa ĐỔI CỠ, mà `scale`
+   * sẽ kéo giãn cả viền vàng lẫn cái bóng 200vmax.
+   */
+  transition:
+    left 250ms steps(5, end),
+    top 250ms steps(5, end),
+    width 250ms steps(5, end),
+    height 250ms steps(5, end);
+}
+
+/* Bước không có đích (thẻ mở màn/kết) — nhuộm đều cả màn. */
+.mangToan {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 2, 12, 0.82);
+}
+
+/* ── Khung TRÒ CHUYỆN ────────────────────────────────────────────────────── */
+/*
+ * ⭐⭐ D374 (founder 21/09) — KẸP THEO CỘT APP, KHÔNG THEO VIEWPORT.
+ *
+ * Nguyên văn: *"Khung chat của oracle che mẹ mất chỗ chọn lệnh nạp/rút"*. Ảnh chụp trên
+ * desktop: khung thoại đậu đúng lên hàng MUA/RÚT của shop.
+ *
+ * Gốc: `position: fixed` + `left: 50%` căn giữa theo CẢ VIEWPORT. Cả app sống trong cột
+ * `--shell-width`; trên màn 1920px thì tâm viewport KHÔNG phải tâm cột, nên khung trôi sang
+ * phải và đè lên shop. Đây đúng lớp lỗi `.phu` của ShopManHinh đã vá 27/07 và `.viSaoTam`
+ * đã vá sau đó — cùng một cái bẫy, cái thứ ba mới lộ vì nó chỉ cắn ở màn ngang.
+ *
+ * Cách vá dùng chung với hai chỗ kia: dựng một dải rộng đúng cột app, căn giữa bằng
+ * `margin-inline: auto`, rồi cho khung nằm trong dải ấy. KHÔNG dùng `left: 50%` nữa —
+ * `transform` ở đây còn phải để dành cho `.theBam` và hoạt ảnh.
+ * ⚠ `pointer-events` giữ nguyên hành vi: dải ngoài không nhận chạm (`none`), chỉ tấm thẻ
+ * nhận (`auto`) — nếu không, cả một dải vô hình sẽ nuốt cú chạm vào shop bên dưới.
+ */
+.the {
+  position: fixed;
+  right: 0;
+  left: 0;
+  width: min(92vw, 370px);
+  margin-inline: auto;
+  padding: 10px 12px;
+  border: 1.5px solid var(--gold-amber, #fbbf24);
+  background: #17102e;
+  pointer-events: auto;
+  box-shadow: 0 0 22px rgba(0, 0, 0, 0.8);
+  cursor: pointer;   /* bấm vào khung = tua hết câu (chuẩn hộp thoại game) */
+}
+
+/* Oracle đậu vai trái khung thoại, nhô ra ngoài như đang bay cạnh nó. */
+.linhVat {
+  position: absolute;
+  top: -30px;
+  left: -8px;
+}
+
+/* Con trỏ khối nhấp nháy khi chữ đang chạy — chữ ký terminal của Mẫu E. */
+.conTro {
+  display: inline-block;
+  margin-left: 2px;
+  color: var(--gold-amber, #fbbf24);
+  animation: coachNhay 0.7s steps(1) infinite;
+}
+@keyframes coachNhay { 50% { opacity: 0; } }
+/* Hai lớp MÉP MÀN — chỉ còn dùng khi ô cao quá, không bên nào đủ chỗ (xem
+   `CAO_THOAI` trong CoachTap.tsx), và khi bước không có ô nào để rọi. */
+.theDuoi { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+/* 15/09 — 40px chứ không 14px: Oracle nhô 30px khỏi mép trên của thẻ, đặt 14px là
+   linh vật bị cắt đầu ở mép màn (đo trên pane 375×812). */
+.theTren { top: calc(40px + env(safe-area-inset-top, 0px)); }
+/*
+ * D540 (founder 06/10: "Delphi luôn neo phía trên khung") — shop mở ⇒ DẢI GỌN sát mép trên: Oracle đứng trong khung bên trái (không nhô lên),
+ * chữ một khối thấp. Đáy là chỗ của tay (lệnh đã xếp · CHỐT), giữa là lưới + phiếu lệnh; thẻ cao 190 px ở trên từng đè đúng tên mã hàng đầu.
+ */
+.theShop { top: calc(4px + env(safe-area-inset-top, 0px)); padding: 4px 10px 4px 50px; }
+.theShop .linhVat { top: 6px; left: 6px; }
+.theShop .dauThe { padding-left: 0; margin-bottom: 0; }
+.theShop .loiChu { margin: 0 0 2px; line-height: 1.3; }
+/*
+ * 12/09 — THẺ BÁM Ô: `top`/`bottom` do JS đặt theo khung ô đang rọi (founder:
+ * *"box chat phải bám theo phần mà nó đang kẻ ô hướng dẫn"*). Trượt theo NẤC
+ * cùng ngôn ngữ với cái lỗ (`.lo`) — hai vật đi cùng nhau thì phải cùng nhịp,
+ * không cái mượt cái giật (§XI luật 3).
+ * ⚠ KHÔNG animate `left`/`right`: từ D374 thẻ đứng giữa bằng `margin-inline: auto` trong một
+ * dải rộng đúng cột app, nên `left`/`right` là mỏ neo của dải ấy — animate chúng là kéo cả
+ * khung ra khỏi cột.
+ */
+.theBam {
+  transition:
+    top 250ms steps(5, end),
+    bottom 250ms steps(5, end);
+}
+@media (prefers-reduced-motion: reduce) {
+  .theBam { transition: none; }
+}
+
+.dauThe {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  padding-left: 40px;   /* chừa vai cho Oracle đậu góc trên-trái */
+}
+
+.nhan {
+  color: var(--gold-amber, #fbbf24);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.tatNut {
+  padding: 2px 8px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: transparent;
+  color: var(--text-dim, #94a3b8);
+  font: inherit;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.tatNut:hover { background: rgba(148, 163, 184, 0.12); }
+
+.loiChu {
+  margin: 0 0 8px;
+  color: var(--text-bright, #e2e8f0);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.tiep {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--gold-amber, #fbbf24);
+  background: rgba(251, 191, 36, 0.16);
+  color: var(--gold-amber, #fbbf24);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.tiep:hover { background: rgba(251, 191, 36, 0.28); }
+
+/*
+ * ── DẢI HAI PHE (15/09, D336 lượt 2) ─────────────────────────────────────────
+ * Founder: *"chẳng có chỗ nào giải thích tài sản nào sẽ hưởng lợi/ bị giảm"*. Hai ô phe cạnh nhau,
+ * mỗi ô ba art mã + mũi tên mức. Khung tím nhạt (vai KHUNG, luật màu 13/09), mũi tên xanh/đỏ là
+ * màu lãi/lỗ của app — không một màu mới. Art 30px: đủ nhận ra đồng coin, rổ VN30, thỏi vàng.
+ */
+.haiPhe {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 9px;
+}
+.phe {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 4px 5px;
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  background: rgba(10, 6, 24, 0.55);
+}
+.pheTen {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--violet-soft, #a78bfa);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+.pheHang {
+  display: flex;
+  justify-content: space-around;
+  gap: 2px;
+}
+.pheLa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 0;
+}
+/* Art của mã là tranh NGANG (~3:2): khung vuông 30px thu nó còn ~30×20. 44×30 giữ đúng tỉ lệ ấy
+   (SVG tự `meet` trong khung) — soi trên 390px: ba mã một phe vẫn lọt ô ~150px. */
+.pheHinh {
+  display: block;
+  width: 44px;
+  height: 30px;
+}
+.pheHinh svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.pheMuc {
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+.muc_tot2, .muc_tot1 { color: var(--win); }
+.muc_trung { color: var(--text-muted); }
+.muc_xau1, .muc_xau2 { color: var(--lose); }
+
+/*
+ * ── ORACLE THU GỌN (15/09, D336) ─────────────────────────────────────────────
+ * Founder: *"delphi phải luôn xuất hiện chứ đ** phải biến mất luôn"*. Khi không bước
+ * nào tới lượt, trợ lý co lại thành MỘT dòng gợi ý thay vì biến mất.
+ * ⚠ `pointer-events: none` cả khối (trừ nút DẮT TIẾP): nó đậu sát cụm nút đáy màn,
+ * chạm xuyên qua được thì đè lên đâu cũng không cướp cú chạm của người chơi.
+ * Không nhuộm đen, không đèn rọi — đây là bạn đồng hành, không phải lệnh.
+ */
+/* D374 — KẸP THEO CỘT APP, cùng lý do và cùng cách với `.the` ngay trên: dock đậu sát cụm nút
+   đáy màn, mà trên desktop tâm viewport không phải tâm cột nên nó trôi ra ngoài cụm nút ấy. */
+.dock {
+  position: fixed;
+  right: 0;
+  left: 0;
+  width: min(92vw, 370px);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px 5px 6px;
+  border: 1px solid rgba(251, 191, 36, 0.55);
+  background: rgba(23, 16, 46, 0.92);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+.dockLinhVat { flex: none; display: inline-flex; }
+.dockChu {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.dockLoi {
+  color: var(--text-bright, #e2e8f0);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.dockNut {
+  flex: none;
+  pointer-events: auto;
+  padding: 6px 8px;
+  border: 1px solid var(--gold-amber, #fbbf24);
+  background: rgba(251, 191, 36, 0.16);
+  color: var(--gold-amber, #fbbf24);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.dockNut:hover { background: rgba(251, 191, 36, 0.28); }
+
+
+/*
+ * TIẾT KIỆM CHUYỂN ĐỘNG.
+ * ⚠ Con trỏ PHẢI ở lại: nhịp nháy là trang trí, nhưng bản thân con trỏ là dấu
+ * "trợ lý đang nói tới đây". Tắt cả con trỏ là tắt luôn cái TIN (D116).
+ */
+@media (prefers-reduced-motion: reduce) {
+  .conTro { animation: none; opacity: 1; }
+}

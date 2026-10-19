@@ -1,0 +1,116 @@
+.nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  padding: 0 8px calc(6px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(4, 7, 13, 0) 0%, rgba(4, 7, 13, 0.92) 38%);
+}
+
+/*
+ * Khung bao — viền + nền tối (theo mẫu Oracle).
+ *
+ * Bóng cũ `0 -8px 26px` hắt NGƯỢC hướng nguồn sáng trên-trái, nên nó chưa bao
+ * giờ là bóng đổ: nó là MÉP của tấm che nằm đè lên nội dung cuộn phía dưới.
+ * Đó đúng là vai `.mepChe` — composes rồi thì KHÔNG khai lại `box-shadow`.
+ */
+.bar {
+  composes: mepChe from '@/styles/pixel.module.css';
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2px;
+  max-width: var(--shell-width);
+  margin: 0 auto;
+  padding: 7px 6px 6px;
+  border: 1px solid var(--border-idle-soft);
+  border-bottom: 0;
+  border-radius: 0;
+  /* Nền 96% đục → gỡ `backdrop-filter: blur(10px)`: không có gì phía sau lọt
+     qua để mà làm mờ, chỉ còn lại cái giá của một lớp compositing. */
+  background: rgba(6, 10, 20, 0.96);
+}
+
+.item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  padding: 6px 2px 5px;
+  border-radius: 0;
+  border: 1px solid transparent;
+  text-decoration: none;
+  color: var(--text-muted);
+  filter: grayscale(0.75) brightness(0.75);
+  /*
+   * Tab bật/tắt là trạng thái NHỊ PHÂN → nhảy hai nấc theo đúng nhịp `.doiMau`
+   * (120ms steps(2,end)). KHÔNG `composes: doiMau` được: ô này còn đổi cả
+   * `filter` (xám → màu), mà composes rồi khai lại `transition` là ghi đè im
+   * lặng — mất luôn ba thuộc tính vừa mượn.
+   */
+  transition:
+    color 120ms steps(2, end),
+    border-color 120ms steps(2, end),
+    background-color 120ms steps(2, end),
+    filter 120ms steps(2, end);
+}
+.item:hover {
+  color: var(--text-title);
+  filter: none;
+}
+
+.iconWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Ô active phát sáng */
+.active {
+  color: var(--accent-bright);
+  border-color: var(--border-accent);
+  background: rgba(34, 211, 238, 0.08);
+  filter: none;
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.16), inset 0 0 14px rgba(34, 211, 238, 0.06);
+}
+
+.label {
+  font-size: 8.5px;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/*
+ * Chấm đỏ thông báo (chỉ khi có việc thật để làm).
+ *
+ * 8px viền 2px chứ không 7px viền 1,5px: lõi đỏ vẫn đúng 4px như cũ, nhưng
+ * cạnh nửa pixel là cạnh MỜ — trên màn 1x nó ra một vệt xám nhoè, tức vật duy
+ * nhất trên thanh không có cạnh cứng. Quầng đỏ offset 0 là ánh sáng, giữ.
+ */
+.dot {
+  position: absolute;
+  top: -3px;
+  right: -5px;
+  width: 8px;
+  height: 8px;
+  border-radius: 0;
+  background: var(--danger);
+  border: 2px solid #060a14;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.75);
+}
+
+/*
+ * ── ĐÃ GỠ: tab giữa "hero" (linh vật nổi lên) ──
+ *
+ * 25/07/2026, cùng lúc nav xuống 4 tab. `.hero` + `.orb` neo vào ô GIỮA của 5 ô;
+ * với 4 ô thì không có ô giữa, nhấn giả một ô trong cùng là lệch thị giác không
+ * lý do. Giữ CSS lại thành code chết còn tệ hơn: lần sau có người thấy `.orb`
+ * đẹp rồi gắn bừa vào một tab bất kỳ.
+ *
+ * Linh vật Oracle vẫn ngự ở khối ORACLE CORE trên Hub — chỗ nó có nghĩa thật.
+ * Chiều cao nav giảm ~22px → AppShell.module.css hạ padding-bottom tương ứng.
+ */

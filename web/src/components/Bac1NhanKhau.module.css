@@ -1,0 +1,137 @@
+/*
+ * BẬC 1 — hỏi nhân khẩu sau trận đầu. Lớp phủ, KHÔNG phải một trang.
+ *
+ * ⚠ §XI Pixel UI: không bo góc, không blur ở viền, không gradient. Quầng sáng
+ * (offset 0) là ÁNH SÁNG nên được giữ blur — đúng luật 6 đã dùng ở `logoChip`.
+ */
+.phu {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  /* Nền tối để mắt dồn vào hộp — cùng thủ pháp spotlight của CoachTap. */
+  background: rgba(2, 5, 12, 0.82);
+}
+
+.hop {
+  width: 100%;
+  /* Tầm đọc, KHÔNG phải bề ngang khung: ba câu hỏi không cần rộng hơn một cột. */
+  max-width: var(--tam-width, 390px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #070c16;
+  border: 1px solid var(--border-accent-soft);
+  border-radius: 0;
+  box-shadow: 0 0 24px rgba(34, 211, 238, 0.12);
+  /* Màn ngang thấp (Discord ~550px) vẫn phải đọc hết — cuộn trong hộp, không
+     để nút XONG rơi khỏi khung hình. */
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.dau {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.tieuDe {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--text-bright);
+}
+
+.phuDe {
+  margin: 4px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.oNam {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.nhan {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.nhap {
+  /* `letter-spacing` rộng vì đây là bốn CHỮ SỐ, đọc theo ô chứ không theo từ. */
+  font: inherit;
+  font-size: 18px;
+  letter-spacing: 4px;
+  padding: 8px 10px;
+  color: var(--text-bright);
+  background: var(--surface-idle);
+  border: 1px solid var(--border-accent-soft);
+  border-radius: 0;
+}
+
+.nhap:focus {
+  outline: none;
+  border-color: rgba(103, 232, 249, 0.7);
+}
+
+.ghiChu {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ── Ô ĐỒNG Ý ─────────────────────────────────────────────────────────────
+   Cả khối là `<label>` nên chạm vào chữ cũng tích được — trên điện thoại, một ô
+   tích 13px là mục tiêu quá nhỏ để bấm trúng. */
+.oDongY {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  background: var(--surface-idle);
+  border: 1px solid var(--border-accent-soft);
+  cursor: pointer;
+}
+
+.tick {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 1px 0 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.dongYChu {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.dongYLink {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.loi {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--lose-tag);
+}
+
+.nut {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 4px;
+}

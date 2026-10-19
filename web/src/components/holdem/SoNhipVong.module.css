@@ -1,0 +1,152 @@
+/*
+ * SỐ NHỊP VÒNG — một con số PIXEL, có sức nặng. Xem `SoNhipVong.tsx` cho lý lẽ.
+ * §XI: radius 0, `steps()`, không blur.
+ *
+ * ⚠ Số nay vẽ bằng `ChuPixel` (`currentColor`), nên MÀU là cần gạt duy nhất —
+ * đổi trạng thái là đổi `color`, không phải sửa gì trong lưới chữ.
+ */
+
+.so {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 4px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  font: inherit;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* D443 — con số đi bằng font app: cỡ `--fs-human`, nét đậm, chữ số đều bề ngang (đang đếm thì không nhảy). */
+.chu {
+  font-size: var(--fs-human);
+  font-weight: 800;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.lai { color: var(--win, #4ade80); }
+.lo { color: var(--lose, #f87171); }
+/* HOÀ — không xanh, không đỏ: vòng huề vốn là một TIN, nhưng không phải tin vui
+   cũng không phải tin buồn; tô màu nó là nói quá về chuyện chẳng có gì xảy ra. */
+.hoa { color: var(--mo, #7b8494); }
+
+/*
+ * ─── LẤP LÁY MỜI CHẠM ─────────────────────────────────────────────────────
+ * Founder 23/08: *"nó sẽ cứ lấp láy nhẹ ở đó nếu không được bấm vào"*.
+ *
+ * ⚠ Chỉ `opacity` — con số nằm trong một hàng chật (ba nhãn lăng kính + nó =
+ * 307/343px ở 375px), nên bất cứ thứ gì đổi KÍCH THƯỚC đều đẩy cả hàng.
+ * ⚠ Chu kỳ 1,6s, đáy 0,55: đủ để mắt bắt được ở ngoại vi, không đủ để tranh chú
+ * ý với viền gấp giờ (D77) — hai thứ nhấp nháy cùng nhịp thì cái nào cũng mất
+ * nghĩa.
+ */
+.moi { animation: snMoi 1600ms steps(8, end) infinite; }
+
+/*
+ * MỨC GẤP — vòng bị chốt hộ, hoặc vốn bị siết. Trước 23/08 hai ca này TỰ BUNG
+ * cả khối chi tiết; nay chúng đi bằng CƯỜNG ĐỘ chứ không bằng DIỆN TÍCH: nhanh
+ * gấp đôi, đáy sâu hơn, và có viền để phân biệt được cả khi đứng yên (người bật
+ * tiết kiệm chuyển động vẫn phải thấy "vòng này có chuyện").
+ */
+.moiGap {
+  border-color: currentColor;
+  animation: snMoiGap 800ms steps(6, end) infinite;
+}
+
+/*
+ * ─── CÚ NỔ MỖI VÒNG ──────────────────────────────────────────────────────
+ * Founder 30/08: *"lãi lỗ do bị ẩn nên chẳng có tý cảm giác nào… đáng ra nó phải
+ * giữ nguyên hiệu ứng của lãi lỗ TO qua mỗi vòng mà ko cần bấm vào. Bấm vào chỉ
+ * để xem nguyên nhân thôi chứ đ** phải để xem hiệu ứng."*
+ *
+ * ⚠ ĐÂY LÀ KHÔI PHỤC, KHÔNG PHẢI THÊM MỚI. D114 từng có `snLai`/`snLo` — hiệu
+ * ứng SỰ KIỆN, nổ một phát mỗi vòng rồi tắt. D119 thay chúng bằng `snMoi` —
+ * hiệu ứng NHÀN RỖI, lấp láy vô hạn chờ được chạm. Đó là lúc mất "cảm giác":
+ * cái tự diễn mỗi vòng co từ một cú nổ xuống 136ms nhảy số trên một ô
+ * 50×18px = 0,30% mặt màn.
+ *
+ * ⚠⚠ VÌ SAO Ở MỘT PHẦN TỬ RIÊNG chứ không thêm vào `.moi`:
+ * `animation` KHÔNG cộng dồn — khai lại là thay trọn (D122, mười hoạt ảnh đã
+ * chết vì đúng điều này). Nút đã sở hữu `animation` cho nhịp lấp láy, và nhịp
+ * đó CÓ ĐIỀU KIỆN (tắt khi đã chạm / đang mở) trong khi cú nổ phải diễn VÔ
+ * ĐIỀU KIỆN. Hai chủ, hai phần tử — đúng khuôn `.khung`/`.o` của MarketMap.
+ *
+ * ⚠ Nổ bằng `transform` nên KHÔNG đẩy bố cục một pixel nào (hàng này chứa cả
+ * cọc chip lẫn tổng tài sản). `steps()` chứ không `cubic-bezier`: đây là VẬT
+ * pixel, và §XI luật 3 giữ nguyên hiệu lực ở tầng này.
+ *
+ * Không cần cò: `SoNhipVong` mang `key={nhip-<vòng>}` nên nó REMOUNT mỗi vòng,
+ * và một hoạt ảnh `1` lượt trên phần tử mới thì tự chạy lại. Đổi `key` đó là
+ * giết cú nổ — có bài test canh.
+ */
+.no {
+  display: inline-flex;
+  transform-origin: center;
+  animation: snNo 560ms steps(7, end) 1;
+}
+
+/* Vòng ĐỘNG MẠNH (|lãi/lỗ| ≥ 10%) — cùng cú nổ, biên độ lớn hơn và lâu hơn một
+   nhịp. Đây là chỗ "juicy" đúng nghĩa: cú lớn PHẢI cảm thấy khác cú thường,
+   nếu không thì hiệu ứng chỉ là trang trí đều đều. */
+.noManh { animation: snNoManh 760ms steps(9, end) 1; }
+
+@keyframes snNo {
+  0%   { transform: scale(1.85); opacity: 0.2; }
+  35%  { transform: scale(1.22); opacity: 1; }
+  70%  { transform: scale(0.94); }
+  100% { transform: scale(1); }
+}
+
+@keyframes snNoManh {
+  0%   { transform: scale(2.6); opacity: 0.15; }
+  30%  { transform: scale(1.45); opacity: 1; }
+  55%  { transform: scale(0.88); }
+  78%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+@keyframes snMoi {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes snMoiGap {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* Đang mở chi tiết — viền cho biết con số này là NÚT và nó đang bật. */
+.mo {
+  border-color: currentColor;
+  background: rgba(148, 163, 184, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* ⚠ Tắt cái NHÁY, giữ cái TIN: mức GẤP vẫn phân biệt được nhờ viền.
+     Cú nổ cũng tắt — nhưng con số, màu và dấu ở lại nguyên, nên người bật tiết
+     kiệm chuyển động vẫn đọc được ĐỦ tin của vòng, chỉ không có cú động (D116:
+     tắt cái nháy, không tắt cái tin). */
+  .moi, .moiGap, .no, .noManh { animation: none; }
+}
+
+/*
+ * D435 — KHỚP TỔNG: một cú rung ngang ngắn khi con số đã bước qua mọi hộp khoản và nhảy về đúng tổng. Rung là VẬT bị
+ * gõ ⇒ `steps()` (luật easing §2 — steps cho vật & nhịp máy). Lớp riêng, phần tử riêng — không đè `.no` / `.moi`.
+ */
+.khop { display: inline-block; animation: snKhop 320ms steps(6, end) 1; }
+@keyframes snKhop {
+  0% { transform: translateX(0); }
+  17% { transform: translateX(-2px); }
+  33% { transform: translateX(2px); }
+  50% { transform: translateX(-2px); }
+  67% { transform: translateX(1px); }
+  83% { transform: translateX(-1px); }
+  100% { transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .khop { animation: none; }
+}

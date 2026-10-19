@@ -1,0 +1,202 @@
+/*
+ * KHOẢNH KHẮC LỚN — ×2 / SSS bừng lên MỘT phát rồi trả lại bàn chơi.
+ * Áp cho cả người chơi lẫn đối thủ: ai làm cũng phải cho cả bàn thấy.
+ * (ALL-IN đã rời khỏi lớp phủ này 22/08 — xem docstring `KhoanhKhac`.)
+ */
+
+.lop {
+  position: fixed;
+  z-index: 120;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.nen {
+  composes: adNenBung from '../../styles/motion.module.css';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    70% 50% at 50% 45%, rgba(251, 191, 36, 0.3), rgba(0, 0, 0, 0.82) 70%);
+}
+
+/*
+ * Chữ vàng CHÁY: trắng ở đỉnh → vàng → cam → đỏ ở chân, kèm hai lớp quầng.
+ *
+ * ⚠ QUẦNG (filter) và CẮT CHỮ (background-clip: text) PHẢI Ở HAI PHẦN TỬ.
+ * Founder gặp trên Android Chrome 28/07: "All-in toàn màn hình bị lỗi font" —
+ * đặt `filter` cùng phần tử với `background-clip: text` làm compositing vỡ,
+ * phép cắt chữ mất và cả khối gradient sơn nguyên hình chữ nhật đè lên chữ.
+ * Đây là bug trình duyệt có tiếng, không phải lỗi font: tách filter ra vỏ
+ * (`.chuVo`) là hai hiệu ứng sống chung được. Animation cũng theo vỏ để phần
+ * tử cắt chữ không bị transform — transform cũng kích hoạt cùng đường vỡ.
+ */
+.chuVo {
+  composes: adChuBung from '../../styles/motion.module.css';
+  position: relative;
+  filter: drop-shadow(0 0 26px #f59e0b) drop-shadow(0 0 60px var(--danger));
+}
+
+.chu {
+  font-size: clamp(52px, 17vw, 150px);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  background: linear-gradient(180deg, #fffbeb 4%, var(--gold) 26%, #f59e0b 54%, var(--danger) 88%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/*
+ * KHỐI HẠNG (S/SS/SSS) — vỏ định vị. Mọi chuyển động của chữ nằm trong
+ * `ChuHang.module.css`; ở đây chỉ có nhịp VÀO/RA chung với các khoảnh khắc khác.
+ *
+ * ⚠ KHÔNG `filter: drop-shadow` ở vỏ này (khác `.chuVo` của ×2): chữ hạng là
+ * glyph box-shadow nhiều lớp đang transform liên tục, chồng thêm một bộ lọc
+ * toàn khối là bắt trình duyệt hợp thành lại vùng đó mỗi khung hình — đúng thứ
+ * gây khựng trên máy tầm trung. Quầng đã nằm sẵn ở nền (`.nenHang`).
+ */
+.hangVo {
+  composes: adChuBung from '../../styles/motion.module.css';
+  position: relative;
+}
+
+/*
+ * Nền của khoảnh khắc HẠNG đổi sang hồng — vàng là màu của cú ALL-IN cũ, giữ
+ * lại thì hai khoảnh khắc khác hẳn nhau lại trông giống nhau.
+ */
+.nenHang {
+  background: radial-gradient(
+    70% 50% at 50% 45%, rgba(255, 93, 143, 0.34), rgba(0, 0, 0, 0.85) 70%);
+}
+
+.ai {
+  composes: adAiDo from '../../styles/motion.module.css';
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 8px 16px;
+  border: 1px solid rgba(251, 191, 36, 0.55);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.55);
+}
+.ai svg { box-shadow: 0 0 16px rgba(251, 191, 36, 0.6); }
+.ten {
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.bac {
+  color: var(--text-muted);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+}
+
+/* ⚠ `composes` CHỈ dùng được trên MỘT class đơn — `.tat > *` làm postcss nổ
+ * ("composition is only allowed when selector is single :local class name").
+ * Nên lớp tắt phải gắn THẲNG vào từng phần tử con ở TSX, không qua bộ chọn con. */
+.tat {
+  composes: adTat from '../../styles/motion.module.css';
+}
+
+/* CHÁY TÀI KHOẢN — nháy đỏ MỘT cái, phủ toàn màn nhưng không chặn thao tác */
+.nhayDo {
+  composes: adNhayDo from '../../styles/motion.module.css';
+  position: fixed;
+  z-index: 95;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    90% 70% at 50% 50%, rgba(239, 68, 68, 0.42), rgba(239, 68, 68, 0.14) 70%);
+}
+
+/* ── GỌI KÝ QUỸ (24/08) ──────────────────────────────────────────────────────
+ * Khoảnh khắc DUY NHẤT của lớp phủ này báo một chuyện xấu, nên nó là chỗ duy
+ * nhất dùng tông ĐỎ. Xem nhánh `laKyQuy` trong MomentOverlay.tsx.
+ */
+.nenKyQuy {
+  background: radial-gradient(
+    70% 50% at 50% 45%, rgba(239, 68, 68, 0.34), rgba(0, 0, 0, 0.88) 70%);
+}
+
+/*
+ * NHÁY ĐỎ MỘT PHÁT — `forwards` chứ không `infinite`.
+ * ⚠ Lặp thì nó thành đèn báo động, mà thứ nhấp nháy mãi là thứ người ta học
+ * cách phớt lờ (đúng lý lẽ đã ghi cho viền gấp giờ ở D77 và cho con số mời
+ * chạm ở D119). Một phát, rồi im, rồi để cái lá gãy kể tiếp.
+ */
+.chop {
+  position: absolute;
+  inset: 0;
+  background: var(--danger);
+  opacity: 0;
+  animation: kqChop 260ms steps(4, end) forwards;
+}
+@keyframes kqChop {
+  0%   { opacity: 0; }
+  22%  { opacity: 0.5; }
+  100% { opacity: 0; }
+}
+
+.man {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/*
+ * CÚ RUNG — NEO VÀO ĐÚNG NHỊP LÁ GÃY (founder 24/08: *"chỉ rung ở khoảnh khắc
+ * lõi gãy đôi thôi"*). `delay` khớp `NHIP_GAY_MS` của LoiGay.tsx.
+ *
+ * ⚠⚠ RUNG `.man`, KHÔNG RUNG `.lop`. `.lop` là `position: fixed; inset: 0` —
+ * đúng hình dạng cái hộp mà D125 vừa phải gỡ cú rung khỏi, vì `bayChip` chụp
+ * toạ độ so với nó và đàn chip bay theo một hệ quy chiếu đang rung. Ở đây
+ * không có gì đang bay (lớp phủ nổ cuối vòng, shop đã đóng) — nhưng vẫn rung
+ * cái vỏ trong, để lần dọn sau không ai đọc file này rồi tưởng rung một hộp
+ * `fixed` toàn màn là nếp được phép.
+ *
+ * ⚠ `steps(3)` và biên độ 3px: đây là cú BẺ GÃY, không phải động đất. §XI luật
+ * 3 — chuyển động pixel nhảy theo nấc.
+ */
+.manRung { animation: kqRung 200ms steps(3, end) 420ms 1; }
+@keyframes kqRung {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-3px, 2px); }
+  55%  { transform: translate(3px, -1px); }
+  80%  { transform: translate(-2px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * ⚠ Tắt cú RUNG và cú NHÁY; GIỮ nguyên nền đỏ và lá gãy. Thứ bị tắt là
+   * chuyển động, không phải thông tin — người bật tiết kiệm chuyển động vẫn
+   * phải biết mình vừa bị lấy bao nhiêu chip và vì cái gì (lỗi D116 đã vá).
+   */
+  .manRung { animation: none; }
+  .chop { animation: none; opacity: 0; }
+}
+
+/*
+ * CHỈ CHO TRÌNH ĐỌC MÀN HÌNH. Không `display: none` và không `visibility:
+ * hidden` — cả hai đều gỡ phần tử khỏi cây trợ năng, tức xoá luôn thứ nó sinh
+ * ra để mang. Cách duy nhất đúng là để nó ở lại và thu về 1px.
+ */
+.doc {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

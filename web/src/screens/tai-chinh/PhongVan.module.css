@@ -1,0 +1,311 @@
+/*
+ * PFM — MÀN PHỎNG VẤN. Số đo và màu CHÉP NGUYÊN từ demo đã chốt
+ * (`docs/ui-ux/demo/pfm-lo-trinh.html`, khối `#man-pv`) — D277: *"chép token màu
+ * và số đo từ demo sang nguyên vẹn, đừng diễn giải lại"*, vì mọi phép đo tương
+ * phản trong demo tính trên đúng những mã ấy.
+ * Tên biến dùng bảng token THẬT của app (`styles/tokens.css`) — hai bên chung một
+ * bảng, nên không phải quy đổi gì.
+ */
+
+.the {
+  background: var(--surface-idle);
+  border: 1px solid var(--border-idle);
+  border-radius: 0;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.nhan {
+  margin: 0 0 9px;
+  font-size: 10.5px;
+  letter-spacing: 1.6px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.giai {
+  margin: 0 0 9px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.dong {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+/* ── Thẻ tính cách rút gọn ở đầu màn ───────────────────────────────────────── */
+.tc {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+.tcMat {
+  font-size: 26px;
+  line-height: 1;
+  flex: none;
+}
+.tcTen {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--text-bright);
+}
+.tcPhu {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+/* ── Ba ô chứng: GAME · TỰ KHAI · SỔ ───────────────────────────────────────── */
+.chung {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+.oCh {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 6px;
+  text-align: center;
+  border: 1px solid var(--border-idle);
+  background: var(--mat-phim, rgba(255, 255, 255, 0.03));
+}
+.oCh i {
+  font-style: normal;
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.oCh s {
+  text-decoration: none;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+/* Ô đã có nhân chứng: viền + chữ sáng lên. Ô chưa có KHÔNG được sáng — nói dối ở
+   đây là hỏng đúng thứ khối này dựng ra để tạo. */
+.oChSang {
+  border-color: var(--border-accent-soft);
+}
+.oChSang i { color: var(--accent); }
+.oChSang s { color: var(--text-dim); }
+
+/* ── Một câu ───────────────────────────────────────────────────────────────── */
+.cau { margin-bottom: 9px; }
+
+.cauDau {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+.cauSo {
+  width: 19px;
+  height: 19px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  color: var(--bg-deep);
+  background: var(--text-muted);
+}
+
+.cauHoi {
+  flex: 1;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  text-align: left;
+}
+
+/* ── Dòng THU của câu đã xử — bấm vào là mở lại ────────────────────────────── */
+.cauThu {
+  font: inherit;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 9px;
+  padding: 7px 8px;
+  cursor: pointer;
+  text-align: left;
+  border: 1px solid var(--border-idle);
+  background: none;
+  color: inherit;
+}
+.cauXong .cauSo { background: var(--win); }
+.cauBo .cauSo {
+  background: var(--border-idle);
+  color: var(--text-muted);
+}
+.dap {
+  font-size: 11.5px;
+  color: var(--accent);
+  overflow-wrap: anywhere;
+}
+.dapBo {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
+.doi {
+  margin-left: auto;
+  flex: none;
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Dòng phụ dưới câu hỏi ("CHỌN NHIỀU ĐƯỢC" · "ĐO · LÚC TIỀN VỀ"). */
+.cauPhu {
+  margin: 0 0 8px 26px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+/* ── Chip ──────────────────────────────────────────────────────────────────── */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+/*
+ * ⚠⚠ CÂU CÓ ĐÁP ÁN DÀI ⇒ CẢ CÂU THÀNH HÀNG DỌC, VÀ BỎ NỀN XÁM.
+ *
+ * Founder 21/09: *"chữ trắng trên nền xám hơi khó nhìn"*. Đo ra thì KHÔNG phải lỗi tỷ lệ —
+ * `--text-bright` trên `--mat-phim` là 11,06, đạt AAA. Thủ phạm là DIỆN TÍCH: chip ngắn thì
+ * mặt phím chỉ là một viên nhỏ, nhưng chip dài tràn ngang biến nó thành mảng mid-tone lớn
+ * giữa một màn gần-đen, mà mắt đã quen tối nên đọc ra là chói.
+ *
+ * ⚠ Quyết theo CẢ CÂU, không theo từng chip: một chip xám nhỏ đứng cạnh mấy dòng tối thì
+ *   đọc ra là lỗi chứ không phải thiết kế (đã tự vấp đúng ca ấy ở câu nợ trong demo).
+ */
+.chipsDai { flex-direction: column; }
+
+.chipsDai .chip {
+  width: 100%;
+  height: auto;
+  min-height: 34px;
+  padding: 8px 10px;
+  line-height: 1.3;
+  text-align: left;
+  background: var(--mat-ban, var(--n-1b));
+}
+
+.chipsDai .chip[aria-pressed='true'] { background: var(--accent); }
+
+.chip {
+  font: inherit;
+  padding: 0 10px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 12.5px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  border: 0;
+  border-radius: 0;
+  color: var(--text-bright);
+  background: var(--mat-phim, rgba(255, 255, 255, 0.03));
+  box-shadow: var(--px-vien), inset 0 0 0 1px var(--border-idle);
+}
+.chip[aria-pressed='true'] {
+  color: var(--bg-deep);
+  background: var(--accent);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+}
+
+/*
+ * Chip GAME ĐIỀN SẴN — viền vàng + cờ ⚑. Chép nguyên ý demo: nó "nói ra rằng giá
+ * trị này tới từ game chứ không phải user gõ — không được lặng lẽ giả vờ là lựa
+ * chọn của họ". Bỏ cờ đi là biến một suy luận của máy thành lời khai của người.
+ */
+.chipGame {
+  box-shadow: var(--px-vien), inset 0 0 0 1.5px var(--gold);
+}
+.chipGame::before {
+  content: '⚑';
+  margin-right: 5px;
+  font-size: 10px;
+  color: var(--gold);
+}
+.chip[aria-pressed='true'].chipGame::before { color: var(--bg-deep); }
+
+.chipBo {
+  color: var(--text-muted);
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--border-idle);
+}
+/* Chỉ hiện ở câu NHIỀU LỰA CHỌN và chỉ khi đã chọn ít nhất một. */
+.chipXong {
+  color: var(--bg-deep);
+  background: var(--win);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.chip:focus-visible,
+.cauThu:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/*
+ * BỎ QUA = TEXT LINK (chỉ thị founder 21/09), không còn là chip "để sau".
+ * ⚠ Vùng chạm vẫn 44px: nhẹ hơn về THỊ GIÁC nhưng KHÔNG khó bấm hơn. Ai bỏ qua và bỏ ở câu
+ *   nào chính là dữ liệu (trục "có sẵn kế hoạch hay tuỳ hứng" — đo được mà không phải hỏi);
+ *   làm nó khó bấm là ép tự khai bằng áp lực giao diện, đúng thứ P5/P6 cấm.
+ */
+.boHang {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 4px;
+}
+
+.boLink {
+  font: inherit;
+  padding: 12px 2px;
+  cursor: pointer;
+  border: 0;
+  background: none;
+  font-size: 12.5px;
+  letter-spacing: 0.6px;
+  color: var(--chu-phu);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.boLink:active { color: var(--accent-bright, var(--accent)); }
+.boLink:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* ── Chân màn ──────────────────────────────────────────────────────────────── */
+.day {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.ghiChu {
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.loi {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: var(--lose-soft);
+}

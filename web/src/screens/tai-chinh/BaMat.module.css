@@ -1,0 +1,78 @@
+/*
+ * NẮP NÓI · LÀM · TRONG TRẬN (D426). Mỗi cặp một khối; mỗi mặt một hàng mở đầu bằng THẺ tên mặt (NÓI · SỔ · TRẬN).
+ * ⚠ Ba thẻ mặt khác nhau bằng VIỀN, cùng một nền trung tính — không mặt nào "đúng hơn" mặt nào (G3: các nhân chứng ngang
+ *   hàng; chỗ họ cãi nhau là nội dung). Không `--win`/`--lose`, không một mã hex rời (quy tắc 1–2 `pfm_token.css`).
+ * ⚠ Chữ ≥ 12px. Không hoạt ảnh — đây là thứ ĐỌC (nếp `HangKyNang.module.css`).
+ */
+.nhom {
+  margin: 12px 0 2px;
+  font-size: 12px;
+  letter-spacing: 1.4px;
+  color: var(--gold);
+}
+.nhom:first-child { margin-top: 4px; }
+
+.cap {
+  margin-top: 8px;
+  padding: 7px 0 7px 9px;
+  border-left: 2px solid var(--line-2);
+}
+.capTen { font-size: 12px; letter-spacing: 1.2px; color: var(--text-muted); }
+
+.mat { display: flex; align-items: flex-start; gap: 8px; margin-top: 6px; }
+.tag {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  min-width: 40px;
+  height: 20px;
+  font-size: 12px;
+  letter-spacing: .6px;
+  color: var(--chu-than);
+  background: var(--mat-phim-phu);
+}
+.tagNoi { box-shadow: inset 0 0 0 1px var(--c-3); }
+.tagSo { box-shadow: inset 0 0 0 1px var(--v-3); }
+.tagTran { box-shadow: inset 0 0 0 1px var(--n-8); }
+.matNoi {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--chu-than);
+  font-variant-numeric: tabular-nums;
+}
+.matNoi b { font-weight: 700; color: var(--text-bright); }
+.loi { color: var(--text-bright); }
+.mo { color: var(--chu-mo); }
+.oDem { flex: none; margin-right: 2px; }
+.cot { display: flex; flex-direction: column; gap: 3px; min-width: 0; width: 100%; }
+.cot > span { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+/* ⚠ Thanh là con TRỰC TIẾP của `.cot` nên dính luật hàng ngay trên: `gap` + `flex-wrap` đẩy khúc thứ hai xuống dòng (soi
+   ảnh 26/09 — thanh CHIA NHIỀU GIỎ gãy làm hai). Thanh là MỘT hàng liền, không khe. */
+.cot > span.thanh { flex-wrap: nowrap; gap: 0; }
+.dongPhu { font-size: 12px; color: var(--chu-mo); }
+
+.thanh {
+  position: relative;
+  display: flex;
+  height: 8px;
+  width: 100%;
+  background: var(--long-thanh);
+  box-shadow: inset 0 0 0 1px rgba(93, 114, 144, .25);
+}
+.thanh > i { display: block; height: 100%; background: var(--c-3); }
+/* Đếm quá 12 lượt: thanh vàng (cùng màu ô đặc của ô đếm), rộng cố định để hai hàng đếm đọc được cạnh nhau. */
+.thanhDem { flex: none; width: 96px; height: 13px; }
+.thanhDem > i { background: var(--gold); }
+/* Khúc danh mục: CÙNG thứ tự nấc với thanh DANH MỤC ở màn HŨ (`--dm-1…3` của `Hu.module.css`) — cùng các vị thế, cùng
+   thứ tự (lõi `danhMuc`), nên hai thanh ở hai màn cùng màu cho cùng một hũ. */
+.thanh > i.gio1 { background: var(--c-3); }
+.thanh > i.gio2 { background: var(--v-3); }
+.thanh > i.gio3 { background: var(--c-2b); }
+
+.giai { margin: 12px 0 0; font-size: 12px; line-height: 1.55; color: var(--chu-mo); }

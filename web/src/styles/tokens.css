@@ -1,0 +1,360 @@
+/**
+ * DESIGN TOKENS — nguồn chân lý duy nhất của phong cách "Terminal × Neon" (Mẫu E).
+ * Trích y hệt từ mẫu founder chốt 17/07/2026:
+ *   Delphi — Thiết kế giao diện/Mau E - Terminal Neon.dc.html
+ * Diễn giải đầy đủ: docs/ui-ux/design_style_terminal_neon.md — sửa token = sửa cả doc.
+ * CẤM rải mã màu trần trong component; chỉ dùng var(--...).
+ */
+:root {
+  /* ===== Nền & bề mặt ===== */
+  --bg-page: #04070d;
+  --bg-page-glow:
+    radial-gradient(1000px 560px at 50% -12%, rgba(34, 211, 238, 0.09), rgba(0, 0, 0, 0)),
+    radial-gradient(800px 500px at 90% 45%, rgba(139, 92, 246, 0.07), rgba(0, 0, 0, 0));
+  --surface-card: linear-gradient(178deg, #081120 0%, #050a14 60%);
+  --surface-card-alt: linear-gradient(178deg, #081120, #060c17);
+  --surface-panel: linear-gradient(178deg, #0a1524, #060c17);
+  --surface-inset: rgba(255, 255, 255, 0.04);
+  --surface-idle: rgba(255, 255, 255, 0.03);
+  --surface-track: rgba(93, 114, 144, 0.14);
+
+  /* ===== Chữ ===== */
+  --text-bright: #e8f6ff;
+  --text-title: #eef6ff;
+  --text-max: #f2f8ff;
+  --text-body: #e8f2fc;
+  --text-muted: #93aac8;
+  --text-dim: #bfd1e6;
+  --text-dim-2: #b9c9de;
+
+  /* ===== Semantic ===== */
+  --accent: #22d3ee;
+  --accent-bright: #67e8f9;
+  --accent-soft: #a5f3fc;
+  --accent-peak: #eafdff;
+  --win: #4ade80;
+  --win-on: #03140a; /* chữ đặt TRÊN nền --win */
+  --win-soft: #bbf7d0;
+  --win-peak: #eafff2;
+  --lose: #f87171;
+  --lose-soft: #f1a7ae;
+  --lose-dim: #e59aa2;
+  --lose-tag: #fca5a5;
+  --violet: #8b5cf6;
+  /* 13/09 (D321 lượt 3) — tím NHẠT cho chữ tiêu đề đặt trên nền panel: 6,7:1, còn tím gốc
+     chỉ 4,3:1 ở cỡ 11px. Mã này đã sống thô ở shop, PixelIcon, đồng hồ vòng — gom về một
+     tên, ngang hàng `--accent-soft` / `--win-soft` / `--lose-soft` (mỗi màu chủ một bậc nhạt). */
+  --violet-soft: #a78bfa;
+  --gold: #fde047;
+  --gold-amber: #fbbf24;
+  --gold-flame: #fb923c;
+  --gold-ember: #fdba74;
+  --danger: #ef4444;
+
+  /* ===== Viền ===== */
+  --border-idle: rgba(93, 114, 144, 0.3);
+  --border-idle-soft: rgba(93, 114, 144, 0.25);
+  --border-idle-strong: rgba(93, 114, 144, 0.35);
+  --border-idle-pill: rgba(93, 114, 144, 0.4);
+  --border-accent-soft: rgba(34, 211, 238, 0.25);
+  --border-accent: rgba(34, 211, 238, 0.4);
+  --border-accent-strong: rgba(34, 211, 238, 0.5);
+  --border-lose: rgba(248, 113, 113, 0.6);
+  --border-gold: rgba(251, 191, 36, 0.45);
+  /*
+   * ── NỈ BÀN CHƠI (founder 31/08) ───────────────────────────────────────
+   * *"Casino thì bạn xem chỗ nào giống cái bàn chơi / chỗ để bài thì cho vào."*
+   *
+   * ⚠ VÌ SAO KHÔNG DÙNG THẲNG Casino Green #0d5e30 CỦA CANON: đo WCAG với
+   * đúng những màu chữ đang nằm trên các mặt này thì nó làm `--lose` tụt còn
+   * **2,85** — trượt cả AA lẫn ngưỡng chữ lớn. Tức nền xanh lá NUỐT đúng kênh
+   * báo MẤT TIỀN, thứ không được phép mờ đi trong một trò về tiền.
+   *   #0d5e30  lose 2,85 ✗ · muted 3,32 ~
+   *   #0a3d21  lose 4,46 ~
+   *   #072b17  lose 5,55 ✓ · muted 6,46 ✓ · thấp nhất toàn bảng 5,55  ← CHỌN
+   * Nỉ vẫn ra nỉ, chỉ sâu hơn — và nó đứng dưới lá bài chứ không dưới số tiền.
+   *
+   * ⚠ CHỈ dán lên MẶT BÀN (chỗ lá nằm): dải ô thị trường · quầy bài shop ·
+   * thanh bài trên tay. KHÔNG dán lên chỗ có SỐ TIỀN và MÀU LÃI/LỖ.
+   */
+  --felt: #072b17;
+  --felt-sang: #0a3d21;
+  --felt-vien: rgba(45, 122, 79, 0.42);
+  /* 13/09 tối — MẶT NỈ LÀ MỘT CÔNG THỨC, KHÔNG PHẢI BA. Bản đồ đang là radial
+     #0a3d21→#072b17 còn thanh tay là #072b17 pha đen 8% ⇒ hai mảng xanh cạnh nhau lệch
+     tone (founder: *"màu xanh lá của 2 cái t chọn đang lệch tone quá"*). Nay cả hai gọi
+     chung biến này. Đỉnh hạ xuống 55% `--felt-sang` để chữ trên thanh tay vẫn qua ngưỡng
+     đo 31/08 (`--lose` trên đỉnh = 5,07:1; trên đáy = 5,55:1). */
+  --felt-mat:
+    linear-gradient(178deg,
+      color-mix(in srgb, var(--felt-sang) 42%, var(--felt)),
+      var(--felt) 70%);
+  /*
+   * ⭐ HOẠ TIẾT DỆT (founder 31/08: *"màu nền đang bóng và đơn điệu quá … thêm
+   * tý hoạ tiết chứ nhìn như bảng màu paint"*).
+   *
+   * Hai dải kẻ chéo ngược chiều, bước 3px, alpha rất thấp ⇒ mắt đọc ra SỢI DỆT
+   * chứ không đọc ra đường kẻ. Đây là mặt NỈ, nên hoạ tiết phải ở ngưỡng "cảm
+   * thấy" chứ không ở ngưỡng "nhìn thấy" — thấy rõ là nó thành hoa văn và tranh
+   * chú ý với lá bài nằm trên.
+   *
+   * ⚠ Bước 3px chứ không 2px: ở 2px trên màn dpr 1,5 hai dải rơi vào cùng điểm
+   * ảnh và hoạ tiết biến thành một mảng phẳng sáng hơn — tức mất hẳn tác dụng
+   * mà vẫn tốn một lớp vẽ.
+   * ⚠ Dùng `repeating-linear-gradient` (kẻ thẳng, cạnh cứng) chứ KHÔNG dùng
+   * chấm tròn: chấm tròn là thứ duy nhất trong khung hình có đường cong, mắt
+   * bắt ngay — cùng lý lẽ đã ghi cho hạt confetti ở `pixel.module.css`.
+   */
+  /*
+   * ⚠ HAI BƯỚC, KHÔNG PHẢI MỘT — đo ra ngân sách hoạ tiết ba mặt lệch nhau 8 lần:
+   *   `.map`   nỉ chỉ lộ 22,5% mặt (khe giữa lá 7px, vành padding 10–12px)
+   *   `.luoiThe` lộ 12,5% (khe 6px)
+   *   `.tay`   lộ ~100% (không lá nào che)
+   * Ở khe 6–7px, bước 3px chỉ nhét vừa hai vạch ⇒ mắt đọc ra NHIỄU chứ không
+   * đọc ra chất liệu. Nên mặt bàn dùng bước 6px, thanh tay dùng 3px.
+   *
+   * ⚠⚠ VÀ CẢ HAI ĐỀU ĐEN, KHÔNG BAO GIỜ TRẮNG. `.tay` là mặt nỉ DUY NHẤT có chữ
+   * nằm trực tiếp (tên mã, tổng, nhãn nút), mà vạch SÁNG nâng độ chói nền lên và
+   * đẩy `--lose` (5,55 — thấp nhất bảng) xuống dưới chuẩn AA. Vạch tối thì chỉ
+   * làm nền tối hơn ⇒ tương phản TĂNG, luôn an toàn theo cấu trúc.
+   */
+  --felt-det-ban:
+    repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.11) 0 3px, rgba(0, 0, 0, 0) 3px 6px),
+    repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.07) 0 3px, rgba(0, 0, 0, 0) 3px 6px);
+  --felt-det-tay:
+    repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.09) 0 1px, rgba(0, 0, 0, 0) 1px 3px),
+    repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.06) 0 1px, rgba(0, 0, 0, 0) 1px 3px);
+  /*
+   * ── D442 — MẶT TRUNG TÍNH + NỀN MÔI TRƯỜNG (founder 27/09 tối) ─────────────────────────────
+   * *"Phần hiển thị tăng giảm các mã tài sản hay chỗ chốt vòng/thao tác của người chơi sẽ đổi thành màu sắc trung
+   * tính phù hợp với nền chứ màu xanh hiện tại hơi lạc quẻ."* ⇒ dải sáu mã và thanh thao tác thôi nỉ xanh, về XÁM KIM
+   * LOẠI; nỉ xanh nay chỉ còn ở quầy bài shop + chợ trait. Bàn thẻ (dải ô) thôi một màu cố định: nền đổi theo xu hướng
+   * (`MarketMap` — đi ngang · đi lên · đi xuống, màu lấy từ HỌ LÁ `HO_MAU` bơm inline, một nguồn).
+   * Đo WCAG trên đúng màu chữ đang chạy ở hai mặt trung tính (đáy #101419 · đỉnh #171c22):
+   *   `--lose` 6,68 / 6,19 · `--text-muted` 7,77 / 7,20 · `--win` 10,61 / 9,83 — cao hơn nỉ cũ (`--lose` 5,55 / 5,06).
+   * Nền môi trường = 16 % họ màu trên `--nen-moi-truong`: đi ngang #1e232b · đi lên #122d22 · đi xuống #2e1b20 —
+   *   `--lose` thấp nhất 5,33 (đi lên), `--text-muted` thấp nhất 6,20.
+   */
+  --mat-trung: #101419;
+  --mat-trung-sang: #20262f;
+  --mat-trung-vien: rgba(148, 163, 184, 0.3);
+  --mat-trung-mat:
+    linear-gradient(178deg,
+      color-mix(in srgb, var(--mat-trung-sang) 42%, var(--mat-trung)),
+      var(--mat-trung) 70%);
+  --nen-moi-truong: #070b10;
+  /* Vệt lóe đi lên: trắng ngả xanh (đặc tả "luồng sáng trắng-xanh mờ"). Hạt tro đi xuống: xám tro. */
+  --quet-sang: #e3fbff;
+  --tro-hat: #b4bcc8;
+
+  /* ===== Gradient chữ ký ===== */
+  --grad-logo: linear-gradient(135deg, #22d3ee, #4ade80);
+  --grad-bar-neutral: linear-gradient(90deg, #22d3ee, #8b5cf6);
+  --grad-bar-win: linear-gradient(90deg, #22d3ee, #4ade80);
+  --grad-bar-lose: linear-gradient(90deg, #7f4550, #8f4a4a);
+  --grad-cta: linear-gradient(90deg, rgba(34, 211, 238, 0.16), rgba(74, 222, 128, 0.14));
+
+  /* ===== Glow / bóng ===== */
+  --shadow-card: 0 30px 90px rgba(0, 0, 0, 0.6);
+  --shadow-card-sm: 0 20px 60px rgba(0, 0, 0, 0.5);
+  --shadow-panel: 0 24px 70px rgba(0, 0, 0, 0.75), 0 0 40px rgba(34, 211, 238, 0.14);
+  --glow-logo: 0 0 12px rgba(34, 211, 238, 0.7);
+  --glow-accent-bar: 0 0 4px rgba(34, 211, 238, 0.5);
+  --glow-win-bar: 0 0 18px rgba(74, 222, 128, 0.8);
+  --glow-cursor: 0 0 8px rgba(34, 211, 238, 0.8);
+
+  /*
+   * ===== Bo góc — TẤT CẢ VỀ 0 (§XI Modern Pixel UI) =====
+   *
+   * Bảy token này từng là một thang bo góc 22 → 5px. Lưới pixel KHÔNG CÓ đường
+   * cong, chỉ có bậc; nên toàn bộ thang về 0 và "góc" giờ do `clip-path` cắt
+   * khấc trong `styles/pixel.module.css` đảm nhiệm.
+   *
+   * HIỆN KHÔNG CÒN CHỖ NÀO THAM CHIẾU mấy token này — 169 khai báo đã sửa
+   * thẳng thành `border-radius: 0`. Giữ lại là CÓ CHỦ Ý, làm lưới an toàn: ai
+   * quen tay viết `var(--radius-card)` thì nhận 0 chứ không nhận 22px cũ.
+   *
+   * ⚠ `--radius-pill` từ 999px → 0: các chấm/viên tròn thành ô vuông. ĐÚNG Ý ĐỒ.
+   * Trên màn mà icon, thẻ, khung, nút đều pixel, một viên bo tròn là vật duy
+   * nhất có đường cong và mắt bắt ra ngay.
+   *
+   * NGOẠI LỆ DUY NHẤT `border-radius: 50%` (avatar tròn) — không đi qua token
+   * này, và `web/tests/pixelui.test.tsx` cố ý tha, vì ảnh đại diện tròn là quy ước nhận
+   * dạng người, không phải trang trí.
+   */
+  --radius-card: 0px;
+  --radius-panel: 0px;
+  --radius-block: 0px;
+  --radius-badge: 0px;
+  --radius-chip: 0px;
+  --radius-tag: 0px;
+  --radius-pill: 0px;
+
+  /*
+   * ===== LƯỚI AN TOÀN — BIẾN QUEN TAY (08/08) =====
+   * Cùng vai với cụm radius 0 ở dưới: `--text` và `--neon` KHÔNG có trong bộ
+   * token gốc nhưng đã bị viết quen tay ở nhiều module. Với CHỮ, biến hỏng
+   * rơi về kế thừa — thường thoát nạn; nhưng trên BUTTON nó rơi về
+   * `buttontext` ĐEN, và trong SVG `fill` rơi về ĐEN — founder chụp được cả
+   * hai (radar đen + hộp thoát trận chữ đen, 08/08). Alias chặn cả LỚP lỗi;
+   * code mới vẫn phải dùng tên gốc (--text-body / --accent).
+   */
+  --text: var(--text-body);
+  --neon: var(--accent);
+
+  /* ===== Font ===== */
+  /* ── FONT: MỘT HỌ DUY NHẤT, HAI VAI (D182) ────────────────────────────
+   * Cả app dùng Handjet — font PIXEL, biến, tự host qua npm. Xem lý do chọn ở
+   * đầu `main.tsx`. Hai token dưới GIỮ TÊN CŨ vì ~8 file đang gọi chúng; cái
+   * đổi là chúng nay trỏ về CÙNG MỘT HỌ, nên không còn hai kiểu chữ trên một màn.
+   *
+   * ⚠ ĐỪNG trả `--font-human` về một font vector khác cho "dễ đọc câu dài". Đó
+   * đúng là cái đã tạo ra cảm giác thập cẩm: art pixel + chữ vector. Cần câu dài
+   * dễ đọc hơn thì tăng `--fs-*` hoặc nới `--elsh`, đừng đổi họ chữ.
+   */
+  /*
+   * ── FONT (31/08, sau hai lượt sai) ─────────────────────────────────────
+   *
+   * Handjet là font app, đúng như founder duyệt. Nhưng nó ĐÃ làm chữ vô hình
+   * khắp app suốt một ngày, và nguyên nhân là ĐÚNG MỘT CON SỐ dưới đây.
+   *
+   * ⚠⚠ `ELSH` (element shape) KHÔNG ĐƯỢC BẰNG 0. D182 đặt `--elsh: 0` kèm chú
+   * thích "0 = ô vuông" — sai. Đo trên trình duyệt, cùng chuỗi, cùng cỡ 44px:
+   *     normal ✓ · **ELSH 0 ✗ TRẮNG TRƠN** · 1 ✓ · 4 ✓ · 8 ✓ · 16 ✓
+   * Ở 0 thì font dựng xong, đo được bề rộng, nhưng KHÔNG VẼ RA GÌ. Hỏng im
+   * lặng tuyệt đối: không lỗi, không cảnh báo, computed style trông hợp lệ.
+   *
+   * ⚠ Và một chẩn đoán SAI phải ghi lại để không ai đi lại: bản vá đầu (D192)
+   * quy tội cho "ô lưới pixel = font-size/17 nhỏ hơn một điểm ảnh" và gỡ hẳn
+   * Handjet. Lý lẽ đó nghe rất hợp, có cả số đo canvas đứng sau — nhưng canvas
+   * rasterise KHÁC bộ vẽ DOM, nên số đó không chứng minh điều nó tưởng. Phép
+   * thử ĐÚNG là A/B ngay trên phần tử thật: cùng chỗ, cùng chuỗi, đổi mỗi font.
+   */
+  --font-mono: 'Handjet Variable', 'Handjet', ui-monospace, SFMono-Regular, monospace;
+  --font-human: 'Handjet Variable', 'Handjet', ui-monospace, SFMono-Regular, monospace;
+  /*
+   * Dự phòng đọc được, cho ngày cần một khối chữ dài hoặc một ô nhập.
+   * KHÔNG phải font thân — đừng dán đại trà.
+   */
+  --font-vector: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* ── HAI TRỤC HÌNH DẠNG CỦA HANDJET ───────────────────────────────────
+   * Đây là cần gạt "chất pixel", và nó là thứ font tĩnh không có:
+   *   ELSH (element shape) 0–16 — 0 = Ô VUÔNG ĐẶC (pixel thật), 16 = chấm tròn.
+   *                               Mặc định của font là 2 (hơi bo) — quá mềm cho
+   *                               một game đặt cạnh art lưới vuông, nên hạ về 0.
+   *   ELGR (element grid) 1–2   — độ dày nét theo lưới. Founder xem bản ELGR 1 và
+   *                               nói "chữ hơi mảnh thật" ⇒ nâng lên 1,4. Đây là
+   *                               cần gạt ĐÚNG cho việc đó vì nó dày nét ở TẦNG
+   *                               FONT, nên ăn cả 270 chỗ tự khai `font-weight`
+   *                               riêng — `--font-dam` bên dưới thì không.
+   *                               ⚠ Còn dư biên tới 2,0 nếu vẫn thấy mảnh.
+   * Đổi hai số này là đổi diện mạo TOÀN APP — chỉnh ở đây, đừng gõ
+   * `font-variation-settings` rải rác trong component (bản thứ hai sẽ trôi).
+   */
+  /*
+   * ⚠ HAI TRỤC CỦA HANDJET — GIỮ LẠI NHƯNG KHÔNG AI DÙNG (31/08).
+   * Chúng chỉ có nghĩa khi Handjet là font đang vẽ. Font thân đã hoàn nguyên,
+   * nên tới lúc nối `--font-hienthi` vào chữ TO thì mới cắm lại — và lúc đó
+   * phải nhớ: thuộc tính rút gọn `font` (kể cả `font: inherit`, repo có 46 chỗ
+   * trên 21 file) RESET `font-variation-settings` về `normal`, nên đặt ở `body`
+   * là không tới nơi. Đã đo: nhãn 9px trả về `normal` dù tokens khai 1.4.
+   */
+  /* ⚠ TUYỆT ĐỐI KHÔNG ĐẶT 0 — ở 0 font vẽ ra RỖNG. Xem khối font ở trên. */
+  --elsh: 1;
+  --elgr: 1.4;
+
+  /*
+   * ĐỘ ĐẬM NỀN — cần gạt RẺ NHẤT để chữ pixel đọc rõ hơn ở cỡ nhỏ, và nó rẻ vì
+   * một lý do đo được: trong Handjet, BỀ RỘNG KÝ TỰ KHÔNG ĐỔI THEO NÉT (đo:
+   * advance của '0' · 'M' · '%' giống hệt nhau ở nét 100 và 900). Nên tăng nét
+   * làm chữ ĐẬM hơn mà KHÔNG xê dịch một pixel bố cục nào.
+   * ⇒ Chữ khó đọc thì tăng số này TRƯỚC, đừng vội tăng cỡ chữ — tăng cỡ mới là
+   *   thứ làm tràn dòng và vỡ hộp.
+   * ⚠ Hệ quả phụ đã biết: nét 700 và 800 trong Handjet cho ra BỀ RỘNG Y HỆT nhau
+   *   (font cũ JetBrains chỉ có 3 nét thật nên trình duyệt bôi đậm giả, và nét
+   *   giả có giãn thêm). Bố cục nào từng dựa vào chênh lệch bề rộng 700↔800 thì
+   *   nay hết phân biệt được — đó là chuyện của BetBar, xem chú thích ở đó.
+   */
+  --font-dam: 600;
+
+  /* ── THANG CỠ CHỮ (doc §3) ─────────────────────────────────────────────
+   * Doc §7.1 đòi spacing/radius/typography nằm CÙNG file token với màu. Trước
+   * 25/07 file này chỉ có màu + radius + font-family, nên mỗi màn tự bịa số:
+   * đo được 17 cỡ chữ khác nhau trên 4 file CSS và 3 giá trị padding card.
+   * Mắt đọc ra "chắp vá", không đọc ra "hệ thống" — đó là một gốc rễ thật của
+   * cảm giác thô sơ, không phải chuyện thẩm mỹ mơ hồ.
+   *
+   * Thang ĐÓNG. Cần cỡ mới thì thêm token, đừng gõ số vào màn.
+   */
+  --fs-micro: 9px;    /* nhãn siêu nhỏ trong thẻ bài, badge */
+  --fs-label: 10.5px; /* NHÃN viết hoa + letter-spacing */
+  --fs-meta: 11px;    /* metadata, breadcrumb, chú thích */
+  --fs-body: 12.5px;  /* chữ nội dung mono */
+  --fs-human: 14px;   /* câu tiếng Việt tự nhiên (font-human) */
+  --fs-title: 16px;   /* câu hỏi kèo, tên cửa */
+  --fs-stat: 22px;    /* số trong stat card */
+  --fs-hero: 32px;    /* số lớn nhất một màn */
+
+  /* ── THANG GIÃN CHỮ (D443) — ba nấc theo VAI, đóng như thang cỡ ───────────
+   * Founder 28/09: *"phải đồng bộ font chữ đi chứ bro. nhìn thiếu chuyên nghiệp quá"*. Đo màn trận lúc ấy: 12 mức giãn
+   * chữ khác nhau (0,02–0,18em, 1px, 0,7px) cho cùng vài vai. Nay: CON SỐ `0` · chữ trên NÚT / TÊN lá `--ls-nut` ·
+   * NHÃN viết hoa nhỏ `--ls-nhan`. Cần nấc mới thì thêm token, đừng gõ số vào màn.
+   */
+  --ls-nut: 0.08em;
+  --ls-nhan: 0.12em;
+
+  /* ── THANG KHOẢNG (doc §4: padding card 14–16, gap dọc 8–12) ──────────
+   * Luật §4.7: khoảng GIỮA nhóm phải ≥1.5× khoảng TRONG nhóm, nếu không thì
+   * không có phân cấp thị giác — mọi thứ trông như một danh sách phẳng.
+   */
+  --pad-card: 14px;
+  --pad-block: 11px;
+  --gap-tight: 6px;   /* trong một phần tử */
+  --gap-item: 10px;   /* giữa các phần tử cùng nhóm */
+  --gap-group: 18px;  /* GIỮA các nhóm — 1.8× gap-item */
+
+  /* Đường phân cách nét đứt — chất "hoá đơn terminal" (doc §4). */
+  --sep-dashed: 1px dashed var(--border-idle);
+
+  /* ===== Khung mobile-first ===== */
+  /*
+   * ⚠ TÁCH ĐÔI 04/08. Trước đó `--shell-width` gánh HAI vai cùng lúc: trần của
+   * KHUNG NGOÀI, và TẦM ĐỌC của chữ bên trong. Một biến hai vai thì không nới
+   * được vai này mà không nới luôn vai kia — đó là lý do thật khiến màn ngang
+   * trông như bất khả thi, chứ không phải vì DoiThuStrip (xem đính chính ở
+   * docs/yeu-cau-ky-thuat/02-discord.md §1.5).
+   *   · `--shell-width` = trần khung ngoài. Nới được.
+   *   · `--tam-width`   = bề ngang tối đa của một KHỐI CHỮ. KHÔNG nới —
+   *     dòng chữ dài quá thì mắt lạc dòng, đó là giới hạn của mắt người, không
+   *     phải của màn hình.
+   */
+  --shell-width: 390px;
+  --tam-width: 390px;
+
+  /* D532 — MÀU TIN TRONG MÀN (demo `minigame-bat-day.html`, founder 03/10): HƯỚNG câu chữ = màu (tốt xanh · xấu đỏ · úp mở xám); UY TÍN nguồn = sắc
+     độ, NHẠT (1) → ĐẬM (5). Tương phản trên nền đồ thị #050b12 — xấu 14,5→4,8 · tốt 16,0→7,6 · úp mở 15,2→5,1 (nấc đậm nhất vẫn đọc được).
+     Chép NGUYÊN mã + tên của demo (A11.25). */
+  --xau-1:#f3d6d6; --xau-2:#f0aeae; --xau-3:#ee8080; --xau-4:#ef5050; --xau-5:#f02a2a;
+  --tot-1:#d3eedc; --tot-2:#a8e3bd; --tot-3:#77d69a; --tot-4:#45c674; --tot-5:#1fb85a;
+  --mo-1:#dde2ea;  --mo-2:#c3cbd8;  --mo-3:#a6b2c4;  --mo-4:#8a99b0;  --mo-5:#71839e;
+
+  /*
+   * ===== TẦNG KHÔNG GIAN (SPEC `ui-tang-khong-gian`, luật ở `docs/ui-ux/09-tang-khong-gian.md`) =====
+   * Ba lớp trên trục Z: NỀN (vignette, chỉ số tổng + hình khối) → Ô NỔI (bóng pixel cứng, một việc chính) → LỚP TRƯỢT (chi
+   * tiết · luồng nhiều bước, chỉ hiện khi chạm). Tên token = lớp nó thuộc về; component đọc token, không tự gõ số.
+   */
+  --z-vignette: 52;           /* vignette của khung không-cuộn: phủ lên ô và BottomNav (50), dưới Oracle (55) */
+  --z-man-toi: 60;            /* nền tối mờ sau lớp trượt — trên BottomNav (50) và bong bóng Oracle (55) */
+  --z-tam-truot: 61;          /* lớp trượt */
+  --nen-vignette: inset 0 0 90px rgba(0, 0, 0, 0.75);   /* LỚP NỀN: tối dần ra mép, dồn mắt vào ô */
+  --nen-man-toi: rgba(2, 4, 9, 0.72);                   /* màn che sau lớp trượt */
+  --o-vien: inset 1px 1px 0 rgba(248, 250, 252, 0.12), inset -1px -1px 0 rgba(10, 6, 24, 0.6);   /* vát của Ô NỔI */
+  --tam-bong: 0 -10px 30px rgba(0, 0, 0, 0.6);          /* bóng hắt LÊN của lớp trượt (nó đè từ dưới lên) */
+  /* THANG CHỮ riêng của khung không-cuộn (demo 11/10): Handjet nhỏ ở 390 px nên mỗi nấc to hơn thang chung một chút. */
+  --tk-micro: 11px; --tk-label: 13px; --tk-body: 15px; --tk-title: 19px; --tk-hero: 40px;
+  /* Chữ MỜ nhất của khung không-cuộn (nhãn cột, ô chưa có): `--text-dim` chung của app là xám SÁNG, nên pha riêng từ chữ muted + nền. */
+  --tk-dim: color-mix(in srgb, var(--text-muted) 62%, var(--bg-page));
+  /* MẶT GIẤY của lá bài trên tay bài banner Hub (founder 11/10: "mặt giấy kem, góc bo, viền mảnh") — vật thật nên có màu thật. */
+  --giay-la: #fdfaf3; --giay-la-toi: #f1e9d8; --giay-la-vien: #cdbf9f;
+}

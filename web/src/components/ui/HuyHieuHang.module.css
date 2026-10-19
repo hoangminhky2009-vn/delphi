@@ -1,0 +1,50 @@
+/* BÓNG HUY HIỆU theo bậc (founder 11/10, chép từ demo hub-tang-khong-gian.html):
+   SẮT/ĐỒNG phẳng · BẠC→BẠCH KIM bóng pixel rơi đậm dần · KIM CƯƠNG/ELITE bóng ĐỘNG.
+   Chỉ số hậu tố = chỉ số bậc 0..6 (SẮT → ELITE). @keyframes nằm CÙNG file này (lint:css-anim — CSS Modules đổi
+   tên keyframe toàn cục nên khai ở file khác là hiệu ứng chết câm). */
+.hh {
+  display: block;
+  flex-shrink: 0;
+  overflow: visible;
+}
+.hh2 { filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.45)); }
+.hh3 { filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.55)); }
+.hh4 {
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.65)) drop-shadow(0 0 3px rgba(94, 234, 212, 0.35));
+}
+.hh5 { animation: bongKimCuong 2.4s ease-in-out infinite; }
+.hh6 { animation: bongElite 2.8s ease-in-out infinite; }
+
+@keyframes bongKimCuong {
+  0%, 100% {
+    transform: translateY(0);
+    filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.7)) drop-shadow(0 0 3px rgba(96, 165, 250, 0.45));
+  }
+  50% {
+    transform: translateY(-1.5px);
+    filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.45)) drop-shadow(0 0 8px rgba(165, 243, 252, 0.75));
+  }
+}
+@keyframes bongElite {
+  0%, 100% {
+    transform: translateY(0);
+    filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.75)) drop-shadow(0 0 4px rgba(167, 139, 250, 0.5));
+  }
+  50% {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 5px 0 rgba(0, 0, 0, 0.45)) drop-shadow(0 0 10px rgba(251, 191, 36, 0.7));
+  }
+}
+
+/* Bậc CHƯA ĐẠT (thang toàn cảnh): xám tối, KHÔNG nhấp nháy — bóng động là phần thưởng của người đã đạt. */
+.chua {
+  animation: none;
+  filter: grayscale(1) brightness(0.55);
+}
+
+/* Sticker chưa có: bóng XÁM đặc, sáng hơn nền rõ — thấy dáng, biết là chưa có (demo `.sticker.chua svg`). */
+.stickerChua { filter: brightness(0) invert(0.5); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hh5, .hh6 { animation: none; }
+}

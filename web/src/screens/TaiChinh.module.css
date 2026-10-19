@@ -1,0 +1,312 @@
+/* TÀI CHÍNH CÁ NHÂN — pixel UI (§XI): bo góc 0, không blur, neon một màu. */
+
+.tieuDe {
+  margin: 0 0 4px;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+}
+
+/* ── Thẻ tính cách — phần để khoe ─────────────────────────────────────── */
+
+.the {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+/* Mặt lá bài: emoji + tên (bố cục của `.the` trước 13/09). */
+.theMat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* 13/09 — dòng chỉ số in dưới mặt: ba dấu kỹ năng, ngăn bằng đường đứt cùng màu khung thẻ. */
+.theKyNang {
+  padding-top: 10px;
+  border-top: 1px dashed color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* Emoji to CỐ Ý — trang khoe (founder 08/08), khác luật bàn đấu D47. */
+.theEmoji {
+  font-size: 52px;
+  line-height: 1;
+}
+
+.theChu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.theTen {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+}
+
+.theDocVi {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-body);
+}
+
+.goiY {
+  margin: 10px 0 0;
+  padding: 6px 8px;
+  border-left: 2px solid var(--accent);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* ── Khối chung ───────────────────────────────────────────────────────── */
+
+.khoi { margin-top: 18px; }
+
+.khoiNhan {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+/* 13/09 — nhãn khối mang `!` ở mép phải; câu giải thích mở ngay dưới nhãn (xem `NhanGiai`). */
+.nhanGiai {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.giaiNhan { margin: -2px 0 8px; }
+
+/*
+ * KHỐI SỐ GỐC — "phần soi kỹ", đứng cuối trang (founder 11/08). Tách hẳn khỏi
+ * mạch khoe bằng một đường kẻ trên và chữ nhỏ hơn: người muốn khoe thì dừng ở
+ * radar, người muốn soi thì cuộn tiếp. Không giấu — chỉ xếp đúng thứ tự đọc.
+ */
+.khoiSo {
+  margin-top: 26px;
+  padding-top: 14px;
+  border-top: 1px solid color-mix(in srgb, var(--text-dim) 30%, transparent);
+  opacity: 0.86;
+}
+
+.khoiNhanPhu {
+  margin-bottom: 8px;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.chuThich {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.ranGioi {
+  margin: 18px 0 0;
+  padding: 8px;
+  border: 1px dashed color-mix(in srgb, var(--text-dim) 45%, transparent);
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.lienKet { color: var(--accent); }
+
+/* ── Radar ────────────────────────────────────────────────────────────── */
+
+.radar {
+  display: block;
+  width: min(300px, 100%);
+  margin: 0 auto;
+}
+
+.radarLuoi {
+  fill: none;
+  stroke: color-mix(in srgb, var(--text-dim) 35%, transparent);
+  stroke-width: 1;
+}
+
+.radarHinh {
+  fill: color-mix(in srgb, var(--accent) 22%, transparent);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.radarDiem { fill: var(--accent); }
+
+.radarDiemMo { fill: color-mix(in srgb, var(--text-dim) 60%, transparent); }
+
+.radarNhan {
+  fill: var(--text-body);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+}
+
+.radarNhanMo {
+  fill: color-mix(in srgb, var(--text-dim) 70%, transparent);
+  font-size: 9px;
+}
+
+/* ── Đường độ chuẩn ───────────────────────────────────────────────────── */
+
+.duong {
+  display: block;
+  width: 100%;
+  height: 40px;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-dim) 35%, transparent);
+}
+
+/* Đường độ chuẩn nay là một DÒNG trong khối số gốc, không còn khối riêng. */
+.duongOm { margin-top: 10px; }
+
+.duongNhan {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.duongNet {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+/* ── Bảng số ──────────────────────────────────────────────────────────── */
+
+.bang {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dong {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  border-bottom: 1px dashed color-mix(in srgb, var(--text-dim) 30%, transparent);
+  padding-bottom: 3px;
+}
+
+.dongTen { color: var(--text-dim); }
+
+.dongPhu { color: color-mix(in srgb, var(--text-dim) 70%, transparent); }
+
+.dongGt {
+  color: var(--text-body);
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ── Dòng token ───────────────────────────────────────────────────────── */
+
+.dongToken {
+  display: grid;
+  grid-template-columns: minmax(120px, 1.2fr) 1fr auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  border-bottom: 1px dashed color-mix(in srgb, var(--text-dim) 30%, transparent);
+  padding-bottom: 4px;
+}
+
+.thanhCum {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 40px;
+}
+
+.thanhVao {
+  display: block;
+  height: 5px;
+  background: var(--accent);
+}
+
+.thanhRa {
+  display: block;
+  height: 5px;
+  background: color-mix(in srgb, var(--text-dim) 75%, transparent);
+}
+
+/* ── Câu tự khai — thang 0..10, nút pixel, không bo góc ───────────────── */
+.thangTuKhai {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.nutThang {
+  padding: 6px 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text-body);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-dim) 45%, transparent);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.nutThang:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.nutThang:disabled { opacity: 0.5; cursor: default; }
+
+/*
+ * ── KHUNG HÌNH ĐẦU: RADAR BỊ CHẶN CHIỀU CAO (founder 07/09) ─────────────────
+ * Trần 280px cho CẢ khối (nhãn + hình). Đo trên máy thật: ngân sách khung đầu là
+ * 684px, breadcrumb+tiêu đề ăn 112, thẻ ~210 ⇒ radar chỉ còn ~280 nếu muốn cả
+ * hai nằm trọn một màn. Không chặn thì radar tự nở theo bề ngang máy và đẩy
+ * chính nó xuống dưới nếp gấp trên máy hẹp.
+ */
+.khoiRadar {
+  max-height: 280px;
+  overflow: hidden;
+}
+.khoiRadar .radar {
+  display: block;
+  margin: 0 auto;
+  max-height: 236px;
+}
+
+/*
+ * ── NẾP GẤP (progressive disclosure) ───────────────────────────────────────
+ * `<details>` thuần — cùng idiom `BangDienTu`/`HuongDan`. Mũi tên mặc định của
+ * trình duyệt bị bỏ và thay bằng ▸/▾ để khớp chữ pixel; `list-style` phải tắt ở
+ * CẢ hai cú pháp vì WebKit chỉ nghe `::-webkit-details-marker`.
+ */
+.gap {
+  border: 1px solid var(--border-idle);
+  border-radius: 0;
+  background: var(--surface-idle);
+  margin-top: 10px;
+}
+.gapNhan {
+  cursor: pointer;
+  list-style: none;
+  padding: 11px 12px;
+  font-size: 10.5px;
+  letter-spacing: 1.6px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.gapNhan::-webkit-details-marker { display: none; }
+.gapNhan::before { content: '▸ '; color: var(--accent); }
+.gap[open] > .gapNhan::before { content: '▾ '; }
+.gap[open] > .gapNhan { border-bottom: 1px solid var(--border-idle); }
+.gapNhan:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+/* Ruột của nếp: chừa lề để nội dung không dính mép khung. */
+.gap > *:not(.gapNhan) { margin-left: 12px; margin-right: 12px; }
+.gap > *:last-child { margin-bottom: 12px; }

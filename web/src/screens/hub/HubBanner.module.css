@@ -1,0 +1,176 @@
+/*
+ * BANNER Ô ĐẤU TRƯỜNG + TAY BÀI XOÈ — bám demo CHỐT `docs/ui-ux/demo/hub-tang-khong-gian.html` (11/10: "bê y nguyên").
+ *
+ * Màu: chỉ token (`tokens.css`); mặt giấy lá bài có token riêng (`--giay-la*`). Lá bài: góc KHẤC bằng `clip-path` (§XI luật 1 —
+ * không `border-radius`), bóng cứng bằng `drop-shadow` blur 0. Hiệu ứng: cảnh chuyển MỜ (ÁNH SÁNG ⇒ ease-in-out), vật chỉ đổi
+ * `opacity` / `transform`.
+ */
+.banner {
+  composes: hubNay from '@/styles/motion.module.css';
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 120px;
+  margin: 8px 0 10px;
+  background: radial-gradient(80% 70% at 50% 45%, var(--felt-sang), var(--felt));
+  box-shadow: inset 0 6px 18px rgba(0, 0, 0, 0.7), inset 0 -2px 0 rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.banner:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+/* Vân nỉ dọc rất nhạt — mặt bàn, không phải hoạ tiết. */
+.banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 2px, transparent 2px 6px);
+  pointer-events: none;
+}
+.bannerLun {
+  transition: none;
+  transform: scale(0.985);
+  filter: brightness(1.15);
+}
+
+/* ── cảnh: chuyển MỜ vào nhau (ÁNH SÁNG ⇒ mềm) ── */
+.canh {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity var(--nhip-hub-banner-mo, 900ms) ease-in-out;
+}
+.hien { opacity: 1; }
+/* Cảnh đầu chừa dải "BẠN CÓ BIẾT?" ở đáy banner. */
+.canh[data-i='0'] { padding-bottom: 96px; }
+.vat {
+  display: block;
+  transform: scale(1.06);
+  transition: transform var(--nhip-hub-banner, 10000ms) linear;
+}
+.hien .vat { transform: scale(1); }
+/* Tay bài TĨNH (founder 11/10: không hiệu ứng) — khai SAU `.hien .vat` cùng độ ưu tiên nên thắng. */
+.vat.vatTinh { transform: none; transition: none; }
+.hao {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--gold) 16%, transparent), transparent 65%);
+}
+
+/* ── chữ đáy banner ── */
+.chu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 28px 9px 8px;
+  background: linear-gradient(180deg, transparent, rgba(2, 10, 6, 0.78) 38%, rgba(2, 8, 5, 0.92));
+  transition: opacity var(--nhip-hub-banner-chu, 350ms) ease-in-out;
+  pointer-events: none;
+}
+.chuDoi { opacity: 0; }
+.hangTag { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.tag { font-size: var(--tk-micro); letter-spacing: 0.14em; color: var(--gold-amber); }
+.doc { font-size: var(--tk-label); color: var(--accent-bright); white-space: nowrap; }
+.goi {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.22;
+  color: var(--text-title);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.7);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── chấm cảnh + thanh thời gian ── */
+.cham { position: absolute; top: 8px; right: 8px; z-index: 2; display: flex; gap: 4px; pointer-events: none; }
+.cham i {
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.22);
+  transition: background-color 120ms steps(2, end);
+}
+.cham i.on { background: var(--gold-amber); }
+@keyframes chayTienDo {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.tienDo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: 100%;
+  height: 2px;
+  background: color-mix(in srgb, var(--gold-amber) 70%, transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: chayTienDo var(--nhip-hub-banner, 10000ms) linear 1 forwards;
+  pointer-events: none;
+}
+
+/* ═════════ TAY BÀI XOÈ ═════════
+   Trái → phải: TĂNG → THIÊN NGA ĐEN → GIẢM; TĂNG đè trên cùng, GIẢM nằm dưới. Art = lưới 48×48 của chính lá trong game, in
+   phẳng trên mặt giấy. Lá dựng 150 px rồi thu theo bề rộng banner (`--lb-k`). */
+.lbBo {
+  display: block;
+  position: relative;
+  width: calc(350px * var(--lb-k, 0.6));
+  height: calc(272px * var(--lb-k, 0.6));
+}
+.lbXoay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 350px;
+  height: 272px;
+  transform: scale(var(--lb-k, 0.6));
+  transform-origin: 0 0;
+}
+.lbO {
+  position: absolute;
+  left: 100px;
+  top: 34px;
+  width: 150px;
+  aspect-ratio: 5 / 7;
+  transform-origin: 50% 122%;
+  transform: rotate(var(--goc));
+  /* Bóng CỨNG (blur 0) theo hình khấc của lá — `box-shadow` sẽ bị `clip-path` cắt mất. */
+  filter: drop-shadow(-3px 4px 0 rgba(0, 0, 0, 0.45));
+}
+.lbLa {
+  position: absolute;
+  inset: 0;
+  padding: 10px;
+  background: linear-gradient(170deg, var(--giay-la) 0%, var(--giay-la-toi) 100%);
+  box-shadow: inset 0 0 0 1px var(--giay-la-vien);
+  /* Góc khấc 6 px (§XI luật 1: lưới pixel không có đường cong) — thay cho góc bo của lá giấy. */
+  clip-path: polygon(
+    6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px),
+    calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px
+  );
+}
+.lbKhung { position: absolute; inset: 9px; box-shadow: inset 0 0 0 1.5px var(--vien); }
+.lbHinh { position: absolute; left: 50%; top: 50%; width: 78%; transform: translate(-50%, -50%); }
+.lbHinh svg, .lbGoc svg { display: block; width: 100%; height: auto; }
+.lbGoc { position: absolute; width: 24px; }
+/* Hình góc ở TRÊN-PHẢI: tay bài xoè lá trái đè lên, phần lộ của lá dưới là mép PHẢI (như bài thật cầm tay trái). */
+.lbTr { right: 14px; top: 14px; }
+.lbBl { left: 14px; bottom: 14px; transform: rotate(180deg); }
+.lb_tang, .lb_giam, .lb_thien_nga { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .canh, .vat, .chu, .cham i { transition: none; }
+  .tienDo { animation: none; }
+}

@@ -1,0 +1,65 @@
+/* Màn nhắc đồng ý — cửa khoá, nên nó phải nói ra là khoá vì gì và mở thế nào.
+   Không bo góc (§XI pixel UI). */
+
+.boc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 16px;
+  text-align: center;
+  border: 1px solid var(--border-accent-soft);
+  background: var(--surface-card);
+}
+
+.tieuDe {
+  margin: 6px 0 0;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.chinh {
+  margin: 0;
+  max-width: 34ch;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-body);
+}
+
+.phu {
+  margin: 0;
+  max-width: 38ch;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+
+.nut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.doc {
+  color: var(--accent);
+  font-size: 13px;
+  /* mốc chạm được trên điện thoại */
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.loi {
+  margin: 0;
+  font-size: 13px;
+  color: var(--lose-soft);
+}
+
+.chan {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}

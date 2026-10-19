@@ -1,0 +1,96 @@
+/* PHÒNG CHỜ — lớp phủ toàn màn, §XI: khấc, steps(), không bo, bóng cứng. */
+.phu {
+  position: fixed;
+  inset: 0;
+  z-index: 66;
+  width: min(100%, var(--shell-width, 390px));
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: rgba(4, 7, 13, 0.96);
+  overflow-y: auto;
+  animation: phuVao 180ms steps(6, end) both;
+}
+@keyframes phuVao { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.dau { display: flex; flex-direction: column; gap: 2px; }
+.nhan { font-size: 15px; font-weight: 800; letter-spacing: 0.2em; color: var(--accent); }
+.cheDo { font-size: 10px; letter-spacing: 0.1em; color: var(--gold-amber, #fbbf24); font-weight: 700; }
+/* Lưới ghế: 4 cột, ghế 32px avatar + tên. */
+.ghe { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.o {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 78px;
+  padding: 8px 4px;
+  border: 1px dashed rgba(93, 114, 144, 0.4);
+  color: var(--text-muted);
+  text-align: center;
+}
+.oLo {
+  border: 1px solid var(--border-accent, rgba(34, 211, 238, 0.4));
+  background: rgba(34, 211, 238, 0.05);
+  color: var(--text-bright);
+  animation: gheLo 260ms steps(4, end) both;
+}
+@keyframes gheLo { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.oToi { border-color: var(--gold-amber, #fbbf24); background: rgba(251, 191, 36, 0.06); }
+.ten { font-size: 9px; font-weight: 700; letter-spacing: 0.04em; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.loai { font-size: 8px; color: var(--text-muted); letter-spacing: 0.06em; }
+.cho {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px;
+  border: 1px solid rgba(93, 114, 144, 0.4);
+  color: var(--text-muted); font-weight: 800;
+  animation: choNhay 1.2s steps(2, end) infinite;
+}
+@keyframes choNhay { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+.chu { margin: 0; font-size: 10.5px; line-height: 1.5; color: var(--text-dim); }
+.doi { display: flex; flex-direction: column; gap: 6px; padding: 8px; border: 1px solid rgba(34, 211, 238, 0.3); }
+.doiDau { font-size: 10px; letter-spacing: 0.14em; color: var(--accent); font-weight: 700; }
+.doiPhu { color: var(--text-muted); font-weight: 400; letter-spacing: 0.04em; }
+.doiDs { display: flex; flex-wrap: wrap; gap: 6px; }
+.doiThe { padding: 3px 8px; border: 1px solid rgba(93, 114, 144, 0.4); font-size: 10px; color: var(--text-dim); }
+.doiToi { border-color: var(--gold-amber, #fbbf24); color: var(--gold-amber, #fbbf24); }
+.hangNut { display: flex; gap: 8px; margin-top: auto; }
+.nutChinh {
+  composes: nut from '@/styles/pixel.module.css';
+  flex: 1;
+  padding: 12px;
+  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.16);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+.nutPhu {
+  composes: nut from '@/styles/pixel.module.css';
+  flex: 1;
+  padding: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.loi { font-size: 11px; color: var(--lose-tag); }
+/* D329 — NÚT CHÍNH chưa từng mang màu của nó: `composes: nut` nạp SAU lớp này nên nền/viền/màu của
+   `pixel.module.css` thắng (cùng lỗi D321 ở bàn đấu). Demo `buoi-do-vao.html` vẽ nút chính màu nhấn — tăng độ
+   đặc hiệu bằng lớp cha, không đụng `pixel.module.css` (nhà chung của ~40 nút). */
+.hangNut .nutChinh { border-color: var(--accent); background: rgba(34, 211, 238, 0.16); color: var(--accent); }
+/* D329 — THẺ ĐỒNG Ý BUỔI ĐO (demo `docs/ui-ux/demo/buoi-do-vao.html` §①). Viền VÀNG: đây là chỗ DỪNG
+   LẠI đọc, không phải một ô trạng thái xanh như lưới ghế. */
+.dongY { display: flex; flex-direction: column; gap: 8px; padding: 10px; border: 1px solid var(--gold-amber, #fbbf24); background: rgba(251, 191, 36, 0.04); }
+.dongYDau { display: flex; align-items: baseline; gap: 8px; }
+.dongYTen { flex: 1; font-size: 13px; font-weight: 800; letter-spacing: 0.12em; color: var(--gold-amber, #fbbf24); }
+.dongYBan { font-size: 9px; letter-spacing: 0.08em; color: var(--text-muted); }
+.dongYChu { margin: 0; font-size: 11px; line-height: 1.5; color: var(--text-dim); }
+.dongYNhan { display: block; margin-bottom: 2px; font-size: 9px; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); }
+.dongYChot { margin: 0; font-size: 10px; line-height: 1.5; color: var(--text-muted); border-top: 1px dashed rgba(93, 114, 144, 0.4); padding-top: 8px; }
+@media (prefers-reduced-motion: reduce) {
+  .phu, .oLo, .cho { animation: none; }
+}
+/* D392 — nút chính dạng LINK (mở Phiếu 1 ở tab mới): cùng hình nút chính, bỏ gạch chân của thẻ <a>. */
+.nutLink { display: flex; align-items: center; justify-content: center; text-decoration: none; }

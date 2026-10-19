@@ -1,0 +1,118 @@
+/*
+ * CỌC CHIP trên lá — vật NHỎ ĐẶC (luật 5 pixel.module.css): chip 15×5 tô màu
+ * PHẲNG, nổi bằng vát `inset` chứ không gradient; không bo góc, không blur.
+ * Đứng absolute trong `.card` của GameCard (position: relative, overflow hidden),
+ * z-index 4 = trên art (1) và scanline (3), dưới nút (!) (5).
+ */
+.coc {
+  position: absolute;
+  z-index: 4;
+  right: 6px;
+  bottom: 5px;
+  left: 6px;
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+  height: 26px;
+  pointer-events: auto;
+}
+
+.coc[role='button'] { cursor: pointer; }
+.coc[role='button']:focus-visible { outline: 2px solid var(--gold-amber, #fbbf24); outline-offset: 2px; }
+
+/* Cột: chip cũ ở DƯỚI, chip mới ở TRÊN (column-reverse). */
+.cot {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 1px;
+}
+
+/*
+ * ⭐ CHIP TO HƠN 15×5 → 17×6 (24/08, founder: *"cả hai"* — vừa nhuộm khung lá,
+ * vừa làm cọc rõ hơn). Cọc là thứ DUY NHẤT nói "tôi đang ở mã này bao nhiêu",
+ * mà ở 15×5 nó chiếm dưới 2% mặt lá và nằm đè lên art nhiều màu.
+ * ⚠ Thêm một viền tối ngoài (`0 0 0 1px`) — không phải trang trí: chip màu phẳng
+ * đặt trên một bức tranh nhiều mảng sáng thì có ô đọc được có ô không, đúng lý do
+ * số vòng của ô thị trường phải có bệ tối ở D125.
+ * ⚠ KHÔNG nới thêm nữa: cọc 8 chip đã cao 55px trên lá 147px. To hơn là nuốt tranh.
+ */
+.chip {
+  display: block;
+  flex: none;
+  width: 17px;
+  height: 6px;
+  background: var(--text-dim, #bfd1e6);
+  box-shadow:
+    inset 1px 1px 0 rgba(248, 250, 252, 0.45),
+    inset -1px -1px 0 rgba(10, 6, 24, 0.8),
+    0 0 0 1px rgba(6, 4, 16, 0.75);
+}
+
+/*
+ * ⭐ CHIP VỪA XẾP CHỜ ĐÀN CHIP BAY TỚI (31/08) — vá cú "lệch timeline".
+ *
+ * Trước bản này cọc đích mọc trong CÙNG lượt render với lúc `bayChip()` tạo
+ * đàn chip, rồi chip mất 260ms mới tới nơi ⇒ chip lao về một cái cọc ĐÃ đầy.
+ * Nay nhóm vừa xếp nằm im đúng bằng thời gian bay rồi mới bật lên, nên mắt đọc
+ * ra "chip bay tới và cọc cao lên" thay vì hai chuyện rời nhau.
+ *
+ * ⚠ CHỈ nhóm `.cho`/`.khg` (vừa xếp). Nhóm `.chip` trần là chip ĐANG GIỮ từ
+ * vòng trước — nó không bay đi đâu cả, cho nó trễ là làm cọc cũ nháy vô cớ.
+ * ⚠ `both` để giữ khung ĐẦU (`scaleY(0)`) trong lúc trễ — không có nó thì chip
+ * hiện ngay rồi mới co lại, tức thêm một cú nháy nữa.
+ * ⚠ Độ trễ đọc `--nhip-chip-bay` (bơm từ `nhip.ts`, cùng số `bayChip` dùng).
+ *   Giá trị lùi 260ms để file còn đúng khi đọc rời.
+ */
+.cho,
+.khg {
+  transform-origin: bottom;
+  animation: ccVao 120ms steps(3, end) var(--nhip-chip-bay, 260ms) both;
+}
+
+@keyframes ccVao {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * ⚠ BẮT BUỘC: khi người dùng xin ít chuyển động, `bayChip()` return NGAY và
+   * KHÔNG tạo con chip nào. Giữ độ trễ lúc đó là bắt cọc chờ một đàn chip
+   * không tồn tại — chip hiện muộn 260ms không vì lý do gì (D116).
+   */
+  .cho,
+  .khg { animation: none; transform: none; }
+}
+
+.cho { background: var(--accent, #22d3ee); }
+.khg { background: var(--lose, #f87171); }
+.vang { background: var(--gold-amber, #fbbf24); }
+
+/*
+ * ⭐ CỌC TÍM — phần ĐÒN BẨY khuếch đại, đứng RIÊNG cạnh cọc thật.
+ * Đọc `--violet` từ token, KHÔNG gõ hex: `.badgeGan` của GameCard đang gõ cứng
+ * ba giá trị tím riêng, và thêm bản thứ ba là dựng đúng bẫy D61 — cú trôi biểu
+ * hiện là "badge ×2 một tím, cọc khuếch đại một tím khác".
+ */
+.nhan { background: var(--violet, #8b5cf6); }
+/* Tách khỏi cọc thật để mắt đọc ra "thêm MỘT THỨ KHÁC", không phải "cọc kia cao
+   hơn" — đó là toàn bộ lý do chọn cọc riêng thay vì nhân đôi cọc thật. */
+.cotNhan { margin-left: 3px; }
+
+/* KHOÁ lúc chốt vòng (dealer gạt cược) là hoạt ảnh của CẢ LÁ — `.laKhoa` trong
+   ShopManHinh.module.css, gắn qua prop `hieuUng` của GameCard. Không định nghĩa
+   ở đây: keyframes phải cùng file với lớp gọi nó (lint:css-anim). */
+
+/*
+ * ⭐ CHIP MẢNH — phần lẻ dưới 25% của một lệnh (D184). Chỉ người cầm lõi CHIA
+ * LỆNH mới đặt được mốc lẻ, nên lát mỏng trên cọc là DẤU HIỆU ĐỌC ĐƯỢC của lá
+ * đó ngay trên bàn — không cần một chữ nào.
+ *
+ * ⚠ Mảnh phải THẤP hơn hẳn chứ không chỉ mờ hơn: mắt đọc CHIỀU CAO của cọc,
+ * nên nếu mảnh cao bằng dày thì cọc 4 mảnh trông y hệt cọc 4 dày và ta vừa
+ * dựng lại đúng cái nhãn-làm-tròn vừa gỡ.
+ */
+.manh {
+  height: 3px;
+  opacity: 0.9;
+}

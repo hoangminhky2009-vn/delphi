@@ -1,0 +1,652 @@
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.headIcon {
+  display: inline-flex;
+  padding: 8px;
+  border-radius: 0;
+  background: var(--surface-idle);
+  border: 1px solid var(--border-accent-soft);
+  box-shadow: inset 0 0 14px rgba(34, 211, 238, 0.08);
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.headHandle {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--text-bright);
+}
+
+.headSince {
+  font-size: 10.5px;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dangerBtn {
+  color: var(--lose-soft);
+  border-color: var(--border-lose);
+}
+.dangerBtn:hover:not(:disabled) {
+  color: var(--lose-tag);
+  border-color: rgba(248, 113, 113, 0.9);
+}
+
+/* Icon pixel đứng trong nhãn nút: hạ một khấc cho nó nằm ngang thân chữ thay vì
+   đội chữ lên (mặc định inline-block ngồi trên baseline). */
+.nutIcon {
+  vertical-align: calc(-1 * var(--px-do-day));
+}
+
+.dangerText {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--lose-soft);
+  background: rgba(248, 113, 113, 0.07);
+  border: 1px solid var(--border-lose);
+  border-radius: 0;
+  padding: 10px 12px;
+}
+
+.resultsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.blockLabel {
+  font-size: 10.5px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  border-bottom: 1px dashed var(--border-idle-soft);
+  padding-bottom: 4px;
+}
+
+.resultRow {
+  /* Viền sáng lên là đổi trạng thái nhị phân → nhảy hai nấc, cùng nhịp toàn app
+     thay cho `transition: border-color .2s` tự gõ. */
+  composes: doiMau from '../styles/pixel.module.css';
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  background: var(--surface-idle);
+  border: 1px solid var(--border-idle-soft);
+  border-radius: 0;
+  padding: 9px 12px;
+}
+.resultRow:hover {
+  border-color: rgba(103, 232, 249, 0.55);
+}
+
+.resultQuestion {
+  font-family: var(--font-human);
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--text-body);
+}
+
+.netUp {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--win);
+}
+
+.netDown {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--lose-soft);
+}
+
+.netFlat {
+  flex-shrink: 0;
+  font-size: 11px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * PORTFOLIO + STAT CARD (25/07 — founder).
+ *
+ * "tái sử dụng phần khung của oracle core vào portfolio người chơi thay vì chỉ
+ *  đơn điệu toàn text như bây giờ."
+ *
+ * Đúng gốc rễ: Hồ sơ trước đó dựng 3 khối lớn bằng "nhãn gạch-đứt + chữ trần",
+ * không nền/viền/padding, và mượn luôn stylesheet của màn ĐĂNG NHẬP. Nên nó
+ * trông đúng như thứ nó đang là — một cái form. Doc §4 phân cấp bo góc 22→16→12
+ * hàm ý KHỐI LỒNG KHỐI; doc §X đòi thay list bằng stat card.
+ *
+ * Khung dưới đây là khung Oracle Core chuyển từ Hub sang, không phải khung mới.
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+.portfolio {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-item);
+  padding: 13px;
+  border-radius: 0;
+  background:
+    radial-gradient(130% 150% at 0% 0%, rgba(124, 58, 237, 0.15), rgba(4, 7, 13, 0)),
+    var(--surface-card);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  /* `--shadow-card-sm` là `0 20px 60px` — bóng CÓ OFFSET, tức nó đang nói khối
+     này dày bao nhiêu, mà nhoè 60px thì nó nói dối: đó là bóng của vật cong
+     dưới đèn mềm. Đổi sang bóng cứng; quầng tím `inset` giữ nguyên (offset 0). */
+  box-shadow: var(--px-bong), inset 0 0 26px rgba(124, 58, 237, 0.07);
+}
+
+.pfTile {
+  display: inline-flex;
+  padding: 5px;
+  border-radius: 0;
+  background: rgba(10, 6, 26, 0.7);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  flex-shrink: 0;
+}
+
+/* Avatar = NÚT mở bảng đổi (founder 02/08). Reset vỏ button về trong suốt —
+ * khung viền do .pfTile bên trong lo, nút chỉ thêm nhãn ĐỔI ▾ dưới ảnh. */
+.pfTileNut {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+.pfTileNut:hover .pfTile { border-color: var(--accent); }
+.pfDoiNhan {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--accent-soft, #a78bfa);
+}
+
+.pfMain {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.pfHandle {
+  font-size: var(--fs-title);
+  font-weight: 800;
+  color: var(--text-bright);
+  overflow-wrap: anywhere;
+}
+
+/* ── ĐỔI TÊN (founder 04/08) ──────────────────────────────────────────────
+   Chính cái tên là nút, đúng lối đã dùng cho avatar bên cạnh. Nút trong suốt
+   để khối danh tính không mọc thêm một cái hộp nữa — chỉ thêm nhãn "ĐỔI ▾". */
+.pfHandleNut {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pfTenForm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pfTenO {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: var(--surface-idle);
+  border: 1px solid var(--border-accent-soft);
+  border-radius: 0;
+}
+
+.pfTenAt {
+  font-size: var(--fs-title);
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.pfTenNhap {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: var(--fs-title);
+  font-weight: 800;
+  color: var(--text-bright);
+  background: none;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+}
+
+.pfTenNut {
+  display: flex;
+  gap: 8px;
+}
+
+.pfTenHuy,
+.pfTenLuu {
+  flex: 1;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  letter-spacing: 1px;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.pfTenHuy {
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border-accent-soft);
+}
+
+.pfTenLuu {
+  color: var(--bg-page);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.pfTenLuu:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pfTenGoiY {
+  font-size: var(--fs-label);
+  color: var(--text-muted);
+}
+
+.pfTenLoi {
+  font-size: var(--fs-label);
+  color: var(--lose-tag);
+}
+
+.pfLevel {
+  font-size: var(--fs-label);
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: var(--accent-bright);
+}
+
+.pfMeta {
+  font-size: var(--fs-micro);
+  color: var(--text-muted);
+}
+
+/* Thanh XP — rãnh + texture tick 2px mỗi 8px (chữ ký thị giác, doc §4). */
+.pfBar {
+  height: 7px;
+  margin-top: 3px;
+  border-radius: 0;
+  background: var(--surface-track);
+  overflow: hidden;
+}
+
+.pfBarFill {
+  display: block;
+  height: 100%;
+  border-radius: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(5, 10, 20, 0) 0 5px, rgba(5, 10, 20, 0.5) 5px 7px),
+    var(--grad-bar-neutral);
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.55);
+  /* Bề rộng = HÌNH của vật → nhảy nấc, cùng thang 10 nấc với mọi thanh khác. */
+  transition: width 400ms steps(10, end);
+}
+
+/* ── STAT CARD: thay list bằng ô số (doc §X) ─────────────────────────── */
+.statLuoi {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--gap-tight);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--pad-block);
+  border-radius: 0;
+  background: var(--surface-card-alt);
+  border: 1px solid var(--border-idle);
+}
+
+.statNhan {
+  font-size: var(--fs-micro);
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.statSo {
+  font-size: var(--fs-stat);
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--text-bright);
+}
+
+.statPhu {
+  font-size: var(--fs-micro);
+  color: var(--text-dim);
+}
+
+/* Nhóm — khoảng GIỮA nhóm ≥1.5× khoảng TRONG nhóm (doc §4.7). */
+.nhom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-tight);
+  margin-top: var(--gap-group);
+}
+
+/* Hàng "nhãn ··· giá trị" — thay .profileRow mượn từ màn đăng nhập. */
+.hang {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-item);
+  padding: 7px 0;
+  border-bottom: var(--sep-dashed);
+  font-size: var(--fs-meta);
+}
+
+.hangNhan {
+  font-size: var(--fs-micro);
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.hangGiaTri {
+  color: var(--text-dim);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* Câu tiếng Việt tự nhiên PHẢI dùng font-human ≥12px (doc §3.2). */
+.ghiChu {
+  margin: var(--gap-tight) 0 0;
+  font-family: var(--font-human);
+  font-size: var(--fs-meta);
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* ─── BẬC ĐẤU TRƯỜNG (Hệ A) ────────────────────────────────────────────────
+   Icon 64px = lưới 16 × 4 px/ô. PHẢI là bội số của 16: PixelIcon suy px từ số
+   hàng lưới rồi IM LẶNG làm tròn, nên 60px sẽ render ra 64px và mọi căn lề tính
+   theo 60 sẽ lệch 4px mà không có lỗi nào báo. */
+.rankHang {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-item);
+  padding: 10px 0;
+  border-bottom: var(--sep-dashed);
+}
+
+/* Thang bậc toàn cảnh (founder 02/08) — 7 hàng, đỉnh Cá Voi ở trên,
+ * bậc đang đứng sáng viền. */
+.rankThang {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 8px;
+}
+.rankNac {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 5px 8px;
+  border: 1px solid rgba(139, 92, 246, 0.18);
+  font-size: 10px;
+  opacity: 0.75;
+}
+.rankNacDay {
+  border-color: var(--accent-bright);
+  box-shadow: 0 0 6px rgba(139, 92, 246, 0.45);
+  opacity: 1;
+}
+.rankNacTen { font-weight: 800; letter-spacing: 0.04em; }
+.rankNacCa { color: var(--accent-soft, #a78bfa); }
+.rankNacMoc { margin-left: auto; color: var(--text-dim); }
+
+.rankChu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rankTen {
+  font-size: var(--fs-body);
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: var(--text-body);
+}
+
+.rankBietDanh {
+  font-family: var(--font-human);
+  font-size: var(--fs-meta);
+  color: var(--text-muted);
+}
+
+.rankPhu {
+  font-size: var(--fs-micro);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Phân vị là thứ AI CŨNG CÓ (D32) nên nó được nhấn, khác với hạng tuyệt đối. */
+.rankPhanVi {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 2px 6px;
+  border: 1px solid var(--gold-amber);
+  font-size: var(--fs-micro);
+  letter-spacing: 1.4px;
+  color: var(--gold-amber);
+}
+
+/* Công tắc dữ liệu — xem `CongTacDuLieu`. */
+.congTac {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.6;
+  cursor: pointer;
+  /* mốc chạm được trên điện thoại */
+  min-height: 44px;
+}
+
+.congTac input { margin-top: 3px; }
+
+.congTacPhu {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* ── TÍNH CÁCH TÀI CHÍNH (04 §3) — thẻ đọc vị, trang khoe ───────────────── */
+
+.tcHang {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Emoji to cố ý (founder đặt hàng "icon/emoji vui vui") — đây là trang khoe,
+   khác luật bàn đấu D47. */
+.tcEmoji {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.tcChu {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tcTen {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.tcDocVi {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-body);
+}
+
+.tcGoiY {
+  margin: 8px 0 0;
+  padding: 6px 8px;
+  border-left: 2px solid var(--accent);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.tcBang {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tcDong {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+  border-bottom: 1px dashed color-mix(in srgb, var(--text-dim) 30%, transparent);
+  padding-bottom: 3px;
+}
+
+.tcDongTen { color: var(--text-dim); }
+
+.tcDongGt {
+  color: var(--text-body);
+  text-align: right;
+  font-weight: 700;
+}
+
+.tcXemThem {
+  display: block;
+  margin-top: 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-decoration: none;
+}
+
+/* ─── HUY HIỆU HẠNG + QUÀ VINH DANH (SPEC huy-hieu-hang-sticker) ─────────────
+   Hàng đầu CAO TỐI THIỂU 101px (= huy hiệu 80 + 2×10 đệm + 1 viền) cho cả ba trạng thái (đang tải · lỗi · có dữ
+   liệu), và thang bậc / hàng sticker là nội dung tĩnh có mặt từ đầu — dữ liệu về chỉ đổi nội dung tại chỗ, không khối
+   nào mọc ra / nhảy xuống (SPEC 5b.2). */
+.rankHang { min-height: 101px; box-sizing: border-box; }
+.rankHuyHieu {
+  display: grid;
+  place-items: center;
+  flex: 0 0 80px;
+  width: 80px;
+  height: 80px;
+}
+/* Dòng giữ chỗ khi chưa có dữ liệu — thanh xám tĩnh (không nhấp nháy: đây là chỗ chờ, không phải hiệu ứng). */
+.rankKhungDong,
+.rankKhungDongNgan {
+  display: block;
+  height: 12px;
+  background: var(--border-idle-soft);
+}
+.rankKhungDong { width: 140px; }
+.rankKhungDongNgan { width: 96px; }
+/* Chưa có dữ liệu: thang bậc + hàng sticker MỜ (không phải "chưa đạt" — chưa biết). */
+.rankThang[data-chua-co-du-lieu='true'],
+.rankStickerLuoi[data-chua-co-du-lieu='true'] { opacity: 0.4; }
+
+.rankThuLai {
+  padding: 6px 12px;
+  border: 1px solid var(--border-idle-strong);
+  background: transparent;
+  color: var(--accent-bright);
+  font: inherit;
+  font-size: var(--fs-meta);
+  letter-spacing: 1.4px;
+  cursor: pointer;
+}
+.rankThuLai:disabled { opacity: 0.5; cursor: default; }
+
+.rankStickerLuoi {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 6px;
+}
+.rankSticker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 0;
+  background: var(--surface-idle);
+  border: 1px solid var(--border-idle-soft);
+}
+.rankStickerRong {
+  display: grid;
+  place-items: center;
+  height: 40px;
+  color: var(--text-muted);
+  font-size: 19px;
+}
+.rankStickerTen,
+.rankStickerTenChua {
+  font-size: 10px;
+  white-space: nowrap;
+}
+.rankStickerTen { color: var(--text-body); }
+.rankStickerTenChua { color: var(--text-muted); }

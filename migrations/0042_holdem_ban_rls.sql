@@ -1,0 +1,14 @@
+-- 0042 — BẬT RLS CHO `holdem_ban` (vá thiếu sót của 0040, phát hiện 17/08).
+--
+-- ⚠⚠ ĐÂY LÀ LỖ THẬT, KHÔNG PHẢI DỌN DẸP HÌNH THỨC. Luật 0006 khoá PostgREST
+-- (Supabase phát REST cho mọi bảng schema `public`) bằng RLS bật + không policy
+-- ⇒ anon key đọc ra RỖNG. Migration 0040 dựng `holdem_ban` mà quên dòng này, nên
+-- từ 16/08 tới nay bảng ấy là bảng public DUY NHẤT không có RLS — mà nội dung
+-- của nó là **`seed` của bàn**: đọc được seed là dựng lại được toàn bộ map trước
+-- khi lật, tức mất sạch thông tin ẩn của mọi người đang chơi bàn đó (A3.1 và cả
+-- lõi trò). Test `schema_constraints` bắt được đúng cú này — nó liệt kê bảng
+-- public thiếu `rowsecurity`, và bảng mới thêm mà quên là đỏ ngay.
+--
+-- KHÔNG tạo policy: app đi qua API bằng connection string (bypass RLS như mọi
+-- bảng khác); RLS ở đây chỉ để bịt cửa PostgREST, đúng khuôn 0006/0029/0034.
+ALTER TABLE holdem_ban ENABLE ROW LEVEL SECURITY;

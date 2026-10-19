@@ -1,0 +1,49 @@
+/*
+ * BỘ CHỮ PIXEL — cấu trúc thuần, KHÔNG hiệu ứng. Nơi nào cần chuyển động thì
+ * cha truyền lớp của mình xuống (`className` / `lopChu` / `lopHang`).
+ *
+ * Tách vậy để cùng một bộ chữ phục vụ ba chỗ có nhịp hoàn toàn khác nhau:
+ * thanh trong trận (đứng yên, đổi màu theo bậc) · khối màn kết (nhấp nháy nhẹ
+ * ở bậc đỉnh) · lớp phủ toàn màn (rơi, dải màu, rung, tia). Nhét cả ba vào một
+ * file thì mỗi lần chỉnh một chỗ lại phải đọc cả ba.
+ *
+ * §XI: radius 0, box-shadow blur = 0, không gradient.
+ */
+
+.cum {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--px);
+  height: var(--cao);
+  /* Chiều cao khai tường minh: các hàng pixel là `position:absolute` nên chúng
+     không tự đẩy hộp cao lên, và một cụm cao 0 thì căn giữa sai. */
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.chu {
+  position: relative;
+  display: block;
+  height: var(--cao);
+  /* `width` do TSX đặt theo bề rộng riêng của từng glyph — chữ cái 10 ô, dấu
+     ± chỉ 6 ô. Một bề rộng chung sẽ để dấu trôi giữa khoảng trống. */
+}
+
+/*
+ * Ô pixel: mỗi phần tử là một điểm neo `px × px`, cả hàng (hoặc cả glyph) vẽ
+ * bằng box-shadow từ nó. `currentColor` nên `color` của cha điều khiển màu.
+ */
+.hang,
+.bong {
+  position: absolute;
+  left: 0;
+  width: var(--px);
+  height: var(--px);
+  background: transparent;
+}
+
+.bong {
+  top: 0;
+  z-index: -1;
+}

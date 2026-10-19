@@ -1,0 +1,184 @@
+/*
+ * HUB — KHUNG BENTO KHÔNG CUỘN (SPEC `ui-tang-khong-gian` đợt 1, demo CHỐT `docs/ui-ux/demo/hub-tang-khong-gian.html`).
+ * Luật ba lớp ở docs/ui-ux/09-tang-khong-gian.md: NỀN (vignette) → Ô NỔI (bóng pixel cứng) → LỚP TRƯỢT (components/ui/TamTruot).
+ * Chiều cao Hub = đúng khoảng giữa mép trên và thanh đáy: KHÔNG thanh cuộn ở 390×812 (và 360×640).
+ */
+
+/* ── gốc: MỘT con duy nhất của <main> ──
+   `.frameNgang > .main > *:only-child` (AppShell) biến con duy nhất thành lưới ở màn rộng; cột điện thoại nằm trong `.khung`
+   nên lưới có đúng một ô và không chia nhỏ Hub. */
+.hub { position: relative; }
+
+.khung {
+  position: relative;
+  width: 100%;
+  max-width: var(--shell-width);
+  margin: 0 auto;
+  /* Discord / máy tính: AppShell có thể biến `.hub` thành lưới — cột điện thoại vẫn đứng GIỮA, không dạt trái. */
+  justify-self: center;
+  /* Trừ đúng phần vỏ AppShell chừa: đầu 12 px + đáy 74 px (thanh điều hướng) — xem `.shell[data-dau-sanh]` ở AppShell.module.css. */
+  height: calc(100dvh - 12px - env(safe-area-inset-top, 0px) - 74px - env(safe-area-inset-bottom, 0px));
+  min-height: 456px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1;
+  /* Demo CHỐT dựng với `line-height: normal`; `body` của app là 1,5 — mỗi dòng nhãn cao thêm ~6 px và khung không-cuộn không còn chỗ. */
+  line-height: normal;
+  font-size: 16px;
+}
+
+/*
+ * LỚP NỀN: tối dần ra mép màn, dồn mắt vào các ô (vignette) — như demo, nó phủ LÊN ô và thanh đáy (z 52: trên BottomNav 50, dưới
+ * bong bóng Oracle 55 và nền lớp trượt 60) nên mép ô cũng tối theo, không chỉ nền trang. Không bắt chạm.
+ */
+.nen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-vignette);
+  pointer-events: none;
+  box-shadow: var(--nen-vignette);
+}
+
+/* ── đầu sảnh: người chơi sát TRÁI · tài sản bên PHẢI (chuẩn sảnh game) ── */
+.dau { display: flex; align-items: center; gap: 10px; min-height: 48px; }
+.anh {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, black 55%, var(--bg-page));
+  box-shadow: var(--o-vien);
+  border: 1px solid color-mix(in srgb, var(--violet) 45%, transparent);
+}
+.nguoi { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ten {
+  font-size: var(--tk-title);
+  line-height: 1;
+  color: var(--text-title);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.phu { font-size: var(--tk-micro); letter-spacing: 0.08em; color: var(--text-muted); white-space: nowrap; }
+.tenCho { color: var(--tk-dim); }
+.loiMe { color: var(--lose-soft); }
+.thuLaiNho {
+  composes: doiMau from '@/styles/pixel.module.css';
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--tk-micro);
+  letter-spacing: 0.08em;
+  color: var(--accent-bright);
+  text-align: left;
+  cursor: pointer;
+}
+.thuLaiNho:disabled { color: var(--tk-dim); cursor: default; }
+
+.taiSan { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+/* Ô giữ sẵn cho avatar Oracle (đo bằng `[data-oracle-cho]`): cạnh khớp `CANH_ORACLE_NEO` (36). Cuối hàng ⇒ x không phụ thuộc chữ tên / số ví. */
+.choOracle { flex: 0 0 36px; width: 36px; height: 36px; }
+/* CHỖ GIỮ SẴN cho huy hiệu hạng mùa — cửa sổ HUY HIỆU (docs/spec/huy-hieu-hang-sticker.md) gỡ `hidden` và vẽ vào đây.
+   Hub KHÔNG vẽ huy hiệu và không in hạng giả (Ý chờ: `/auth/me` chưa trả hạng). */
+.choHuyHieu { position: relative; width: 46px; height: 46px; display: grid; place-items: center; }
+.choHuyHieu[hidden] { display: none; }
+.vi {
+  composes: hubNay from '@/styles/motion.module.css';
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border-gold);
+  color: var(--gold);
+  font-size: var(--tk-body);
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  background: color-mix(in srgb, var(--gold-amber) 5%, transparent);
+  box-shadow: var(--px-bong);
+  -webkit-tap-highlight-color: transparent;
+}
+.vi:hover { color: var(--gold); }
+.vi:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+.vi.lun {
+  transition: none;
+  transform: translate(2px, 2px);
+  filter: brightness(1.25);
+}
+.viCho {
+  color: var(--tk-dim);
+  /* Chỗ giữ sẵn rộng bằng số thật điển hình ("1.250 T"): ví không co rồi giãn khi tài khoản về (SPEC 5b.2 — không khối nào nhảy). */
+  min-width: 78px;
+  justify-content: flex-end;
+}
+
+/* ── lưới bento: hai cột bất đối xứng, Đấu trường 2 hàng ── */
+.luoi {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1.22fr 1fr;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+.cotPhai { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.cotPhai > * { flex: 1 1 0; }
+/* Link nhu cầu PFM trong lớp trượt Tài chính KHOÁ (SPEC chan-truoc-beta). */
+.linkNho {
+  align-self: flex-start;
+  min-height: 32px;
+  padding: 0 2px;
+  border: none;
+  background: none;
+  color: var(--violet-soft);
+  font: inherit;
+  font-size: var(--tk-label);
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.hangNho { grid-column: 1 / 3; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Ô Đấu trường: banner (vùng ảnh) + nút VÀO TRẬN — hai đích chạm riêng; cả ô KHÔNG tự bấm (cursor mặc định). */
+.khung .oTran { cursor: default; }
+.bannerHong { display: grid; place-items: center; }
+.nhanDong { display: flex; align-items: center; gap: 6px; font-size: var(--tk-label); letter-spacing: 0.16em; color: var(--violet-soft); }
+
+/* Hai ô nhỏ: mờ (D86 — Predict hạ xuống nhưng vẫn bấm được). */
+.khung .oNho { flex-direction: row; align-items: center; gap: 10px; padding: 9px 10px; min-height: 56px; }
+.tenNho { font-size: var(--tk-label); letter-spacing: 0.14em; color: var(--text-muted); }
+.khoaIcon { margin-left: auto; opacity: 0.8; }
+/* Ô to KHOÁ (Tài chính lúc PFM web khoá — SPEC chan-truoc-beta): cùng ổ khoá của Lab, đặt ở góc vì ô xếp dọc. */
+.khoaGoc { position: absolute; top: 10px; right: 10px; opacity: 0.8; }
+
+/* Khách: nút ĐĂNG KÝ nằm TRONG khung (không đẩy khung dài ra). */
+.khung .dangKy {
+  flex: 0 0 auto;
+  width: 100%;
+  padding: 11px 0;
+  align-items: center;
+  border-color: var(--border-accent);
+  color: var(--accent-bright);
+  font-size: var(--tk-body);
+  letter-spacing: 0.16em;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+.mienTru {
+  flex: 0 0 auto;
+  margin: 0;
+  font-size: var(--tk-micro);
+  color: var(--tk-dim);
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+/* Máy thấp (≤ 700 px, vd 360×640): khoảng cách gọn lại để vẫn không cuộn. */
+@media (max-height: 700px) {
+  .khung { gap: 8px; }
+  .luoi, .cotPhai, .hangNho { gap: 8px; }
+}

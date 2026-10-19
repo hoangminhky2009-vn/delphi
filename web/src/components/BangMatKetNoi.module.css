@@ -1,0 +1,49 @@
+/*
+ * DẢI MẤT KẾT NỐI — nổi trên mọi thứ, không chạm vào bố cục.
+ *
+ * §XI: radius 0. D68: chỉ `opacity` được animate. `pointer-events: none` là
+ * ràng buộc cứng — nó nằm trên đầu màn hình, chặn chạm là chặn đúng nút người
+ * chơi đang cần bấm để thoát khỏi tình huống.
+ */
+.dai {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 90;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--lose);
+  border-radius: 0;
+  background: rgba(69, 10, 20, 0.94);
+  color: #fecdd3;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  pointer-events: none;
+  animation: bmknHien 1.6s ease-in-out infinite;
+}
+
+/* Chấm nhịp — dấu hiệu "đang thử", đọc được cả khi tắt hoạt ảnh (nó vẫn đỏ). */
+.cham {
+  width: 6px;
+  height: 6px;
+  background: var(--lose);
+}
+
+/*
+ * Thở CHẬM (1,6s ≈ 0,6 Hz) và đáy CAO (0,72): đây là dải thường trực suốt lúc
+ * mất mạng, không phải cú cảnh báo ngắn. Nháy gắt ở đây là tra tấn người đang
+ * đi tàu điện — và họ không làm gì được để nó tắt.
+ */
+@keyframes bmknHien {
+  0%, 100% { opacity: 0.72; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dai { animation: none; opacity: 1; }
+}

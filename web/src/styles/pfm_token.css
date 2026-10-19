@@ -1,0 +1,88 @@
+/*
+ * PFM — TOKEN MÀU CỦA DEMO ĐÃ CHỐT (bàn tiền, founder chốt 04/09/2026).
+ *
+ * ⚠⚠⚠ KHỐI `:root` DƯỚI ĐÂY CHÉP NGUYÊN TỪ DEMO, KHÔNG PHẢI BẢN DIỄN GIẢI LẠI.
+ * Mọi số đo tương phản trong demo (ΔE00 giữa chín mệnh giá, sàn 4,5 của chữ trên nền,
+ * năm nấc mốc tiến độ) tính trên ĐÚNG những mã màu này. Sửa một nấc ở đây là làm hỏng
+ * một phép đo đã có kết quả — muốn đổi thì đổi ở DEMO, chốt lại với founder, rồi chép
+ * sang (A11.25).
+ *
+ * ⚠ BỐN QUY TẮC MÀU của founder (04/09), giữ nguyên vì chúng giải thích cấu trúc bảng:
+ *   1. Không chọn một MÀU, chọn một BẢNG SẮC ĐỘ. Cần sắc nữa thì thêm NẤC vào họ
+ *      (`--n-1b`, `--c-2b`), không đẻ mã màu rời.
+ *   2. Đặt tên theo CÔNG NĂNG, không theo sắc: nấc thô (`--n-4`) chỉ dùng qua một tên
+ *      công năng (`--long-thanh`). Đọc CSS là biết màu đang LÀM GÌ.
+ *   3. Cân theo tâm lý thị giác: trung tính lệch nhẹ về lam để đứng cạnh neon mà không
+ *      thành xám bẩn; chỉ chỗ ĐANG SỐNG mới được nấc sáng nhất (Mẫu E).
+ *   4. Tương phản ĐO ĐƯỢC, không ước lượng — số đo ở `docs/ui-ux/04-mau-va-tuong-phan.md`.
+ *
+ * ⚠ Phạm vi: chỉ khu PFM. `tokens.css` vẫn là nguồn của phần còn lại; hai bảng cố ý
+ * KHÔNG trộn, vì trộn là phải chọn một bên thắng ở mọi chỗ va nhau. Tệp này chỉ THÊM
+ * biến, không đè biến nào của app.
+ */
+:root{
+  /* ── NẤC THÔ: ba họ, không dùng thẳng ─────────────────────────────────── */
+  --n-0:#04070d;  --n-1:#060d18; --n-2:#081120; --n-3:#0d1522; --n-4:#16202f;
+  /* nấc CHEN GIỮA (thêm nấc vào họ, không đẻ mã rời — quy tắc 1) */
+  --n-1b:#0b1727; --n-2b:#182740; --n-3b:#26364f; --n-4b:#31415c;
+  --n-5:#33465e;  --n-6:#5d7290; --n-7:#6d84a2; --n-8:#93aac8; --n-9:#bfd1e6;
+  --n-10:#e8f6ff;
+  --c-1:#0b3f4d;  --c-2:#0e7490; --c-3:#22d3ee; --c-4:#67e8f9;
+  --v-1:#4d3d05;  --v-2:#a16207; --v-3:#fde047;
+  /* nấc CHEN GIỮA cho THANG MỐC tiến độ hũ (D239): --c-2b nâng sàn nấc đầu
+     (3,06 → 4,22 so với lòng thanh) · --v-2b là nấc ấm giữa --v-2 và --v-3 */
+  --c-2b:#138da8; --v-2b:#e2a64c;
+
+  /* ── TÊN CÔNG NĂNG: chỗ duy nhất phần còn lại của CSS được gọi ─────────── */
+  --nen-trang:var(--n-0);      /* nền toàn trang */
+  /* ⚠ BA TẦNG CỦA VÙNG BẤM — đo chứ không suy từ tên nấc:
+     nền trang → mặt bàn (1,12) → mặt phím (1,48), mép bàn 1,75 so mặt bàn. */
+  --mat-ban:var(--n-1b);       /* mặt bàn phím — NỔI trên nền trang */
+  --mat-phim:var(--n-3b);      /* mặt PHÍM — nổi tiếp trên mặt bàn */
+  --mep-ban:var(--n-4b);       /* lip: dải sáng chạy cạnh trên mặt bàn */
+  --mat-phim-phu:var(--n-2b);  /* phím PHỤ: giữa mặt bàn và mặt phím */
+  --mat-the:var(--n-2);        /* mặt thẻ, nổi lên một nấc */
+  --long-thanh:var(--n-4);     /* lòng thanh đo: phần CHƯA tới */
+  --soc-thieu:var(--n-3);      /* sọc "chưa đủ mẫu để nói" */
+  --muc-cu:var(--c-2);         /* phần tháng trước ĐÃ đạt */
+  --muc-nay:var(--c-3);        /* phần MỚI của tháng này — chỗ đang sống */
+  --moc-cu:var(--v-3);         /* vạch mốc tháng trước */
+  --chu-mo:var(--n-7);         /* chữ mờ nhất còn được phép hiện */
+  --chu-phu:var(--n-8);
+  --chu-than:var(--n-9);
+  --chu-sang:var(--n-10);
+
+  --bg-page:var(--nen-trang);
+  --surface-card:linear-gradient(178deg,var(--n-2) 0%,#050a14 60%);
+  --surface-inset:rgba(255,255,255,.04);
+  --text-body:#e8f2fc; --text-bright:var(--chu-sang); --text-muted:var(--chu-phu);
+  --text-dim:var(--chu-than);
+  --accent:var(--c-3); --accent-bright:var(--c-4);
+  --win:#4ade80; --lose:#f87171; --gold:var(--v-3);
+  --line:rgba(93,114,144,.30); --line-2:rgba(93,114,144,.45);
+  --ink:#0a0618;
+  --px-notch:3px; --px-day:3px;
+  --px-vien:inset 1px 1px 0 rgba(248,250,252,.22), inset -1px -1px 0 rgba(10,6,24,.55);
+  --px-bong:3px 3px 0 rgba(10,6,24,.7);
+  --elsh:1; --elgr:1.4;
+
+  /* ── BA TOKEN GOM VỀ ĐÂY 08/09 (D308) — trước đó thiếu, mỗi nơi tự chống đỡ ──
+     · `--bg-deep`: nấc nền SÂU NHẤT còn dùng được. Chín chỗ từng viết nó KÈM
+       một fallback hex, mà cái hex ấy chính là `--n-1` — tức mã màu của demo đi
+       vòng qua một tên chưa ai khai. Chưa hỏng lần nào (fallback luôn trúng),
+       nhưng đó là một mã hex rời chép tay ở năm tệp: đổi bảng màu thì năm chỗ
+       đứng im. Khai ở đây rồi thì chín chỗ kia bỏ fallback, còn đúng một nguồn.
+       Hai công năng cùng dùng một nấc — nền TẤM PHỦ, và CHỮ trên chip sáng —
+       cả hai đều muốn "nền sâu nhất", nên một token là đủ.
+     · `--chu-thieu` · `--linh-nen`: demo thêm vào `:root` hôm 06/09 (D290),
+       `Guong.module.css` phải khai tạm trên `.man` và tự ghi nợ *"đưa hai dòng
+       này về pfm_token.css là một lượt riêng"*. Đây là lượt ấy. */
+  --bg-deep:var(--n-1);
+  /* ⚠ `--n-7`, KHÔNG phải `--n-6`: `--chu-mo` LÀ `--n-7` và đó là "chữ mờ nhất
+     còn được phép hiện". `--n-6` (#5d7290) đo trên `--surface-card` ra 3,85 —
+     dưới sàn 4,5 của `04-mau-va-tuong-phan.md` §6.2. */
+  --chu-thieu:var(--n-7);
+  /* ⚠ Mã hex RỜI duy nhất của bảng, thuộc ngoại lệ đã ghi ở §6.1 ("1 ô giữ chỗ
+     art được phép") — chỗ giữ cho Mascot thật (nợ art D68). */
+  --linh-nen:#4c1d95;
+}

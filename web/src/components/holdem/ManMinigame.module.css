@@ -1,0 +1,458 @@
+/*
+ * MÀN MINIGAME (D472 vỏ → D476 đủ nhịp) — số đo + màu CHÉP NGUYÊN từ demo `docs/ui-ux/demo/minigame-bat-day.html` (A11.25): `.hud` · `.pha` ·
+ * `.ban` (mặt nỉ) · `.oThe`/`.the` · `.sanKhau` · màn chọn lá (`.chonDau` · `.haiLa` · `.la`) · `.mgDau` · `.doThi` · `.giaTag` · `.nhanDo` ·
+ * `.demNguoc` · `.tamTinh` · `.nut3`/`.nut` · `.kq` · `.qt` · `.nutKe`. Bốn token demo chưa có trong `tokens.css` (`--ink`, `--px-vien`,
+ * `--px-bong`, `--nay`) khai TẠI ĐÂY đúng giá trị demo; khi khối thứ hai của app dùng chúng thì dời vào `tokens.css` (một nguồn).
+ * Cỡ chữ theo demo (nền 17px của khung điện thoại demo) — tệp này không thuộc danh sách thang chữ của màn trận (lớp phủ đứng một mình).
+ */
+.phu {
+  position: fixed; inset: 0; z-index: 100; display: flex;   /* trên shop/chợ trait (85–95) tự bật sau mỗi lá lật; dưới khoảnh khắc (120, v57 tắt) */
+  justify-content: center; align-items: flex-start;
+  padding: 12px 16px; background: var(--bg-page); overflow-y: auto;
+  --ink: #0a0618;
+  --px-vien: inset 1px 1px 0 rgba(248, 250, 252, 0.22), inset -1px -1px 0 rgba(10, 6, 24, 0.55);
+  --px-bong: 3px 3px 0 rgba(10, 6, 24, 0.7);
+  --nay: cubic-bezier(0.34, 1.56, 0.64, 1);   /* overshoot — chuyển động VẬT LÝ (A11.18) */
+  font-family: var(--font-mono); font-size: 17px; line-height: 1.35; color: var(--text-body);
+}
+
+/*
+ * D588 — CHUYỂN CẢNH bàn ↔ màn (founder 11/10). Nền phủ hiện / tắt = ÁNH SÁNG ⇒ mềm (ease, §2.3 (1)); khung điện thoại trồi lên
+ * = VẬT ⇒ nảy `--nay`. Thời lượng từ `lib/nhip.ts` (`--nhip-man-vao` · `--nhip-man-ra`). Chỉ opacity / transform. Lớp `vao` chỉ
+ * đứng trên `.phu` đúng một nhịp (ManMinigame gỡ sau `MAN_VAO`) ⇒ không giành `animation` với `.rung` của `.dt` về sau.
+ */
+.phu.vao { animation: manNenVao var(--nhip-man-vao, 420ms) ease-out both; }
+.phu.vao > .dt { animation: manKhungVao var(--nhip-man-vao, 420ms) var(--nay) both; }
+.phu.ra { animation: manNenRa var(--nhip-man-ra, 260ms) ease-in both; pointer-events: none; }
+.phu.ra > .dt { animation: manKhungRa var(--nhip-man-ra, 260ms) ease-in both; }
+@keyframes manNenVao { from { opacity: 0; } to { opacity: 1; } }
+@keyframes manKhungVao { from { transform: translateY(28px) scale(0.96); } to { transform: none; } }
+@keyframes manNenRa { from { opacity: 1; } to { opacity: 0; } }
+@keyframes manKhungRa { from { transform: none; } to { transform: translateY(20px) scale(0.98); } }
+@media (prefers-reduced-motion: reduce) { .phu.vao, .phu.vao > .dt, .phu.ra, .phu.ra > .dt { animation: none; } }
+
+/* ── ĐIỆN THOẠI ── */
+.dt { position: relative; width: min(390px, 100%); border: 1px solid var(--border-idle); background: var(--bg-page); overflow: hidden; display: flex; flex-direction: column; }
+.hud { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--surface-panel); border-bottom: 1px solid var(--border-idle); font-size: 15px; }
+.vongHud { color: var(--accent); font-weight: 700; letter-spacing: 0.08em; }
+.navHud { margin-left: auto; color: var(--text-muted); }
+.navHud b { color: var(--text-bright); font-variant-numeric: tabular-nums; }
+.pha { display: flex; align-items: center; gap: 8px; padding: 5px 10px; font-size: 14px; color: var(--text-muted); border-bottom: 1px solid var(--border-idle); }
+.tenPha { letter-spacing: 0.1em; color: var(--text-dim); }
+.giay { margin-left: auto; color: var(--gold-amber); font-weight: 700; font-variant-numeric: tabular-nums; min-width: 2ch; text-align: right; }
+.thanhGio { flex: 0 0 90px; height: 5px; background: var(--surface-inset); overflow: hidden; }
+.thanhGio i { display: block; height: 100%; background: var(--gold-amber); transform-origin: left; transform: scaleX(1); }
+
+/* ── MẶT NỈ: hai ô thẻ + sân khấu ── */
+.ban {
+  position: relative; margin: 10px; padding: 10px; background: var(--felt-det-ban), var(--felt-mat);
+  border: 1px solid var(--felt-vien); box-shadow: var(--px-vien); min-height: 520px;
+}
+.oThe { display: flex; gap: 10px; justify-content: center; perspective: 700px; }
+.the { width: 96px; height: 128px; position: relative; transform-style: preserve-3d; transition: transform 0.55s var(--nay); }
+.mat, .lung {
+  position: absolute; inset: 0; backface-visibility: hidden; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4px; border: 2px solid var(--ink); box-shadow: var(--px-vien), var(--px-bong);
+}
+.mat { background: linear-gradient(178deg, #132238, #0a1524); font-size: 15px; text-align: center; padding: 0 4px; }
+.matArt { width: 72px; height: 72px; display: block; }
+.matArt svg { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.matTen { font-size: 14px; line-height: 1.1; }
+.lung { transform: rotateY(180deg); background: repeating-linear-gradient(45deg, #3b0f1c 0 4px, #4a1424 4px 8px); color: var(--gold-amber); font-size: 30px; }
+.up { transform: rotateY(180deg); }
+.theMoi { transition-delay: 0.45s; }
+.cot1 { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; color: var(--text-muted); letter-spacing: 0.08em; }
+
+.sanKhau { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 10px; gap: 7px; background: var(--felt-det-ban), var(--felt-mat); }
+.skKq { top: 156px; background: none; padding-top: 4px; }
+
+/* MÀN CHỌN LÁ — kiểu chọn lõi TFT: bấm vào lá là chọn, không có chữ "Chọn" */
+.chonDau { display: flex; align-items: baseline; gap: 8px; }
+.chonDau .t { font-size: 20px; font-weight: 700; letter-spacing: 0.12em; color: var(--gold); }
+.chonDau .p { font-size: 13px; color: var(--text-muted); }
+.oChip { font-size: 13px; padding: 1px 6px; border: 1px solid var(--border-gold); color: var(--gold-amber); letter-spacing: 0.06em; margin-left: auto; }
+.haiLa { flex: 1; display: flex; gap: 12px; justify-content: center; align-items: center; perspective: 800px; }
+.la {
+  width: 146px; height: 212px; position: relative; border: 2px solid var(--ink); cursor: pointer; padding: 0;
+  font: inherit; color: inherit;
+  background: linear-gradient(178deg, #1c1033, #0d0a1f); box-shadow: var(--px-vien), var(--px-bong), 0 0 0 2px var(--gold-amber) inset;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; padding-top: 14px;
+  transition: transform 0.18s var(--nay), opacity 0.25s ease, filter 0.25s ease;
+  animation: laVao 0.55s var(--nay) both;
+}
+.la:nth-child(2) { animation-delay: 0.09s; }
+.la:nth-child(3) { animation-delay: 0.18s; }
+.ba { gap: 6px; }
+.ba .la { width: 112px; height: 200px; }
+.ba .la .icon { width: 64px; height: 64px; }
+.ba .la .ten { font-size: 19px; }
+.ba .la .mt { font-size: 12.5px; padding: 0 6px; }
+@keyframes laVao { from { transform: translateY(120px) rotate(-8deg) scale(0.8); opacity: 0; } to { transform: none; opacity: 1; } }
+/* Art CÓ SẴN của lõi (quầy lõi) thay biểu tượng emoji của demo — founder 04/10 "card dùng art có sẵn". Cỡ = ô biểu tượng của demo. */
+.icon { width: 72px; height: 72px; display: block; filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.6)); }
+.icon svg { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.ten { font-size: 23px; font-weight: 700; color: var(--gold); letter-spacing: 0.04em; }
+.mt { font-size: 14px; color: var(--text-dim); padding: 0 10px; text-align: center; }
+.day {
+  margin-top: auto; width: 100%; padding: 5px 0; font-size: 13px; color: var(--text-muted); text-align: center;
+  border-top: 1px solid rgba(251, 191, 36, 0.25); background: rgba(0, 0, 0, 0.25);
+}
+.la:hover { filter: brightness(1.15); }
+.da { animation: none; transform: translateY(-12px) scale(1.08); box-shadow: var(--px-vien), var(--px-bong), 0 0 0 2px var(--gold) inset, 0 0 18px rgba(253, 224, 71, 0.45); }
+.bo { animation: none; transform: translateY(40px) scale(0.9); opacity: 0.25; }
+.loiKhoa { text-align: center; font-size: 15px; color: var(--text-dim); }
+
+/* D483 — GÀI TIN GIẢ (TUNG TIN của Đội lái) — chép demo `.truocMan` (tên `.gaiTin`: `.truocMan` của module là lớp phủ HẾT MÀN) */
+.gaiTin { display: flex; flex-direction: column; gap: 6px; padding: 8px; background: rgba(0, 0, 0, 0.6); border: 1px solid var(--border-gold); }
+.tmT { font-size: 14px; color: var(--gold-amber); letter-spacing: 0.08em; }
+.tmGhi { font-size: 13px; color: var(--text-muted); }
+.tmH { display: flex; gap: 6px; flex-wrap: wrap; }
+.tmH button {
+  flex: 1 1 40%; padding: 6px 6px; font: inherit; font-size: 14px; font-weight: 700; border: 2px solid var(--ink); cursor: pointer;
+  background: #1e293b; color: var(--text-bright); box-shadow: var(--px-vien), 0 3px 0 #0b1220;
+}
+.tmH button[aria-pressed='true'] { outline: 2px solid var(--gold); outline-offset: 1px; }
+.tmH button:disabled { cursor: default; }
+.tmH button:disabled:not([aria-pressed='true']) { opacity: 0.45; }
+.tmH button:active:not(:disabled) { transform: translateY(2px); box-shadow: var(--px-vien), 0 1px 0 #0b1220; }
+
+/* D490 — chốt xong ⇒ hàng nút xám (chép demo `.xamMan`, bản 32) */
+.xamMan { filter: grayscale(1) brightness(0.8); transition: filter 500ms ease-in-out 300ms; }
+@media (prefers-reduced-motion: reduce) { .xamMan { transition: none; } }
+
+/* D485 — VÌ SAO: ba phần, gập sau "VÌ SAO ▾"; mở thì thay chỗ câu mô tả + bảng QUYẾT TOÁN (chép demo bản 29) */
+.viSao { width: 100%; font-size: 14px; }
+.viSao summary { cursor: pointer; list-style: none; font-size: 13px; letter-spacing: 0.12em; color: var(--gold-amber); padding: 0; text-align: center; }
+.viSao summary::-webkit-details-marker { display: none; }
+.viSao[open] summary { color: var(--text-muted); }
+.vsND { display: flex; flex-direction: column; gap: 0; padding: 4px 8px; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border-idle); text-align: left; }
+.vsMuc { display: flex; gap: 8px; align-items: baseline; margin-top: 3px; font-size: 12px; letter-spacing: 0.12em; color: var(--gold-amber); }
+.vsMuc:first-child { margin-top: 0; }
+.vsMuc span { margin-left: auto; letter-spacing: 0.04em; color: var(--text-muted); }
+.vsDong { display: flex; gap: 8px; }
+.vsDong span:last-child { margin-left: auto; font-variant-numeric: tabular-nums; text-align: right; }
+.vsGhi { font-size: 12px; color: var(--text-dim); }
+
+/* D484 — BẢNG PHỤ: mã khác đang cầm, trên bảng chính (chép demo bản 27–28) */
+.bangPhu { display: flex; flex-direction: column; gap: 5px; }
+.bpHang { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.bpChip { display: flex; align-items: center; gap: 4px; padding: 2px 6px; border: 1px solid var(--border-idle); font-size: 13px; background: rgba(0, 0, 0, 0.35); }
+.bpChip i { display: inline-block; width: 7px; height: 7px; background: var(--c); }
+.bpChip b { font-variant-numeric: tabular-nums; }
+.bpMo {
+  margin-left: auto; font: inherit; font-size: 12px; letter-spacing: 0.06em; border: 1px solid var(--border-idle); background: transparent;
+  padding: 1px 6px; cursor: pointer; color: var(--text-muted);
+}
+.bpLuoi { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; animation: bpVao 0.25s var(--nay) both; }
+@keyframes bpVao { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.bpO { position: relative; background: #050b12; border: 2px solid var(--ink); box-shadow: var(--px-vien), inset 0 -2px 0 var(--c); height: 64px; }
+.bpO canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.bpO span { position: absolute; left: 4px; top: 1px; font-size: 12px; color: var(--text-dim); }
+.bpO b { position: absolute; right: 4px; top: 1px; font-size: 12px; font-variant-numeric: tabular-nums; }
+/* D490 — mở mặc định: từ 3 mã chia 3 cột, ô thấp hơn — không thì khung đồ thị chính bị ép (demo bản 32) */
+.bpLuoi.ba { grid-template-columns: 1fr 1fr 1fr; }
+.bpLuoi.ba .bpO { height: 50px; }
+.bpLuoi.ba .bpO span { max-width: 52%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* MINIGAME */
+.mgDau { display: flex; align-items: center; gap: 6px; font-size: 15px; flex-wrap: wrap; }
+.mgDau .lo { color: var(--gold); font-weight: 700; letter-spacing: 0.06em; }
+.loArt { width: 22px; height: 22px; display: block; }
+.loArt svg { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.tk { font-size: 12px; padding: 0 4px; border: 1px solid var(--border-idle); color: var(--text-muted); letter-spacing: 0.06em; }
+.von { margin-left: auto; color: var(--text-muted); font-size: 14px; }
+.von b { color: var(--text-bright); font-variant-numeric: tabular-nums; }
+.doThi { position: relative; background: #050b12; border: 2px solid var(--ink); box-shadow: var(--px-vien); overflow: hidden; }
+.cv { display: block; width: 100%; height: auto; aspect-ratio: 202 / 150; image-rendering: pixelated; }
+.giaTag {
+  position: absolute; right: 2px; top: 0; padding: 0 4px; font-size: 13px; background: var(--accent); color: var(--ink);
+  font-variant-numeric: tabular-nums; will-change: transform; z-index: 2;
+}
+.demNguoc {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 64px; font-weight: 800;
+  color: var(--gold); text-shadow: 3px 3px 0 var(--ink); pointer-events: none; z-index: 4;
+}
+.nhanDo {
+  position: absolute; left: 50%; top: 16%; translate: -50% 0; padding: 2px 8px; font-size: 15px; font-weight: 800; letter-spacing: 0.1em;
+  background: var(--lose); color: var(--ink); z-index: 2; animation: doNhay 0.4s steps(2) infinite; pointer-events: none;
+}
+@keyframes doNhay { 50% { opacity: 0.35; } }
+.truocMan {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  background: rgba(5, 11, 18, 0.72); pointer-events: none; z-index: 4;
+}
+.truocTen { font-size: 15px; font-weight: 800; letter-spacing: 0.1em; color: var(--gold); text-shadow: 2px 2px 0 var(--ink); }
+.tamTinh { display: flex; gap: 10px; font-size: 14px; color: var(--text-muted); min-height: 20px; flex-wrap: wrap; }
+.tamTinh b { font-variant-numeric: tabular-nums; }
+.loi { margin: 0; font-size: 13px; color: var(--lose); }
+
+.nut3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: auto; }
+.hai { grid-template-columns: 1fr 1fr; }
+.nut {
+  position: relative; padding: 12px 4px 10px; font: inherit; font-size: 19px; font-weight: 700; letter-spacing: 0.06em; border: 2px solid var(--ink);
+  cursor: pointer; transform: translateY(0); transition: transform 0.06s steps(1), box-shadow 0.06s steps(1), filter 0.12s ease;
+}
+.xanh { background: var(--win); color: var(--win-on); box-shadow: var(--px-vien), 0 5px 0 #166534; }
+.vang { background: var(--gold-amber); color: var(--ink); box-shadow: var(--px-vien), 0 5px 0 #92400e; }
+.lam { background: #1e293b; color: var(--accent-bright); box-shadow: var(--px-vien), 0 5px 0 #0b1220; }
+.do { background: #3b0f1c; color: var(--lose); box-shadow: var(--px-vien), 0 5px 0 #1a050c; }
+.nut:hover:not(:disabled) { filter: brightness(1.12) drop-shadow(0 0 6px rgba(103, 232, 249, 0.35)); }
+.nut:active:not(:disabled), .lun { transform: translateY(4px); box-shadow: var(--px-vien), 0 1px 0 rgba(0, 0, 0, 0.6); }
+.nut:disabled { filter: grayscale(0.8) brightness(0.45); cursor: not-allowed; }
+.nut small { display: block; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; opacity: 0.8; }
+.rung { animation: rung 0.13s steps(3); }
+@keyframes rung { 25% { transform: translate(3px, -2px); } 50% { transform: translate(-3px, 2px); } 75% { transform: translate(2px, 3px); } }
+
+/* KẾT QUẢ + QUYẾT TOÁN */
+.kq { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; }
+.nhan { font-size: 14px; letter-spacing: 0.14em; color: var(--text-muted); }
+.so { font-size: 54px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; text-shadow: 3px 3px 0 var(--ink); animation: soVao 0.45s var(--nay) both; }
+@keyframes soVao { from { transform: scale(0.4); } to { transform: none; } }
+.so.lai { color: var(--win); }
+.so.lo { color: var(--lose); }
+.so.khong { color: var(--text-dim); }
+.mo { font-size: 15px; color: var(--text-dim); max-width: 32ch; }
+.tu { font-size: 13px; padding: 1px 6px; background: var(--surface-inset); color: var(--text-dim); border: 1px solid var(--border-idle); letter-spacing: 0.06em; }   /* D479: GIỮ không phải lỗi — trung tính (demo bản 27) */
+.qt { width: 100%; display: flex; flex-direction: column; gap: 3px; padding: 8px; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border-idle); font-size: 15px; }
+.qt div { display: flex; gap: 8px; }
+.qt span:last-child { margin-left: auto; font-variant-numeric: tabular-nums; text-align: right; }
+.phuQt { font-size: 13px; color: var(--text-muted); }
+.tong { border-top: 1px solid var(--border-idle); padding-top: 4px; color: var(--text-bright); font-weight: 700; }
+.lai { color: var(--win); }
+.lo { color: var(--lose); }
+.nutKe {
+  padding: 9px 16px; font: inherit; font-size: 17px; font-weight: 700; letter-spacing: 0.08em; background: var(--accent); color: var(--ink);
+  border: 2px solid var(--ink); box-shadow: var(--px-vien), 0 4px 0 #0e7490; cursor: pointer;
+}
+.nutKe:active { transform: translateY(3px); box-shadow: var(--px-vien), 0 1px 0 #0e7490; }
+
+@media (prefers-reduced-motion: reduce) {
+  .la, .da, .bo { animation: none !important; transition: none; }
+  .the { transition: none; }
+  .nhanDo, .rung { animation: none; }
+  .so { animation: none; }
+}
+
+
+/* Icon pixel của mã (art có sẵn của app thay emoji của demo) — cao bằng dòng chữ, đứng trước tên */
+.icMa { display: inline-block; width: 1.15em; height: 1.15em; margin-right: 0.3em; vertical-align: -0.2em; }
+.icMa svg { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+/* D507 — Tiền mặt: icon pixel ví (PixelIcon lưới 16 — cỡ phải bội số 16). */
+.icTien { display: inline-block; line-height: 0; margin-right: 0.3em; vertical-align: -0.3em; }
+.maTen { display: inline-flex; align-items: center; }
+
+/*
+ * D493 — CUỘC GỌI KÝ QUỸ (chép demo `.cuocGoi` · `.dtGoi`, founder 04/10): 0–0,25 s hiện + phóng 95 %→100 % rồi khựng (cubic-bezier nảy — chuyển
+ * động vật lý, A11.18) · 0,25–0,45 s rung ngang + xoay ±2° · 0,45–0,6 s thu vào góc phải trên thành icon điện thoại rung lặp.
+ */
+.cuocGoi { position: absolute; inset: 0; z-index: 6; display: flex; justify-content: center; align-items: flex-start; padding-top: 3px; pointer-events: none;
+  box-shadow: inset 0 0 0 2px var(--lose); animation: goiNen 600ms linear both; }
+/* D497 (founder 04/10: "che mẹ hết nửa cái chart") — demo bản 34: DẢI mảnh mép trên + viền đỏ quanh đồ thị, không phủ đỏ, không che nến. */
+.goiThe { padding: 3px 6px; background: #05070c; border: 2px solid var(--ink); box-shadow: var(--px-vien), 0 0 0 2px var(--lose) inset;
+  display: flex; flex-direction: row; align-items: center; gap: 8px; white-space: nowrap; transform-origin: 100% 0;
+  animation: goiVao 250ms cubic-bezier(0.16, 1, 0.3, 1) both, goiRung 200ms linear 250ms both, goiThu 150ms cubic-bezier(0.5, 0, 0.75, 0) 450ms both; }
+.goiTieu { font-size: 13px; font-weight: 800; letter-spacing: 0.14em; color: var(--text-bright); }
+.goiPhu { font-size: 11px; color: var(--text-dim); }
+.goiHai { display: flex; gap: 6px; }
+.goiHai i { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--ink); }
+.cup { background: var(--lose); }
+.cup > * { transform: rotate(135deg); }
+.nghe { background: var(--win); }
+@keyframes goiNen { 0% { opacity: 0; } 12% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes goiVao { from { opacity: 0; transform: translateY(-60%) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes goiRung {
+  0%, 100% { transform: translateX(0) rotate(0); } 20% { transform: translateX(-6px) rotate(-2deg); } 40% { transform: translateX(6px) rotate(2deg); }
+  60% { transform: translateX(-5px) rotate(-1.5deg); } 80% { transform: translateX(4px) rotate(1deg); }
+}
+@keyframes goiThu { from { transform: scale(1); opacity: 1; } to { transform: translate(40%, 0) scale(0.15); opacity: 0; } }
+.dtGoi { position: absolute; right: 6px; top: 22px; z-index: 5; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--ink);
+  background: var(--lose); display: grid; place-items: center; cursor: pointer; padding: 0; animation: dtRung 1.2s linear infinite; }
+@keyframes dtRung {
+  0%, 18%, 100% { transform: rotate(0); } 3% { transform: rotate(-14deg); } 6% { transform: rotate(14deg); } 9% { transform: rotate(-10deg); }
+  12% { transform: rotate(10deg); } 15% { transform: rotate(-4deg); }
+}
+/* D489/D493 — bị SÀN thanh lý: lóe đỏ toàn màn một phát (ÁNH SÁNG ⇒ ease-out, như demo) rồi đồ thị + hàng nút xám (`.xamMan`). */
+.chopDo { position: fixed; inset: 0; z-index: 50; background: var(--lose); pointer-events: none; animation: chopDo 420ms ease-out both; }
+@keyframes chopDo { 0% { opacity: 0; } 15% { opacity: 0.6; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .cuocGoi, .goiThe, .dtGoi { animation: none; } .chopDo { display: none; } }
+
+/* D499 — BÚA PHÁP LÝ của Tổ Chức chạm trần (chép demo bản 34 `.bua`): góc trái trên, rơi + đập (cubic-bezier — chuyển động vật lý), rồi thu nhỏ. */
+.bua { position: absolute; left: 0; top: 0; z-index: 6; display: flex; align-items: center; gap: 4px; padding: 4px; pointer-events: none; }
+.buaHinh { display: block; transform-origin: 70% 85%; }
+.buaChu { font-size: 13px; letter-spacing: 0.14em; color: var(--lose); background: #05070c; padding: 0 6px; border: 1px solid var(--border-lose); }
+.buaDap .buaHinh { animation: buaRoi 230ms cubic-bezier(0.5, 0, 0.75, 0) both, buaNay 260ms cubic-bezier(0.16, 1, 0.3, 1) 230ms both; }
+.buaDap .buaChu { animation: buaChu 300ms steps(3) 230ms both; }
+.buaThu .buaHinh { animation: none; }
+@keyframes buaRoi { from { opacity: 0; transform: translate(40%, -90%) rotate(-50deg) scale(1.15); } to { opacity: 1; transform: translate(0, 0) rotate(6deg) scale(1); } }
+@keyframes buaNay { 0% { transform: rotate(6deg) scale(1.08, 0.9); } 55% { transform: rotate(-4deg) scale(0.97, 1.04); } 100% { transform: rotate(0) scale(1); } }
+@keyframes buaChu { from { opacity: 0; transform: scale(1.6); } to { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .buaDap .buaHinh, .buaDap .buaChu { animation: none; } }
+
+/* D500 — BÀN NGHIÊN CỨU (chép demo bản 34 `.ncDai`): dải dưới chân đồ thị — mỗi khúc thời gian ▼ % tạo ĐÁY (đỏ) · ▲ % tạo ĐỈNH (xanh). */
+.ncDai { display: grid; gap: 2px; margin-top: 2px; font-size: 11px; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.ncNhan { color: var(--text-muted); font-size: 10px; letter-spacing: 0.06em; align-self: center; }
+.ncO { display: flex; flex-direction: column; align-items: center; background: #050b12; border: 1px solid var(--border-idle); padding: 1px 0; }
+.ncO b { font-weight: 400; }
+.ncD { color: var(--lose); }
+.ncP { color: var(--win); }
+
+/*
+ * D503 — DẢI DƯỚI ĐỒ THỊ cao CỐ ĐỊNH (chép demo bản 36 `.oDuoi` · `.napHang`): dòng tạm tính ↔ + hàng nút bán tài sản khi bị gọi.
+ * Cao cố định ⇒ mở/đóng hàng nút không xô đồ thị lẫn hàng nút. Nút vào bằng steps (vật · nhịp máy, A11.18).
+ */
+.oDuoi { position: relative; display: flex; flex-direction: column; gap: 3px; height: 58px; overflow: hidden; flex: none; }   /* D528 — relative: hàng KÊ MUA / KÊ BÁN neo góc phải */
+.oDuoi .tamTinh { align-items: baseline; gap: 6px; }
+.oDuoi .tamTinh small { font-size: 11px; letter-spacing: 0.08em; color: var(--text-muted); }
+.oDuoi .tamTinh b { font-size: 17px; }
+.napHang { display: flex; gap: 4px; height: 34px; }
+.napHang button { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 1px 2px;
+  font-size: 11px; line-height: 1.15; color: var(--text); background: #1a050c; border: 1px solid var(--border-lose); box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.5);
+  cursor: pointer; animation: napVao 240ms steps(3) both; }
+.napHang button span { display: flex; align-items: center; gap: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.napHang button b { color: var(--lose); font-weight: 400; }
+.napHang button:active { transform: translateY(2px); box-shadow: none; }
+.napHang button:disabled { opacity: 0.35; cursor: not-allowed; }
+@keyframes napVao { from { transform: translateY(40%); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .napHang button { animation: none; } }
+
+/* D513 — nhãn LỚP SOI (chép demo bản 41 `.soiLop`): ×L ở mép phải dải · ĐÁY THÁC / HỒI ở mép trái vạch. Không bắt chuột. */
+.soiNhan { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.soiNhan b { position: absolute; right: 4px; font-size: 9px; font-weight: 400; color: var(--text-bright); text-shadow: 1px 1px 0 var(--ink); }
+.soiNhan b[data-k='thac'], .soiNhan b[data-k='ngoi'] { right: auto; left: 4px; }
+.soiNhan b[data-k='thac'] { color: var(--lose); }
+.soiNhan b[data-k='ngoi'] { color: var(--text-muted); }
+.soiNhan i { position: absolute; left: 4px; bottom: 4px; font-size: 9px; font-style: normal; color: var(--text-muted); }
+
+/* D519 — bàn phím vừa ĐỔI (chép demo bản 42 `.doiPhim`): lật phím (vật ⇒ steps, A11.18) + không nhận bấm trong 250 ms. */
+.doiPhim .nut { pointer-events: none; animation: latPhim 250ms steps(3) both; }
+@keyframes latPhim { 0% { transform: scaleY(0.55); filter: brightness(1.6); } 100% { transform: scaleY(1); filter: none; } }
+@media (prefers-reduced-motion: reduce) { .doiPhim .nut { animation: none; } }
+
+/* D520 — chú thích bàn nghiên cứu (demo bản 43 `.ncLop .ncNhan`): một dòng chữ nhỏ trải hết bề ngang dải. */
+.ncChu { grid-column: 1 / -1; font-size: 9px; letter-spacing: 0.06em; color: var(--text-muted); }
+
+/* D523 — nhãn ĐƯỜNG GIÁ TRỊ + QUÁ BÁN của Bắt Đáy (chép demo bản 46 `.gtNhan` · `.quaBan`). */
+.soiNhan b[data-k='gt'] { color: var(--gold-amber); }
+.soiNhan b[data-k='qb'] { right: auto; transform: translateX(-50%); font-size: 8px; line-height: 1; padding: 1px 2px; color: #120c02; text-shadow: none;
+  background: color-mix(in srgb, var(--gold-amber) 85%, #000); }
+
+/*
+ * D527 — DẢI ORACLE CỦA BÀN TẬP trong màn: gọn một khối dưới thanh pha, không che đồ thị lẫn nút. Viền tím = màu Oracle (khung
+ * thoại CoachTap); chữ đọc được ở 12px. Không hoạt ảnh — màn đang chạy đã đủ chuyển động.
+ */
+.oracleTap {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 4px 0 2px;
+  padding: 6px 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-body);
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.55);
+}
+.oracleTap > svg { flex: none; }
+
+/* ── D528 — KÊ LỆNH (demo bản 49): nhãn = tay cầm kéo ở mép phải (chừa nhãn giá) · hai nút ở dải dưới đồ thị · Tâm lý yếu bán tháo ── */
+.coKe { touch-action: none; }
+.keNhan {
+  position: absolute; right: 46px; z-index: 3; display: flex; align-items: stretch; transform: translateY(-50%); font-size: 12px; line-height: 1;
+  color: #04130a; background: var(--win); box-shadow: 1px 1px 0 var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; touch-action: none; cursor: ns-resize;
+}
+.kBan { background: var(--lose); color: #1a0508; }
+.keNhan[data-khop='1'] { outline: 2px solid var(--gold); cursor: default; }
+.keNhan[data-khop='1'] .keT i { display: none; }
+.keNhan:not([data-l='1']) .keL { display: none; }
+/* D539 — VẠCH NHÁP (chưa gửi, không bao giờ tự khớp): nền tối, chữ + viền màu phía lệnh · ✓ ĐẶT vàng nổi nhất nhãn. */
+.keNhan[data-nhap='1'] { background: #0b1712; color: var(--win); box-shadow: inset 0 0 0 1px var(--win), 1px 1px 0 var(--ink); }
+.kBan[data-nhap='1'] { background: #1c0b0f; color: var(--lose); box-shadow: inset 0 0 0 1px var(--lose), 1px 1px 0 var(--ink); }
+.keNhan .keDat { background: var(--gold); color: var(--ink); letter-spacing: 0.04em; }
+.keNhan .keDat:disabled { filter: grayscale(0.8) brightness(0.5); cursor: not-allowed; }
+.keT { display: flex; align-items: center; gap: 3px; padding: 0 6px; min-height: 30px; }
+.keT i { font-style: normal; opacity: 0.75; }
+.keNhan button { font: inherit; font-size: 13px; min-width: 30px; min-height: 30px; padding: 0 6px; border: 0; border-left: 1px solid rgba(10, 6, 24, 0.35); background: rgba(10, 6, 24, 0.14); color: inherit; cursor: pointer; }
+.keNhan button:active { background: rgba(10, 6, 24, 0.3); }
+.keHang { position: absolute; right: 0; top: 0; display: flex; gap: 5px; }
+.keNutMua, .keNutBan {
+  font: inherit; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; line-height: 1; min-height: 28px; padding: 5px 9px 4px; cursor: pointer; border: 2px solid var(--ink);
+  color: var(--ink); background: var(--win); box-shadow: var(--px-vien), 0 3px 0 #166534; transition: transform 0.06s steps(1), box-shadow 0.06s steps(1);
+}
+.keNutBan { background: var(--lose); box-shadow: var(--px-vien), 0 3px 0 #7f1d1d; }
+.keNutMua:active, .keNutBan:active { transform: translateY(3px); box-shadow: var(--px-vien); }
+.keNutMua[aria-pressed='true'], .keNutBan[aria-pressed='true'] { filter: grayscale(0.7) brightness(0.6); }
+.keNutMua:disabled, .keNutBan:disabled { filter: grayscale(0.8) brightness(0.45); cursor: not-allowed; }
+.tlyBao {
+  position: absolute; left: 50%; top: 38%; z-index: 4; transform: translateX(-50%); white-space: nowrap; font-size: 12px; font-weight: 700; padding: 2px 8px;
+  color: #1a0508; background: var(--lose); pointer-events: none; animation: tlyBao 1.6s steps(4) both;
+}
+@keyframes tlyBao { 0% { opacity: 0; transform: translate(-50%, 6px); } 15%, 85% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tlyBao { animation: none; } }
+/* D528 — KÍNH LÚP: nút nhỏ góc dưới trái đồ thị (lún steps khi bấm — vật, A11.18). */
+.kinhLup {
+  position: absolute; left: 3px; bottom: 3px; z-index: 3; display: flex; align-items: center; gap: 3px; min-width: 26px; min-height: 26px; padding: 2px 5px;
+  font: inherit; font-size: 11px; line-height: 1; color: var(--text-bright, #e8f6ff); background: rgba(5, 11, 18, 0.82); border: 1px solid rgba(93, 114, 144, 0.55);
+  cursor: pointer; transition: transform 0.06s steps(1);
+}
+.kinhLup:active { transform: translateY(2px); }
+.kinhLup b { font-weight: 700; color: var(--gold-amber, #fbbf24); font-variant-numeric: tabular-nums; }
+
+/* D532 — TIN TRÊN ĐỒ THỊ (chép demo `.ghim` · `.chong` · `.bong` · `.dauXM` · `.tinThatRa` · `.dsTin`) — bong bóng tại cây nến, rồi thu về ghim màu */
+.tinLop { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.ghim {
+  position: absolute; top: 0; left: 0; width: 18px; height: 18px; margin-left: -9px; padding: 0; border: 0; background: none; cursor: pointer; z-index: 3;
+  display: flex; align-items: flex-start; justify-content: center; will-change: transform; pointer-events: auto;
+}
+.ghim i { display: block; width: 8px; height: 8px; margin-top: 2px; background: var(--c); box-shadow: 1px 1px 0 var(--ink); }
+.ghimTruoc { opacity: 0.55; pointer-events: none; }   /* D471 — Kiên nhẫn thấy trước tin sắp tới */
+.ghimTruoc i { box-shadow: none; outline: 1px dashed var(--c); outline-offset: 1px; }
+.chong {
+  position: absolute; top: 0; left: 0; width: min(250px, 80%); display: flex; flex-direction: column; gap: 3px; z-index: 3; will-change: transform;
+  pointer-events: none;
+}
+.bong {
+  padding: 4px 7px 5px; background: rgba(5, 11, 18, 0.94); border: 2px solid var(--c); box-shadow: var(--px-bong);
+  font-size: 14px; line-height: 1.25; color: var(--text-body);
+}
+.bongVao { animation: bongVao 0.32s var(--nay) both; }
+@keyframes bongVao { from { opacity: 0; scale: 0.55; } to { opacity: 1; scale: 1; } }
+.bongDau { display: flex; align-items: center; gap: 5px; margin-bottom: 2px; }
+.bongNg { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--c); }
+.bongUy { font-size: 11px; letter-spacing: 1px; color: var(--c); }
+.bongUy s { text-decoration: none; opacity: 0.3; }
+.dauXM { display: inline-block; margin-left: 6px; padding: 0 5px; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; }
+.xmThat { background: var(--win); color: var(--win-on); }
+.xmNhieu { background: var(--text-muted); color: var(--ink); }
+.tinThatRa {
+  position: absolute; inset: 6px; z-index: 5; display: flex; flex-direction: column; gap: 4px; padding: 6px;
+  background: rgba(5, 11, 18, 0.94); border: 1px solid var(--border-gold);
+}
+.ttrT { font-size: 13px; color: var(--gold-amber); letter-spacing: 0.06em; }
+.dsTin { display: flex; flex-direction: column; gap: 3px; max-height: 150px; overflow: auto; }
+.tinThatRa .dsTin { max-height: none; }
+.dsTin div { font-size: 13px; padding: 2px 6px; border-left: 4px solid var(--c); background: rgba(255, 255, 255, 0.03); color: var(--text-body); }
+/* D532 — nút chính của khung trước màn (demo `.truocMan .h button.chinh`): MUA TIN SỚM. */
+.tmH button.tmChinh { background: var(--gold-amber); color: var(--ink); box-shadow: var(--px-vien), 0 3px 0 #92400e; }
+.tmH button small { display: block; font-size: 12px; font-weight: 500; }
+@media (prefers-reduced-motion: reduce) { .bongVao { animation: none; } }
+
+/* D534 — chép demo `.bung` · `.nhanLon` · `.nut.hut`: nhãn đà của lõi (nhấp theo nhịp máy — steps) · nhãn bán cưỡng bức · nút rung khi bấm hụt. */
+.bung {
+  position: absolute; left: 6px; bottom: 22%; display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; font-size: 13px; font-weight: 700;
+  letter-spacing: 0.08em; background: var(--gold-flame); color: var(--ink); opacity: 0; transform: scale(0.8); transition: opacity 0.15s ease; z-index: 2;
+  pointer-events: none;
+}
+.bungOn { opacity: 1; animation: bungNhay 0.5s steps(2) infinite; }
+@keyframes bungNhay { 50% { transform: scale(1.06); } }
+.nhanLon {
+  position: absolute; right: 4px; bottom: 22%; display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; font-size: 13px; font-weight: 700;
+  letter-spacing: 0.06em; background: var(--text-bright); color: var(--ink); z-index: 2; pointer-events: none;
+}
+.hut { animation: rung 0.13s steps(3); }
+@media (prefers-reduced-motion: reduce) { .bungOn, .hut { animation: none; } }
+
+/* D561 — khoá nhiều mã: ô bảng phụ là cửa sang màn con của mã ấy (chạm để đánh). */
+.bpDoi { cursor: pointer; }
+.bpDoi:hover, .bpDoi:focus-visible { outline: 2px solid var(--c); outline-offset: -2px; }
+.bpDoi:active { transform: translateY(1px); }
+.bangPhu[data-nhieu-ma] .bpChip { cursor: pointer; }

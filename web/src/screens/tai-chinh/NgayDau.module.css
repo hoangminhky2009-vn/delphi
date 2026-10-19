@@ -1,0 +1,230 @@
+/*
+ * PFM — MÀN NGÀY ĐẦU (GIAI ĐOẠN A, D355/D356). Số đo/màu/token CHÉP TỪ DEMO ĐÃ CHỐT
+ * (A11.25): `docs/ui-ux/demo/pfm-ngay-dau.html`, khối `.cd`/`.viec`/`.orc`/`.nutChinh`.
+ *
+ * ⚠ KHÔNG `composes` từ `pixel.module.css` — giống nếp `Hu.module.css`/`So.module.css`/
+ * `BanTien.module.css`: demo có bộ nút RIÊNG (`.nutChinh`/`.nut2`/`.nutNho`) khác hẳn
+ * `.nut` dùng chung, tự reset từ đầu. Vì KHÔNG composes pixel nên `steps()` viết THẲNG ở
+ * đây cho NHỊP MÁY (lún nút) là đúng luật; cú NẢY (vật lý) vẫn phải đứng ở
+ * `motion.module.css` rồi `composes` sang — một luật, một hướng, không đảo lại.
+ */
+
+/* Khối vào bước mới trượt lên có nảy — chỉ chạy khi `key={buoc}` đổi (xem NgayDau.tsx). */
+.vao { composes: ndVaoLen from '../../styles/motion.module.css'; }
+
+/* ── ORACLE: bong bóng dời sang `components/pfm/BongOracle.module.css` (D365) — GĐ B thêm ba
+   chỗ Oracle nói nữa, giữ bản thứ hai ở đây là để nó trôi (A11.5/D61). ── */
+
+/* ── khối chung ─────────────────────────────────────────────────────────────────── */
+.mo { font-size: 12px; line-height: 1.5; color: var(--chu-mo); margin: 5px 0 0; }
+.chot { font-size: 12px; letter-spacing: 1px; color: var(--win); margin: 6px 0 0; }
+/* ĐÃ BỎ — dimmer hơn ĐÃ XONG, KHÔNG phải màu phán xét (A10): tả trạng thái, không chê. */
+.chotBo { color: var(--chu-mo); }
+/* Trích LỜI NHẮC điền sẵn của mẫu luật (việc 2) — cùng khối `.loiBan` demo dùng ở NGÀY 5. */
+.loiBan {
+  margin: 8px 0 0;
+  padding: 7px 9px;
+  border-left: 3px solid var(--gold);
+  background: rgba(253, 224, 71, 0.07);
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: var(--text-bright);
+}
+
+/* ── CHÂN DUNG ──────────────────────────────────────────────────────────────────── */
+.cd {
+  border: 1px solid var(--accent);
+  background: var(--surface-card);
+  padding: 13px 12px 11px;
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.12), 0 4px 0 rgba(10, 6, 24, 0.7);
+  margin-bottom: 9px;
+}
+.cdDau { display: flex; gap: 11px; align-items: center; }
+.glyph {
+  flex: none;
+  width: 70px;
+  height: 70px;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  letter-spacing: 1px;
+  font-weight: 800;
+  color: var(--bg-deep);
+  background: var(--gold);
+  box-shadow: 0 4px 0 var(--v-2);
+}
+.cdTen {
+  font-size: 26px;
+  line-height: 1.05;
+  letter-spacing: 1px;
+  color: var(--text-bright);
+  font-weight: 800;
+  margin: 0;
+}
+.cdNhom { font-size: 12px; letter-spacing: 1.2px; color: var(--accent-bright); margin: 4px 0 0; }
+.cdDoan {
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(34, 211, 238, 0.28);
+  font-size: 14.5px;
+  line-height: 1.35;
+  color: var(--text-bright);
+}
+.cdDoanTieu { display: block; font-size: 12px; letter-spacing: 1.6px; color: var(--gold); font-weight: 600; margin-bottom: 2px; }
+.cdDoanGhiChu { display: block; margin-top: 3px; font-size: 12px; color: var(--chu-mo); }
+
+.net { border-top: 1px dashed rgba(93, 114, 144, 0.22); padding: 6px 0 1px; }
+.net:first-child { border-top: 0; padding-top: 0; }
+.netDau { display: flex; align-items: center; gap: 8px; min-height: 26px; }
+.netTen { flex: 1; font-size: 12px; letter-spacing: 1px; color: var(--chu-phu); }
+.netGt { font-size: 18px; line-height: 1.15; color: var(--text-bright); margin: 0 0 3px; }
+.netBac .netGt { color: var(--chu-mo); text-decoration: line-through; }
+.doi { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+
+/* ── BA VIỆC ────────────────────────────────────────────────────────────────────── */
+.viec {
+  display: flex;
+  gap: 10px;
+  border: 1px solid var(--line-2);
+  background: var(--surface-card);
+  padding: 10px 11px;
+  margin-bottom: 8px;
+}
+.viecSo {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--bg-deep);
+  background: var(--accent);
+  box-shadow: 0 3px 0 var(--c-1);
+}
+.viecXong { border-color: rgba(74, 222, 128, 0.55); }
+.viecXong .viecSo { background: var(--win); box-shadow: 0 3px 0 #14532d; }
+.viecBo { opacity: 0.5; }
+.viecThan { flex: 1; min-width: 0; }
+.viecDau { display: flex; align-items: center; gap: 5px; }
+.viecDau .nutNho { flex: none; min-height: 34px; padding: 6px 9px; }
+.viecTen { flex: 1; font-size: 17px; line-height: 1.15; color: var(--text-bright); margin: 0; }
+.viecNut {
+  width: 100%;
+  height: 42px;
+  margin-top: 8px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 14px;
+  letter-spacing: 1.3px;
+  color: var(--accent-bright);
+  border: 1px solid var(--accent);
+  background: var(--c-1);
+  box-shadow: 0 4px 0 #062730;
+  transform: translateY(-1px);
+  transition: transform var(--nhip-nd-lun, 90ms) steps(2, end),
+    box-shadow var(--nhip-nd-lun, 90ms) steps(2, end);
+  cursor: pointer;
+}
+.viecNut:active { transform: translateY(3px); box-shadow: 0 0 0 #062730; }
+
+/* ── nút nhỏ dùng chung: KHÔNG HẲN · ĐỔI · HOÀN TÁC · THÔI GIỮ NHƯ CŨ · SỬA · BỎ · chip ── */
+.nutNho {
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  padding: 7px 10px;
+  color: var(--text-dim);
+  border: 1px solid var(--line);
+  background: var(--n-1);
+  cursor: pointer;
+  transition: transform var(--nhip-nd-lun, 90ms) steps(2, end);
+}
+.nutNho:active { transform: translateY(2px); }
+
+/* ── nút NEO ĐÁY — chính, 2.5D lún + đổi màu bóng + thở nhẹ ────────────────────────── */
+/*
+ * ⚠ NEO ĐÁY THẬT, không chỉ "nằm cuối trang" (D358 — soi mắt 375×812: màn ba việc cao 1033px, nút chính rơi khỏi
+ * khung đầu tiên). Cùng khuôn `.day` của Hu.module.css: dính đáy, chừa 65px cho thanh tab của app + vùng an toàn.
+ * Nền đặc để chữ bên dưới không lẫn vào nút khi cuộn.
+ */
+.neo {
+  position: sticky;
+  bottom: calc(65px + env(safe-area-inset-bottom, 0px));
+  z-index: 4;
+  margin-top: 14px;
+  padding: 9px 0 6px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-deep);
+}
+.nutChinh {
+  position: relative;
+  width: 100%;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 17px;
+  letter-spacing: 1.6px;
+  padding-left: 1.6px;
+  color: var(--bg-deep);
+  background: var(--accent);
+  box-shadow: 0 5px 0 var(--c-1), 0 5px 0 1px rgba(10, 6, 24, 0.7);
+  transform: translateY(-2px);
+  transition: transform var(--nhip-nd-lun, 90ms) steps(2, end),
+    box-shadow var(--nhip-nd-lun, 90ms) steps(2, end);
+  cursor: pointer;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+/* Ánh sáng THỞ — pseudo-element RIÊNG, không tranh `animation` với chính `.nutChinh`
+   (nó chỉ có `transition`, không `animation` — "một phần tử một chủ" vẫn giữ đúng vì
+   đây là HAI hộp render khác nhau). `ease-in-out infinite` đúng luật 4 §XI: đây là ÁNH
+   SÁNG thở, dùng `steps()` ở đây sẽ ra strobe. */
+.nutChinh::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--chu-sang);
+  opacity: 0;
+  animation: nutTho var(--nhip-nd-tho, 2600ms) ease-in-out infinite;
+}
+@keyframes nutTho {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.16; }
+}
+.nutChinh:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--c-2), 0 0 0 1px rgba(10, 6, 24, 0.7);
+}
+.nutChinh[disabled] {
+  background: var(--n-4);
+  color: var(--chu-mo);
+  box-shadow: 0 5px 0 var(--n-2);
+  cursor: default;
+}
+.nutChinh[disabled]::after { animation: none; }
+
+@media (hover: hover) and (pointer: fine) {
+  .nutNho:hover { border-color: var(--accent); color: var(--accent); }
+  .nutChinh:hover { background: var(--c-4); }
+  .viecNut:hover { border-color: var(--accent-bright); color: var(--accent-bright); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* TẮT CÁI NHÁY, GIỮ CÁI TIN (D116) — chỉ tắt vòng lặp vô hạn; lún nút là phản hồi tức
+     thời của một cú chạm, không phải cái nháy cần dẹp. */
+  .nutChinh::after { animation: none; }
+}
+
+/*
+ * Ô LỖI — chép ĐÚNG khuôn `.loi` của `PhongVan.module.css`/`CamKet.module.css` (D360), không dựng kiểu thứ ba.
+ * A11.25: đây là áp một mẫu ĐÃ CHỐT trong cùng khu PFM, không phải thiết kế mới.
+ */
+.loi {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: var(--lose-soft);
+}

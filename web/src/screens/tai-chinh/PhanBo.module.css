@@ -1,0 +1,392 @@
+/*
+ * KHAY PHÂN BỔ TỐI (D410) — xem `PhanBo.tsx`.
+ * ⚠ Ranh D182: cú lún của tờ/ô là NHỊP MÁY (`steps()`); luồng sáng thở và cú loé là ÁNH SÁNG (`ease-in-out`/`ease-out`);
+ *   hạt bay là CHUYỂN ĐỘNG VẬT LÝ (`cubic-bezier`, viết ở WAAPI trong TSX). Chỉ `transform`/`opacity`.
+ * ⚠ Quầng là một VẬT (khối màu đặc, `opacity` thở) — không box-shadow blur động (không map được sang native).
+ * ⚠ Không mã hex rời; màu tờ đi vào bằng `--m`/`--bam` inline (bậc của `TO_TIEN`), như bàn tiền.
+ */
+
+/* ── KỆ HŨ ─────────────────────────────────────────────────────────────────── */
+.ke {
+  composes: ndVaoLen from '../../styles/motion.module.css';
+  margin: 4px 0 12px;
+  padding: 10px 10px 11px;
+  border: 1px solid rgba(253, 224, 71, .38);
+  background: var(--surface-card);
+  box-shadow: var(--px-vien), var(--px-bong);
+}
+.dauKe { display: flex; align-items: center; gap: 8px; }
+.tieu { flex: 1; font-size: 12.5px; letter-spacing: 1.6px; color: var(--gold); }
+.hoi { composes: hoi from './Hu.module.css'; }
+.giai { composes: giai from './Hu.module.css'; }
+.goiY { margin: 7px 0 0; font-size: 12px; line-height: 1.5; color: var(--chu-phu); }
+
+/* Khe hàng 12px: nhãn quy tắc dán ở mép trên ô (`.tuDongO`, nhô 7px) không đè lên hàng ô phía trên. */
+.luoiHu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 6px; margin-top: 11px; }
+/* D421 — hai nhóm trên kệ: vàng là TIỀN (tích lũy), xanh là PHIẾU (tiêu dùng) — không đỏ (A10: tiêu không phải lỗi). */
+.nhomKe { margin: 12px 0 0; font-size: 11px; letter-spacing: 1.4px; color: var(--gold); }
+.nhomTieu { color: var(--c-3); }
+.nhomKe + .luoiHu { margin-top: 9px; }
+.oHu {
+  position: relative;
+  display: block;
+  min-width: 0;
+  padding: 8px 9px 9px;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  background: var(--mat-ban);
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  box-shadow: var(--px-bong);
+  cursor: pointer;
+  /* Thanh đo mini — cùng component với màn SỔ, cỡ SỔ (xem `--tt-cao` ở `ThanhTienDo.module.css`). */
+  --tt-cao: 8px;
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.oHu:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+.oHu.dangChon { border-color: var(--gold); }
+/* Ô hũ TIÊU DÙNG: một vạch xanh đặc ở mép trái (vật, không phải viền đổi bề rộng — ô hai nhóm thẳng hàng nhau). */
+.oTieu::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  left: -1px;
+  z-index: 1;
+  width: 3px;
+  background: var(--c-2);
+  pointer-events: none;
+}
+.ruotO { position: relative; z-index: 1; display: grid; gap: 7px; }
+
+/* Hũ đang chọn: một khối vàng đặc THỞ phía sau — "đang mở miệng chờ nạp". */
+.quangChon {
+  position: absolute;
+  inset: -3px;
+  z-index: 0;
+  background: var(--gold);
+  opacity: .12;
+  pointer-events: none;
+  animation: quangTho var(--nhip-nd-tho, 2600ms) ease-in-out infinite;
+}
+/* Cú "hấp thụ": cả ô loé một nhịp đúng lúc hạt chạm — dựng lại bằng `key` mỗi cú, chạy MỘT lần. */
+.quangNap {
+  position: absolute;
+  inset: -2px;
+  z-index: 0;
+  background: var(--gold);
+  opacity: 0;
+  pointer-events: none;
+  animation: napLoe var(--nhip-hap-thu-loe, 420ms) ease-out 1;
+}
+@keyframes quangTho { 0%, 100% { opacity: .10; } 50% { opacity: .26; } }
+@keyframes napLoe { 0% { opacity: .5; } 100% { opacity: 0; } }
+
+.dongTen { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.icon { flex: none; }
+.tenO {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12.5px;
+  letter-spacing: .6px;
+  color: var(--chu-sang);
+}
+.thanhO { position: relative; display: block; }
+/* Vạch LOÉ ở điểm mốc mới — ánh sáng, `ease-out`; chỉ `opacity` + `transform`. */
+.loe {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 4px;
+  margin-left: -2px;
+  background: var(--chu-sang);
+  box-shadow: 0 0 0 1px var(--gold), 0 0 10px var(--gold);
+  pointer-events: none;
+  opacity: 0;
+  animation: loeMoc var(--nhip-hap-thu-loe, 420ms) ease-out 1;
+}
+@keyframes loeMoc {
+  0% { opacity: 1; transform: scaleY(1.9); }
+  100% { opacity: 0; transform: scaleY(1); }
+}
+.dongSo { display: flex; align-items: baseline; gap: 5px; min-width: 0; }
+.soO { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--chu-sang); }
+.phuO { font-size: 11px; color: var(--chu-phu); white-space: nowrap; }
+
+/* ── KHAY TIỀN (góc dưới, trong thanh neo đáy) ──────────────────────────────── */
+.khay {
+  position: relative;
+  margin: 0 10px 8px;
+  padding: 8px 9px 9px;
+  border: 1px solid rgba(253, 224, 71, .5);
+  background: var(--surface-card);
+  box-shadow: var(--px-vien), var(--px-bong);
+}
+/* Luồng sáng nhẹ quanh cục tiền chưa phân bổ — khối vàng thở phía sau, không phải blur. */
+.quang {
+  position: absolute;
+  inset: -4px;
+  z-index: 0;
+  background: var(--gold);
+  opacity: .1;
+  pointer-events: none;
+  animation: quangTho var(--nhip-nd-tho, 2600ms) ease-in-out infinite;
+}
+.ruotKhay { position: relative; z-index: 1; }
+/*
+ * D453 — KHAY RỖNG THÔI PHÁT SÁNG. Viền vàng + quầng thở là lời mời "có tiền đang chờ chia"; khi ví và phần chi đều 0 mà
+ * khay vẫn sáng thì nó mời một việc không có — mắt học cách phớt lờ đúng tín hiệu ấy. Khay VẪN đứng đó (D421: không gì tự
+ * biến mất), chỉ về viền trung tính và tắt quầng.
+ */
+.khayRong { border-color: var(--line-2); }
+.khayRong .quang { display: none; }
+.khayRong .nhanKhay { color: var(--text-muted); }
+.dauKhay { display: flex; align-items: center; gap: 8px; min-height: 24px; }
+.nhanKhay { flex: 1; min-width: 0; font-size: 11.5px; letter-spacing: 1.3px; color: var(--gold); }
+.chip {
+  flex: none;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: .5px;
+  color: var(--chu-than);
+  background: none;
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  cursor: pointer;
+}
+.dongTo { display: flex; flex-wrap: wrap; gap: 8px 7px; margin-top: 9px; padding: 3px 3px 0 0; }
+.to {
+  position: relative;
+  min-width: 66px;
+  height: 44px;
+  padding: 0 12px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 17px;
+  color: var(--chu-sang);
+  background: var(--mat-phim);
+  border: 0;
+  border-bottom: 3px solid var(--m, var(--line-2));
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16),
+    inset 1px 0 0 rgba(255, 255, 255, .07),
+    inset -1px 0 0 rgba(0, 0, 0, .30),
+    var(--px-bong);
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end), background-color 90ms steps(2, end);
+}
+.to:active {
+  transform: translate(var(--px-day), var(--px-day));
+  background-color: var(--bam, var(--mat-phim));
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, .35), inset 0 -1px 0 rgba(255, 255, 255, .14);
+}
+/*
+ * Tờ đã nạp hết = Ô TRỐNG TẠI CHỖ (không rời khay — xem `usePhanBo`): mờ, xám, không bấm, không nổi. Giữ nguyên cỡ để
+ * không tờ nào quanh nó xê dịch.
+ */
+.to:disabled {
+  opacity: .3;
+  filter: grayscale(1);
+  cursor: default;
+  box-shadow: none;
+}
+.soTo { font-variant-numeric: tabular-nums; }
+/* Số lượng trên MỖI tờ (founder: "có số lượng trên mỗi tờ tiền") — kể cả ×1. */
+.demTo {
+  position: absolute;
+  top: -8px;
+  right: -7px;
+  min-width: 22px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 18px;
+  text-align: center;
+  color: var(--ink);
+  background: var(--gold);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, .5);
+}
+
+.xong { composes: ndBat from '../../styles/motion.module.css'; margin: 2px 0 1px; display: grid; gap: 3px; }
+.xong b { font-size: 14px; font-weight: 400; letter-spacing: 1.6px; color: var(--gold); }
+.xong span { font-size: 12px; color: var(--chu-phu); }
+
+.toast {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 9;
+  width: max-content;
+  max-width: calc(100% - 20px);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 5px 5px 12px;
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--chu-sang);
+  background: var(--n-2);
+  border: 1px solid var(--line-2);
+  box-shadow: var(--px-bong);
+}
+.toast button {
+  min-height: 34px;
+  padding: 0 11px;
+  font: inherit;
+  letter-spacing: 1px;
+  color: var(--gold);
+  background: none;
+  border: 1px solid rgba(253, 224, 71, .45);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+/* ── D420: THẺ HỎI của quy tắc tự chia (thiếu / thừa) — đầu kệ, nơi mắt đang ở khi màn mở ─────────── */
+.theHoi {
+  composes: ndBat from '../../styles/motion.module.css';
+  margin-top: 9px;
+  padding: 8px 9px 9px;
+  border: 1px solid var(--gold);
+  background: var(--mat-ban);
+  box-shadow: var(--px-bong);
+}
+.theHoi[data-ket-qua='thieu'] { border-color: var(--lose); }
+.dauHoi { display: flex; align-items: center; gap: 8px; }
+.dauHoi b { flex: 1; font-size: 11.5px; font-weight: 400; letter-spacing: 1.4px; color: var(--gold); }
+/* D421 — thẻ KẾT QUẢ nằm yên tại chỗ: đã chia (vàng, có HOÀN TÁC) · bỏ qua / hoàn tác (lặng — xám). */
+.theHoi[data-trang-thai='da_chia'] { border-color: var(--gold); }
+.theHoi[data-trang-thai='bo_qua'],
+.theHoi[data-trang-thai='hoan_tac'] { border-color: var(--line-2); }
+.theHoi[data-trang-thai='bo_qua'] .dauHoi b,
+.theHoi[data-trang-thai='hoan_tac'] .dauHoi b { color: var(--chu-than); }
+.tongChia {
+  flex: 1 1 auto;
+  align-self: center;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--chu-than);
+}
+.cauHoi { margin: 6px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--chu-sang); }
+.dongPhan { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 3px; }
+.dongPhan li { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--chu-than); }
+.dongPhan b { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--chu-sang); }
+.nutHoiHang { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.nutHoiChinh,
+.nutHoiPhu {
+  flex: 1 1 auto;
+  min-height: 40px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: .8px;
+  border-radius: 0;
+  box-shadow: var(--px-bong);
+  cursor: pointer;
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.nutHoiChinh { color: var(--ink); background: var(--gold); border: 1px solid var(--gold); }
+.nutHoiPhu { color: var(--chu-than); background: none; border: 1px solid var(--line-2); }
+.nutHoiChinh:active,
+.nutHoiPhu:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+.nutHoiChinh:disabled,
+.nutHoiPhu:disabled { opacity: .45; box-shadow: none; cursor: default; }
+
+/* D420 — nhãn quy tắc DÁN lên mép trên ô hũ ("⟳ 50k/ngày"), khuôn số lượng trên tờ tiền — không ăn chỗ của tên. */
+.tuDongO {
+  position: absolute;
+  top: -7px;
+  right: 6px;
+  z-index: 2;
+  height: 17px;
+  padding: 0 5px;
+  font-size: 10.5px;
+  line-height: 17px;
+  letter-spacing: .3px;
+  white-space: nowrap;
+  color: var(--ink);
+  background: var(--gold);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, .5);
+}
+
+/* D420 — ví còn bao nhiêu, cạnh tên hũ đang nạp. */
+.conKhay { flex: none; font-size: 11px; font-variant-numeric: tabular-nums; color: var(--chu-than); }
+
+/* D420 — GÕ SỐ: con số đang gõ + nút NẠP, rồi bàn phím của bàn tiền (một bản — `BanPhim`). */
+.goSo { margin-top: 8px; }
+.hangGo { display: flex; align-items: center; gap: 8px; }
+.soGo {
+  flex: 1;
+  min-width: 0;
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--chu-sang);
+}
+.soGoRong { color: var(--chu-phu); }
+.nutNapGo {
+  flex: none;
+  min-height: 40px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 12.5px;
+  letter-spacing: .8px;
+  color: var(--ink);
+  background: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 0;
+  box-shadow: var(--px-bong);
+  cursor: pointer;
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.nutNapGo:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+.nutNapGo:disabled { opacity: .35; box-shadow: none; cursor: default; }
+.vuot { margin: 5px 0 0; font-size: 11.5px; color: var(--lose); }
+
+/* ── D421 → D424: hai CHIỀU của mọi hũ — VÀO (nạp tiền còn lại · chia tiền chi) · RA (rút · gỡ) ─────────── */
+.hangHuong { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
+.huong { flex: 1; display: flex; gap: 6px; min-width: 0; }
+.nutHuong {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 11.5px;
+  letter-spacing: 1px;
+  color: var(--chu-than);
+  background: none;
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  cursor: pointer;
+  transition: transform 90ms steps(2, end), background-color 90ms steps(2, end);
+}
+.nutHuong[aria-pressed='true'] { color: var(--ink); background: var(--gold); border-color: var(--gold); }
+.nutHuong:active { transform: translate(var(--px-day), var(--px-day)); }
+/* Hũ tiêu dùng: nút chiều sáng XANH — vàng là tiền (tích lũy), xanh là tiền đã tiêu (tiêu dùng), như hai nhóm trên kệ. */
+.khay[data-nhom='tieu_dung'] .nutHuong[aria-pressed='true'] { background: var(--c-3); border-color: var(--c-3); }
+.hangHuong .chip { min-height: 34px; }
+.chip:disabled { opacity: .35; cursor: default; }
+
+/* ── HẠT SÁNG đang bay (gắn vào `body`, WAAPI ở TSX) ─────────────────────────── */
+.hat {
+  position: fixed;
+  z-index: 30;
+  width: 14px;
+  height: 14px;
+  background: var(--mau, var(--gold));
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .55), 0 0 14px var(--mau, var(--gold));
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quang, .quangChon { animation: none; }
+  .quangNap, .loe, .hat { display: none; }
+}

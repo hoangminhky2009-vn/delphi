@@ -1,0 +1,6 @@
+# Keep line endings as LF everywhere so generated documents and golden fixtures compare byte-for-byte on every platform.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary

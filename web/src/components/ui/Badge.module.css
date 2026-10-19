@@ -1,0 +1,74 @@
+.badge {
+  composes: khung from '@/styles/pixel.module.css';
+  composes: badgeup from '../../styles/motion.module.css';
+  --dl-badgeup-dur: 0.5s;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 0;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--text-bright);
+}
+
+.violet {
+  background: rgba(139, 92, 246, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.45);
+}
+
+.gold {
+  background: rgba(251, 146, 60, 0.1);
+  border: 1px solid var(--border-gold);
+}
+
+/*
+ * NHỊP ĐẬP CỦA ICON — 2 khung, đổi ĐỘ SÁNG, KHÔNG đổi cỡ.
+ *
+ * `scale(1.16)` cũ là bẫy riêng của icon pixel: lưới 8 hàng ở cỡ 16px là 2px/ô,
+ * nhân 1,16 ra 2,32px/ô — mọi ô lệch khỏi lưới và cả sprite nhoè trong đúng
+ * khoảnh khắc nó được nhấn mạnh. Sprite dựng bằng `box-shadow` chỉ phóng đúng
+ * nét ở bội số NGUYÊN, mà 2× thì to gấp đôi, quá tay cho một dòng chữ 13px.
+ * Nên nhấn mạnh bằng thứ không đụng tới hình: sáng lên một nấc rồi tối lại.
+ */
+.icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  /* 0,85s × alternate = vẫn đúng chu kỳ 1,7s của mẫu. */
+  animation: iconpulse 0.85s steps(2, jump-none) infinite alternate;
+}
+
+.sweep {
+  composes: sweepBadge from '../../styles/motion.module.css';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 34%;
+  background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+@keyframes iconpulse {
+  0% { filter: brightness(1); }
+  100% { filter: brightness(1.4); }
+}
+
+/*
+ * Icon lửa LIẾM thay vì phồng (spec handoff: iconflame .55s alternate).
+ *
+ * `scaleY(1.22) skewX(-5deg)` cũ vừa kéo lệch lưới vừa cắt chéo sprite — nghiêng
+ * một lưới ô vuông thì mọi cạnh thành răng cưa nửa vời. Ngọn lửa thật trong
+ * pixel art nhảy bằng CẢ Ô: đây là 1px lên và một nấc sáng, hai khung, đúng cách
+ * sprite lửa hai frame vẫn chạy.
+ */
+.iconFlame {
+  transform-origin: 50% 100%;
+  animation: iconflame 0.55s steps(2, jump-none) infinite alternate;
+}
+
+@keyframes iconflame {
+  0% { transform: translateY(0); filter: brightness(1); }
+  100% { transform: translateY(-1px); filter: brightness(1.3); }
+}

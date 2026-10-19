@@ -1,0 +1,93 @@
+/*
+ * GIẢI VÒNG (D401) — hộp quỹ vòng cuối hàng HUD.
+ *
+ * CÙNG KHUÔN hộp đồng hồ vòng (`DongHoVong .hop`/`.nhan`/`.so` — composes, không chép): hai ô số của CẢ VÒNG đứng
+ * cạnh nhau trên một hàng thì phải là một loại vật. Khác đúng hai thứ, cả hai lấy từ demo `giai-vong.html` founder đã
+ * xem: viền ánh VÀNG (vật mang tiền — token `--border-gold`) và con số màu vàng. Lề ngang 6px thay 8px để hàng HUD
+ * còn MỘT dòng ở 375px.
+ * ⚠ Cú NẢY khi một ghế đáp là WAAPI trên `.hop` (GiaiVong.tsx) — `.hop` không mang `animation` CSS nào, nên nó có
+ *   đúng một chủ. Quầng sáng nằm ở `::after` — một phần tử khác, chủ khác (§2.5-1).
+ */
+
+.hop {
+  composes: hop from './DongHoVong.module.css';
+  position: relative;
+  padding: 3px 6px;
+  box-shadow: inset 0 0 0 1px var(--border-gold);
+}
+
+.nhan {
+  composes: nhan from './DongHoVong.module.css';
+}
+
+.so {
+  composes: so from './DongHoVong.module.css';
+  color: var(--gold-amber);
+}
+
+/* Quầng vàng — ÁNH SÁNG nên thở ease-in-out (A11.18), một lần, lúc giải vừa đủ. Chỉ `opacity` chuyển động. */
+.hop::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.75);
+}
+
+.sang::after {
+  animation: giaiSang var(--nhip-giai-sang, 720ms) ease-in-out 1;
+}
+
+/* CSS Modules đổi tên keyframe theo file ⇒ @keyframes phải CÙNG FILE với lớp dùng nó. */
+@keyframes giaiSang {
+  50% { opacity: 1; }
+}
+
+/*
+ * Viên xu bay từ ghế lên giải — đồng xu pixel của `PixelIcon` (nhân bản từ mẫu ẩn trong hộp, 24px như demo). Sống ở
+ * `document.body`, `fixed` (đặt bằng style — mẫu mang sẵn `position: relative`), z-index 80 như chip bay của Shop:
+ * nổi trên cả dải ghế lẫn hàng HUD suốt đường bay, không nhận chạm.
+ */
+.xu {
+  z-index: 80;
+  pointer-events: none;
+}
+
+/*
+ * D402 — nhãn "hạng · +tiền" nổi trên ghế nhận giải. Sống ở `document.body` (`fixed`), chỉ `transform`/`opacity`
+ * chuyển động (WAAPI trong GiaiVong.tsx — `translate(-50%)` nằm TRONG khung hình, lớp này không khai `transform`). Viền
+ * chữ đen 1px bốn phía để đọc được trên art ghế đủ màu; hạng là ô vàng đặc, số là chữ vàng.
+ */
+.noi {
+  position: fixed;
+  z-index: 81;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  pointer-events: none;
+  white-space: nowrap;
+  font-size: var(--fs-human);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold-amber);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.95), 1px 0 0 rgba(0, 0, 0, 0.95), -1px 0 0 rgba(0, 0, 0, 0.95), 0 -1px 0 rgba(0, 0, 0, 0.95);
+}
+
+.noiHang {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 13px;
+  height: 13px;
+  padding: 0 2px;
+  font-size: var(--fs-label);
+  color: rgba(4, 7, 13, 1);
+  background: var(--gold-amber);
+  text-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sang::after { animation: none; }
+}

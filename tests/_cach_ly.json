@@ -1,0 +1,5 @@
+{
+  "_doc": "SỔ CÁCH LY bài test đỏ-đã-biết (D535 B4). Bài ở đây KHÔNG chạy trong `npm test` và CI — vì đỏ liên tục không cho tín hiệu, lại chặn cổng. Mỗi mục PHẢI có lý do, chủ, hạn (N2): quá hạn thì `kiem` cảnh báo và `so-do` đếm; không ai được thêm mục mà không ghi việc chữa. Cách ly ≠ xoá: bài vẫn chạy được bằng `npx vitest run <tệp>`.",
+  "goc": [],
+  "web": []
+}

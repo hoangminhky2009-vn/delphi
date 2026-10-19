@@ -1,0 +1,67 @@
+/*
+ * RUỘT ba lớp trượt của SPEC chan-truoc-beta — Dữ liệu của tôi · Báo lỗi · Hỏi lại đồng ý. Khung (nền tối, quai, nút ĐÓNG) là
+ * `components/ui/TamTruot`; ở đây chỉ chữ + hàng, bám nếp `screens/hub/HubTam.module.css` (cùng token, không hiệu ứng riêng).
+ */
+.dau { margin: 0; font-size: 22px; letter-spacing: 0.08em; line-height: 1.1; color: var(--text-title); }
+.mo { margin: 0; font-size: 16px; font-weight: 500; line-height: 1.35; color: var(--text-body); }
+.nhom { display: flex; flex-direction: column; gap: 6px; }
+.nhomTen { margin: 4px 0 0; font-size: var(--tk-label); letter-spacing: 0.16em; color: var(--violet-soft); }
+
+/* Hàng "nhãn — giá trị". */
+.dong {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 9px;
+  background: color-mix(in srgb, black 55%, var(--bg-page));
+  box-shadow: var(--o-vien);
+  font-size: var(--tk-body);
+  font-variant-numeric: tabular-nums;
+}
+.dong > span:first-child { color: var(--text-muted); min-width: 0; overflow-wrap: anywhere; }
+.dong b { color: var(--text-title); font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+.phu { font-size: var(--tk-label); color: var(--text-muted); letter-spacing: 0.06em; }
+
+/* Văn bản đồng ý: năm vế, mỗi vế một đoạn ngắn. */
+.vanBan { display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border-left: 3px solid var(--gold-amber); }
+.vanBan p { margin: 0; font-size: var(--tk-body); line-height: 1.35; }
+.vanBanTen { font-size: var(--tk-label); letter-spacing: 0.14em; color: var(--gold-amber); }
+
+.congTac { display: flex; align-items: flex-start; gap: 10px; font-size: var(--tk-body); line-height: 1.35; cursor: pointer; }
+.congTac input { width: 22px; height: 22px; margin: 0; flex: 0 0 auto; accent-color: var(--violet); }
+
+.nut {
+  composes: doiMau from '@/styles/pixel.module.css';
+  padding: 11px 0;
+  border: 1px solid var(--border-accent);
+  background: none;
+  color: var(--text-title);
+  font: inherit;
+  font-size: var(--tk-body);
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+.nut:disabled { opacity: 0.55; cursor: default; }
+.nutNguy { composes: nut; border-color: var(--danger); color: var(--danger); }
+
+.oNhap {
+  width: 100%;
+  min-height: 112px;
+  box-sizing: border-box;
+  padding: 9px 10px;
+  border: 1px solid var(--border-idle);
+  background: color-mix(in srgb, black 55%, var(--bg-page));
+  color: var(--text-title);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.35;
+  resize: vertical;
+}
+.oNhap:focus { outline: none; border-color: var(--border-accent); }
+/* Ô một dòng (email ở bảng Báo lỗi) — cùng khung `oNhap`, bỏ chiều cao của ô chữ nhiều dòng. */
+.oMotDong { composes: oNhap; min-height: 0; resize: none; }
+
+.tot { margin: 0; font-size: var(--tk-body); color: var(--win); }
+.loi { margin: 0; font-size: var(--tk-body); color: var(--danger); }
+.lienKet { color: var(--violet-soft); font-size: var(--tk-label); letter-spacing: 0.08em; }

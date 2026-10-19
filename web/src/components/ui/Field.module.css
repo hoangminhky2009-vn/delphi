@@ -1,0 +1,52 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/*
+ * Ô nhập là VẬT có cạnh → góc khấc như mọi khung khác (`khung`), và viền sáng
+ * lên khi focus là đổi trạng thái NHỊ PHÂN → nhảy 2 nấc chung nhịp với cả web
+ * (`doiMau`), không tự gõ `transition: border-color .2s` nữa.
+ */
+.input {
+  composes: khung from '@/styles/pixel.module.css';
+  composes: doiMau from '@/styles/pixel.module.css';
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-bright);
+  background: var(--surface-inset);
+  border: 1px solid var(--border-idle);
+  padding: 10px 12px;
+  outline: none;
+}
+.input:focus {
+  border-color: var(--border-accent-strong);
+}
+.input::placeholder {
+  color: rgba(147, 170, 200, 0.5);
+}
+
+.inputError {
+  border-color: var(--border-lose);
+}
+
+.error {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--lose-soft);
+}
+
+.hint {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}

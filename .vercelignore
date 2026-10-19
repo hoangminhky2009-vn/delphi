@@ -1,0 +1,12 @@
+# Allowlist theo đúng cú pháp docs Vercel (vercel.com/docs/deployments/vercel-ignore):
+# dòng đầu /* loại mọi thứ ở root, các dòng ! (KHÔNG có / đầu) cho phép lại.
+# Chỉ deploy API + phần code nó import; web/ đi Cloudflare Pages,
+# migrations chạy từ máy founder.
+/*
+!api
+!config
+!server
+!package.json
+!package-lock.json
+!vercel.json
+!tsconfig.json

@@ -1,0 +1,85 @@
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-idle);
+  border-radius: 0;
+  /*
+   * `--shadow-card-sm` là `0 20px 60px` — CÓ offset, tức nó đang nói thẻ DÀY
+   * bao nhiêu chứ không phải thẻ đang phát sáng → vai VẬT, blur phải bằng 0.
+   * Vát mặt trước rồi mới tới bóng đổ (thứ tự luật 6), và gọi BIẾN thay vì
+   * `composes` lớp `.bong` vì cả hai vai đi chung một khai báo `box-shadow`.
+   */
+  box-shadow: var(--px-vien-trong), var(--px-bong);
+  padding: 16px 14px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.prompt {
+  color: var(--accent);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-human);
+  font-size: 17.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-title);
+}
+
+.body {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stub {
+  align-self: flex-start;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: var(--gold-amber);
+  border: 1px dashed var(--border-gold);
+  border-radius: 0;
+  padding: 2px 8px;
+}
+
+/*
+ * Khe GÓC PHẢI của dòng breadcrumb (07/09). `margin-left: auto` đẩy nó ra mép mà
+ * không cần `position: absolute` — tuyệt đối thì nó rơi ra ngoài luồng và chồng
+ * lên đường dẫn khi path dài (`/tai-chinh/guong` đã đủ dài để đụng).
+ * `line-height: 0` để một biểu tượng cao 44px KHÔNG kéo cao cả dòng breadcrumb.
+ */
+.goc {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+/*
+ * KHUNG GỌN — khu riêng (PFM). Bỏ breadcrumb + tiêu đề thì dải còn lại chỉ chở
+ * mỗi ⚙, nên kéo đệm trên xuống sát và bỏ khoảng cách thừa của hàng ấy.
+ * ⚠ `min-height` giữ đúng vùng chạm 44px của bánh răng — gọn không được đổi
+ * thành khó bấm.
+ */
+.cardGon {
+  padding-top: 4px;
+  gap: 8px;
+}
+.cardGon .breadcrumb {
+  min-height: 30px;
+  margin-bottom: -6px;
+}

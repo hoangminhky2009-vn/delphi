@@ -1,0 +1,989 @@
+/*
+ * BẢN ĐỒ THỊ TRƯỜNG — chuỗi ô lật cuốn chiếu.
+ *
+ * Ba trạng thái phải phân biệt được TỪ XA: đã qua (mờ, dấu ✓) · đang lật
+ * (viền sáng, glow mạnh) · còn úp (tối, dấu ?).
+ * Ô úp CỐ Ý không nói gì thêm — thành phần bộ bài công khai ở chỗ khác
+ * (nút XEM CHI TIẾT), còn THỨ TỰ là bí mật, đó là lớp kỹ năng đếm bài.
+ */
+
+/*
+ * ⭐ MẶT BÀN (31/08) — đây là "bàn chơi" theo đúng nghĩa đen: chỗ các lá thị
+ * trường được bày ra. Trước bản này nó không có nền, nên lá nằm trực tiếp trên
+ * nền trang và không có gì nói "đây là một cái bàn".
+ *
+ * ⚠ AN TOÀN VỀ TƯƠNG PHẢN THEO CẤU TRÚC: không một chữ nào nằm TRỰC TIẾP trên
+ * `.map` — mọi nhãn đều ở trong lá, mà lá có nền riêng. Nên đây là mặt duy
+ * nhất có thể nhận nỉ mà không phải cân lại một tỷ lệ tương phản nào.
+ * ⚠ Vát góc thì KHÔNG (§XI luật 1): mặt bàn cũng là một vật pixel.
+ */
+.map {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding: 11px 10px 12px;
+  /* D442 — mặt bàn thôi một tấm nỉ xanh cố định: nền MÔI TRƯỜNG (`.mapNen` bên dưới) nằm sau lưng dải ô và đổi theo
+     xu hướng. Ở đây chỉ còn VÂN DỆT (vạch đen, luôn an toàn tương phản) phủ lên nền ấy. */
+  position: relative;
+  z-index: 1;
+  background: var(--felt-det-ban);
+  /* Mép bàn hai nấc — một cái bàn thật đọc ra là bàn nhờ có MÉP, không nhờ vân.
+     blur = 0 ⇒ đây là VẬT chứ không phải ánh sáng (§XI luật 2). 13/09 (D321 lượt 3) thêm
+     một bóng đổ VÀO TRONG có blur: đó là ÁNH SÁNG rơi xuống giếng (luật 4 cho phép blur ở
+     ánh sáng) — bàn nay LÕM dưới mặt panel nổi, không còn phẳng ngang với nó. */
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.65),
+    inset 0 0 0 1px var(--mat-trung-vien),
+    inset 0 0 0 4px rgba(0, 0, 0, 0.26);
+  scrollbar-width: thin;
+}
+
+/*
+ * ⚠⚠ KHUNG ≠ Ô — VÀ ĐÂY LÀ SỬA MỘT LỖI ĐÃ ĂN BỐN HOẠT ẢNH (23/08).
+ *
+ * Cú LẬT (`latO`/`latSuKien`, motion.module.css) và nhịp SỐNG (`oThoNhe` +
+ * tính cách `skGiat`/`skNoiLen`) đều là chuyển động của CẢ TẤM THẺ, nên cả hai
+ * đòi đúng một chỗ: thuộc tính `animation` của một phần tử. Trước hôm nay cả
+ * hai cùng dán lên `.o`, và `motion.module.css` nằm SAU trong bundle ⇒ cú lật
+ * thắng 100% số lần, im lặng. Đo trên stack thật: ô đang lật có SÁU lớp, năm
+ * lớp khai `animation`, `getComputedStyle` trả về đúng một cái.
+ *
+ * ⇒ Tách làm hai tầng, hai chủ — nối tiếp đúng lý lẽ D121 ("khung là LÁ BÀI
+ *   đứng yên, hình bên trong là CẢNH đang rung"), nay áp thêm một tầng lên:
+ *      `.khung`  ← CÚ LẬT (một lần, lúc thẻ vừa tới)
+ *      `.o`      ← NHỊP SỐNG + TÍNH CÁCH (lặp mãi)
+ *      `.art`    ← BẢN CHẤT (D121: tro bay · loé kim · nhiễu)
+ *   Không lớp nào tranh `animation` với lớp nào nữa, và không phải chép lại
+ *   cú lật vào bốn rule (bản chép là bản sẽ trôi — D61).
+ */
+/*
+ * ⚠⚠ LỚP LÓT ĐỤC — BẮT BUỘC KHI CÓ NỈ (31/08, bắt được bằng mắt trên stack).
+ *
+ * Ô "ĐÃ QUA" chạy `opacity: .62` (D121 — quá khứ trầm xuống). Trước khi `.map`
+ * có nền thì nó pha với nền TRANG (gần đen) nên lá cũ ra XÁM, đúng ý đồ. Vừa
+ * dán nỉ vào là nó pha với NỈ XANH ⇒ lá cũ hoá ÁM LỤC, tức `grayscale(1)` ngay
+ * bên cạnh thành vô nghĩa: quá khứ thôi "rút hết màu", nó chỉ đổi sang một màu
+ * khác. Hỏng IM LẶNG — không lỗi, không test đỏ, chỉ có dải bài đọc sai.
+ *
+ * ⇒ `.khung` (lớp KHÔNG bị opacity, D123 tách ra) nhận một nền đục. Lá lại pha
+ * với nền tối như cũ; nỉ chỉ còn thấy ở khe 7px và viền bàn — đúng cách một lá
+ * bài thật che mặt bàn thật.
+ */
+.khung {
+  position: relative;
+  flex: 0 0 116px;
+  height: 152px;
+  background: var(--bg-page);
+  /* 13/09 (D321 lượt 3) — ô là VẬT đặt trên nỉ ⇒ bóng pixel 3px. Đặt ở KHUNG chứ không ở
+     `.o`: box-shadow của `.o` là chỗ `.nay` vẽ vòng + quầng và gạch chân xu hướng ghi đè,
+     ba luật cùng ghi một thuộc tính thì bóng mất im lặng. Khung chỉ có cú lật (transform). */
+  box-shadow: var(--px-bong);
+}
+
+/*
+ * ⭐⭐ 24/09 (D393) — Ô = LÁ BÀI BẢN MỚI (D390), chép khuôn `.the` của trang demo
+ * `docs/ui-ux/demo/la-bai-phong-cach.html`: khắc góc bằng `clip-path`, viền = HAI lớp
+ * inset (vạch màu họ + khe tối), nền xanh đêm, quầng trong theo họ. Token + số đo chép
+ * nguyên (A11.25). Thay khuôn 24/08 (art tràn mép, nền nhuộm màu tin): lá mới là nét vẽ
+ * trên CỬA SỔ TỐI, nên cái để nhuộm là khung, không phải cả mặt ô.
+ * ⚠ `clip-path` cắt mọi thứ vẽ RA NGOÀI ô ⇒ quầng sáng ô đang lật + sóng xung kích sống
+ * ở `.khung` (`.quangNay`, `.song`), hào quang tính cách vẽ TRONG mép (`.nay::after`).
+ */
+.o {
+  --khac: polygon(6px 0, calc(100% - 6px) 0, calc(100% - 6px) 3px, calc(100% - 3px) 3px,
+    calc(100% - 3px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 3px) calc(100% - 6px),
+    calc(100% - 3px) calc(100% - 3px), calc(100% - 6px) calc(100% - 3px), calc(100% - 6px) 100%,
+    6px 100%, 6px calc(100% - 3px), 3px calc(100% - 3px), 3px calc(100% - 6px), 0 calc(100% - 6px),
+    0 6px, 3px 6px, 3px 3px, 6px 3px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  height: 100%;
+  padding: 5px;
+  overflow: hidden;
+  clip-path: var(--khac);
+  background: linear-gradient(178deg, #0b1628 0%, #060c17 72%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--o-mau, #5d7290) 75%, transparent),
+    inset 0 0 0 2px var(--bg-page),
+    inset 0 0 22px color-mix(in srgb, var(--o-mau, #5d7290) 12%, transparent);
+  /* Ô chuyển qua/nay/úp là đổi TRẠNG THÁI, nhị phân → nhảy nấc, cùng nhịp 120ms
+     với phần còn lại của app. */
+  transition:
+    transform 120ms steps(3, end),
+    box-shadow 120ms steps(2, end),
+    opacity 120ms steps(2, end);
+}
+
+/* HÀNG ĐẦU LÁ (D393 — `.tren` của demo): số vòng trái · [tính chất][mã lá] phải. Số không
+   còn đè lên tranh nên thôi cần bệ tối (D125) — nó đứng trên nền lá như nhóm lá ở demo. */
+.tren {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  min-height: 16px;
+}
+.so {
+  color: var(--o-mau, var(--text-muted));
+  font-size: var(--fs-human);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: var(--ls-nut);
+}
+.ma {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--o-sang, var(--text-bright));
+  font-size: var(--fs-human);
+  font-weight: 800;
+  line-height: 1;
+}
+/* Chấm sáng trước mã lá — `.ma i` của demo. */
+.dauMa {
+  width: 4px;
+  height: 4px;
+  background: var(--o-mau, var(--text-muted));
+  box-shadow: 0 0 5px var(--o-mau, transparent);
+}
+/* HUY HIỆU TÍNH CHẤT (D152/K1) — nay đứng trong hàng đầu lá, cạnh mã lá. */
+.hoEm {
+  display: inline-flex;
+  align-items: center;
+}
+/* Icon LOẠI tin của lá thiên nga (D390): góc phải, quầng theo họ như `.ma svg` của demo. */
+.loai {
+  display: inline-flex;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--o-mau, #ef4444) 70%, transparent));
+}
+
+/* BẢNG TÊN — dời từ TRÊN art xuống DƯỚI art. Ở trên nó ăn một hàng ngang qua
+   đỉnh thẻ và đẩy tranh tụt xuống; ở dưới nó là cái nhãn của bức tranh, đúng
+   chỗ một lá bài đặt tên lá. Màu lấy từ chính tin nên đọc được từ xa. */
+.ten {
+  display: flex;
+  align-items: center;
+  color: var(--o-sang, var(--text-muted));
+  font-size: var(--fs-body);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: var(--ls-nut);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--o-mau, transparent) 45%, transparent);
+  text-wrap: balance;
+}
+/* ⚠ Ô ÚP dựng `.ten` RỖNG (không được lộ tên ô chưa lật). Từ khi `.ten` mang
+   `flex: 1`, một hộp rỗng cũng giành nửa chỗ với `.upArt` và đẩy dấu "?" tụt
+   hẳn xuống nửa dưới thẻ. Rỗng thì biến mất hẳn. */
+.ten:empty { display: none; }
+/* Không `transition: transform`: không rule nào trong file đổi transform của
+   `.art`, nên đó là một khai báo chết — và một transition chết đọc nhầm được
+   thành "chỗ này có hoạt hình, đừng đụng". */
+/*
+ * ⭐⭐ CỬA SỔ HÌNH (D393 — `.cua` của demo): nền gần đen + lưới 12px nhuộm họ + scanline.
+ * Lá mới là NÉT VẼ TRONG SUỐT, vuông, nên cửa sổ là thứ tạo "màn hình terminal", và tranh
+ * VUÔNG nằm giữa (88% bề ngang) — thay luật 24/08 "art 4:3 tràn mép": đó là luật của bộ
+ * cảnh 200×150 đã rời bản đồ. `aspect-ratio: 1` trên svg giữ lá không bị kéo méo khi ô
+ * có thêm hàng chip kỳ họp.
+ */
+.art {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #02050a;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--o-mau, #5d7290) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--o-mau, #5d7290) 9%, transparent) 1px, transparent 1px);
+  background-size: 12px 12px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--o-mau, #5d7290) 30%, transparent);
+}
+.art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.28) 0 1px, transparent 1px 3px);
+}
+.art > svg {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 88%;
+  height: auto;
+  max-height: 94%;
+  aspect-ratio: 1;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--o-mau, #5d7290) 65%, transparent));
+}
+.chan {
+  padding: 2px 4px 3px;
+  color: var(--text-muted);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-nhan);
+  text-align: center;
+}
+
+/*
+ * ⭐ THẺ ĐÃ QUA — XÁM THẬT, không chỉ mờ (founder 23/08: *"Thẻ cũ sau khi thẻ
+ * mới lật thì bị biến thành màu xám chứ không chỉ làm mờ như hiện tại"*).
+ *
+ * Mờ đi mà giữ màu thì cả dải vẫn là bảy màu neon nhạt — mắt vẫn phải đọc từng
+ * ô để biết cái nào còn sống. Rút hết màu thì QUÁ KHỨ và HIỆN TẠI thành hai
+ * CHẤT LIỆU khác nhau, phân biệt được bằng ngoại vi, không cần đọc.
+ * ⚠ `grayscale` là bộ lọc TĨNH, chạy một lần khi thẻ đổi trạng thái — không
+ * phải thứ animate mỗi khung hình, nên nó không phạm luật "chỉ transform và
+ * opacity" (luật đó nói về CHUYỂN ĐỘNG). Trên native, thẻ đã qua vẽ bằng art
+ * xám là xong.
+ * ⚠ Giữ một chút opacity: xám ĐẶC vẫn có thể nặng hơn thẻ đang sống nếu art
+ * nhiều mảng sáng.
+ */
+.qua {
+  opacity: 0.62;
+  filter: grayscale(1);
+}
+/* Nhãn cũng rút màu — `grayscale` đã lo phần art, nhưng chữ cyan sáng vẫn kéo
+   mắt về một ô đã hết chuyện để kể. */
+.qua .so, .qua .chan { color: rgba(148, 163, 184, 0.75); }
+
+/* ⚠ KHÔNG `composes: adLatThe` nữa: đó là cú lật THỨ BA dán lên cùng phần tử
+   (TSX đã dán `latO`/`latSuKien`), và nó chưa từng thắng lần nào. Cú lật nay
+   ở trên `.khung`. */
+/* ⚠ Ô ĐANG LẬT thôi bị nhuộm TÍM ĐÈ. Nền tím ở đây từng đè lên đúng cái ô mà
+   màu của tin cần đọc rõ nhất — hào quang tím + nền tím + viền tím thắng cả
+   sáu màu tính cách. Nay nó chỉ ĐẬM HƠN theo màu của chính mình. */
+.nay {
+  box-shadow:
+    inset 0 0 0 2px var(--o-sang, var(--violet)),
+    inset 0 0 0 3px var(--bg-page),
+    inset 0 0 26px color-mix(in srgb, var(--o-mau, var(--violet)) 26%, transparent);
+}
+/* Quầng NGOÀI của ô đang lật — ở KHUNG vì `.o` khắc góc cắt mọi thứ vẽ ra ngoài. */
+.quangNay {
+  box-shadow:
+    var(--px-bong),
+    0 0 28px color-mix(in srgb, var(--o-mau, var(--violet)) 45%, transparent);
+}
+.nay .ten { color: var(--text-max); }
+.nay .chan { color: var(--o-mau, var(--violet)); }
+.nay .art { filter: saturate(1.18) brightness(1.12); }
+
+/* Ô GIAI ĐOẠN cũng có màu — cùng cần gạt `--o-mau`. 24/09 (D393): màu lấy từ HỌ lá
+   (`matLa`, đặt ở khung) thay cho `.len`/`.xuong` theo hướng — Đi ngang có họ xám, Quá
+   nóng họ cam, không còn chỉ hai màu. */
+
+.up { opacity: 0.4; }
+.upArt {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 40px;
+  opacity: 0.5;
+}
+
+/* Dải tiến độ dưới bản đồ */
+.track {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  padding: 0 4px;
+}
+/*
+ * CHẤM TIẾN ĐỘ — vật nhỏ đặc, đúng nhóm luật 5 mô tả.
+ *
+ * Bỏ `border-radius: 50%` (hình tròn cuối cùng của dải) và nổi khối bằng vát 2px
+ * thay vì bằng bề mặt cong. Quầng `0 0 …` thì giữ: offset 0, đó là ánh sáng.
+ *
+ * Chấm HIỆN TẠI to lên bằng KÍCH THƯỚC THẬT 12px chứ không `scale(1.35)`: nhân
+ * 9 với 1,35 ra 12,15px, tức viên tròn lẫn cạnh vát đều rơi giữa hai điểm ảnh.
+ * 12px là đúng 4 đơn vị khấc. Dải là flex và `.noi` co giãn nên đổi bề rộng
+ * không đẩy gì ra khỏi hàng.
+ */
+.cham {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 0;
+  background: rgba(93, 114, 144, 0.45);
+  box-shadow: var(--px-vien-trong-day);
+  transition:
+    background-color 120ms steps(2, end),
+    box-shadow 120ms steps(2, end);
+}
+.chamXong {
+  background: var(--accent);
+  box-shadow: var(--px-vien-trong-day), 0 0 10px var(--accent);
+}
+.chamNay {
+  width: 12px;
+  height: 12px;
+  background: var(--violet);
+  box-shadow: var(--px-vien-trong-day), 0 0 14px var(--violet);
+}
+.noi { flex: 1; height: 2px; background: rgba(93, 114, 144, 0.35); }
+/* Vạch nối cao 2px — "thanh nhỏ" theo luật 4, nên hai màu là hai DẢI PHẲNG.
+   Một dải hoà sắc trên vật cao 2px không đọc ra là chuyển sắc, chỉ ra là bẩn. */
+.noiXong {
+  background: linear-gradient(90deg, var(--accent) 0 50%, var(--violet) 50%);
+}
+
+/*
+ * ⚠⚠ 24/08 — GỠ `adTho`: nhịp thở ấy animate `filter: brightness` VÔ HẠN, và nó
+ * không chở một bit thông tin nào.
+ *
+ * Ba lý do cộng lại:
+ *   · `filter` không map sang RN/Flutter (ràng buộc ba runtime mà chính
+ *     `ThanhPhongCach` phát biểu), và nó bắt phần tử vào một ngữ cảnh vẽ riêng
+ *     rồi repaint mỗi khung hình — trên một KHỐI CHỮ, thứ đắt nhất để vẽ lại;
+ *   · nó chạy VÔ HẠN suốt cả trận trên 1–3 khối, trong khi nội dung telegraph
+ *     đứng yên — nhịp sáng không nói gì ngoài "tôi đang nhấp nháy";
+ *   · và MarketMap.module.css có một câu TỰ KIỂM khai *"ngoại lệ DUY NHẤT là
+ *     `filter: brightness` của lửa"* — câu đó SAI suốt thời gian dòng này tồn
+ *     tại, vì đây là cái thứ hai, nằm trong CHÍNH file ấy.
+ * Viền đứt + màu tím đã đủ nói "đây là dự đoán, không phải sự thật".
+ */
+/* ⭐ 13/09 tối — HỘP CHỮ KỲ HỌP DƯỚI BẢN ĐỒ ĐÃ GỠ (`.telegraph` + `.chuoi`).
+   Founder: *"đừng thêm mấy phần chú thích trực tiếp ra màn hình như thế"* — cùng một
+   lệnh đã gỡ hộp "chuỗi xu hướng" và hộp "tin trước báo hiệu" hồi chiều. Cặp KỲ VỌNG →
+   THỰC nay là hai nhãn ngắn TRÊN CHÍNH Ô kỳ họp, câu dài vào `title` (đọc khi muốn, đúng
+   nếp dấu (!) mà founder giữ). A10 nguyên: mô tả, không kê đơn. */
+.cs {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px 3px;
+  color: var(--text-muted);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-nut);
+}
+.csKy { opacity: 0.55; }
+.csThuc { color: var(--text-bright); font-weight: 800; }
+/* LỆCH = tím (màu KHUNG/hệ thống, không phải xanh-đỏ được-mất): sai lầm chính sách không
+   tự nó là tin tốt hay xấu cho người chơi, nó là một sự kiện của thị trường. */
+.o[data-chinh-sach="lech"] .csThuc { color: var(--violet-soft); }
+
+/* Sóng xung kích toả từ ô sự kiện vừa lật. Không bắt chuột nên không che ô. */
+.song {
+  position: absolute;
+  inset: -6px;
+  z-index: 0;
+  border: 2px solid var(--gold-amber, #fbbf24);
+  border-radius: 0;
+  pointer-events: none;
+}
+
+/* Gợi ý DÂY CHUYỀN — tin này thường kéo theo tin gì. Tách dòng riêng, nhạt hơn
+   telegraph, vì nó là suy đoán bậc hai (chỉ đúng nếu tin hiện tại là thật). */
+
+
+.chuoi b { color: #c4b5fd; }
+
+/* ── §D68 (4) — THẺ ĐANG LẬT THỞ NHẸ ────────────────────────────────────
+   Founder: *"thẻ thị trường thành ảnh động — hiệu ứng nhẹ nhưng vẫn phải dễ
+   nhìn, không cần đập đi xây lại"*.
+
+   ⚠ CHỈ thẻ `.nay`, KHÔNG phải cả dải. Đây là chỗ hiệu năng thật sự nằm: 8–16
+   thẻ chạy hoạt ảnh liên tục là bắt máy hợp thành lại MỖI KHUNG HÌNH suốt cả
+   trận ⇒ pin tụt thấy rõ trên máy tầm trung, và dải thẻ nhấp nháy chính là thứ
+   founder dặn tránh ("vẫn phải dễ nhìn"). Một thẻ động giữa những thẻ đứng yên
+   còn HƯỚNG MẮT tốt hơn mười sáu thẻ cùng động.
+
+   Chỉ `transform` + `opacity` (hai thuộc tính chạy trên luồng hợp thành, không
+   bắt tính lại bố cục). Biên độ cố tình nhỏ — 1,5% co giãn: đủ để mắt bắt được
+   "cái này đang sống", không đủ để làm chữ trên thẻ khó đọc. */
+@keyframes oThoNhe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.015); }
+}
+
+@keyframes vienDangLat {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 1; }
+}
+
+.nay {
+  animation: oThoNhe 2600ms ease-in-out infinite;
+  /* Bật khi diễn — nhưng đây là hoạt ảnh CHẠY MÃI trên đúng MỘT phần tử nên
+     giữ `will-change` là hợp lệ, không phải rò rỉ như trường hợp gacha. */
+  will-change: transform;
+}
+
+/* Viền sáng nhịp chậm hơn nhịp thở: hai chu kỳ lệch nhau thì mắt đọc ra "đang
+   hoạt động", còn trùng nhau thì thành một cú đập, mệt mắt sau vài vòng. */
+.nay::after {
+  content: '';
+  position: absolute;
+  /* TRONG mép (D393): `.o` khắc góc, vẽ ra ngoài là bị cắt mất. */
+  inset: 0;
+  border: 2px solid var(--accent);
+  pointer-events: none;
+  animation: vienDangLat 3400ms ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nay { animation: none; will-change: auto; }
+  .nay::after { animation: none; opacity: 0.8; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * TÍNH CÁCH RIÊNG CHO TỪNG THẺ SỰ KIỆN (founder 04/08)
+ * ══════════════════════════════════════════════════════════════════════════
+ *
+ * Founder chỉ định bốn thẻ, giao tôi tự thiết kế ba thẻ còn lại. Để bảy cái
+ * thành MỘT HỆ chứ không phải bảy hiệu ứng rời, chúng theo hai luật:
+ *
+ *   · MÀU mã hoá HƯỚNG tác động  — xanh lá tốt · đỏ xấu · cam bào mòn ·
+ *     cyan/tím hỏng hóc kỹ thuật · tím óng hưng phấn.
+ *   · NHỊP mã hoá THANG THỜI GIAN — chớp gắt = cú sốc đột ngột · trôi chậm =
+ *     bào mòn dần · nổi lên = bong bóng phồng.
+ *
+ * ⭐ Vì sao luật thứ hai đáng giá hơn luật thứ nhất: người chơi học được
+ * "chuyện này xảy ra NHANH hay CHẬM" trước khi kịp đọc chữ. Lạm phát mà chớp
+ * gắt như thiên nga đen là dạy sai — nó là thứ bào mòn qua nhiều vòng, không
+ * phải cú tát.
+ *
+ * HIỆU NĂNG: chỉ `opacity` và `transform` (hai thuộc tính chạy trên luồng hợp
+ * thành). Ngoại lệ DUY NHẤT là `filter: brightness` của lửa — nó bắt vẽ lại,
+ * nhưng chỉ trên MỘT phần tử và đó là hiệu ứng founder chỉ đích danh muốn dùng
+ * lại từ thanh ALL-IN.
+ */
+
+/* ── CHỚP MÀN HÌNH MỘT CÁI ─────────────────────────────────────────────────
+   Một lớp phủ toàn màn, chạy ĐÚNG MỘT LẦN lúc thẻ lật rồi nằm im ở opacity 0.
+   Node có `key` theo vòng nên mỗi vòng React thay node mới ⇒ hoạt ảnh chạy lại.
+   `pointer-events: none` là bắt buộc — một lớp phủ nuốt cú chạm giữa lúc đang
+   đếm giờ là lỗi tệ hơn hẳn việc không có hiệu ứng nào. */
+.chopMan {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0;
+}
+
+@keyframes chopMotCai {
+  0%   { opacity: 0; }
+  12%  { opacity: 0.55; }
+  100% { opacity: 0; }
+}
+
+.chopMan { animation: chopMotCai 900ms ease-out both; }
+
+.chopXanh { background: radial-gradient(circle at 50% 45%, var(--o-mau) 0%, transparent 70%); }
+.chopDo   { background: radial-gradient(circle at 50% 45%, var(--o-mau) 0%, transparent 70%); }
+.chopCam  { background: radial-gradient(circle at 50% 80%, var(--o-mau) 0%, transparent 75%); }
+.chopTim  { background: radial-gradient(circle at 50% 55%, var(--o-mau) 0%, transparent 70%); }
+
+@media (prefers-reduced-motion: reduce) { .chopMan { animation: none; } }
+
+/* ── HÀO QUANG QUANH THẺ, THEO TÍNH CÁCH ──────────────────────────────────
+   Đè lên `.nay::after` (viền thở mặc định) bằng cách đổi màu + nhịp. Thẻ
+   thường KHÔNG khai lớp nào ⇒ giữ nguyên viền cyan như cũ, đúng ý founder. */
+
+@keyframes nhipQuanh {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50%      { opacity: 0.9;  transform: scale(1.035); }
+}
+
+/* 24/09 (D393) — `skChienTranh` (hào quang cam riêng) ĐÃ GỠ: chiến tranh nay là một loại
+   của lá THIÊN NGA ĐEN (D390) nên nhận đúng nhịp `skXau` như sáu tin hoảng loạn kia. */
+
+/* HẠ LÃI SUẤT — tin TỐT: nhịp xanh lá chậm, thư thái. */
+.skTot::after { border-color: var(--o-mau); animation: nhipQuanh 1800ms ease-in-out infinite; }
+
+/* TĂNG LÃI SUẤT · THIÊN NGA ĐEN (cả bảy tin hoảng loạn) — tin XẤU: nhịp NHANH, giục giã. */
+.skXau::after { border-color: var(--o-mau); animation: nhipQuanh 700ms ease-in-out infinite; }
+
+/* ── BA THẺ TÔI TỰ THIẾT KẾ ───────────────────────────────────────────────*/
+
+/* 24/09 (D393) — `skLoi` (viền cyan giật cục của HACK SÀN) ĐÃ GỠ: founder đổi tin ấy thành
+   CẠN THANH KHOẢN (*"ngoài đời có mấy khi sàn khoá đâu"*) — một trạng thái của chợ chứ không
+   phải trục trặc kỹ thuật, nên nó sang nhịp cạn dần `skBaoMon` như lạm phát. */
+
+/* LẠM PHÁT · CẠN THANH KHOẢN — thứ BÀO MÒN, không phải cú tát. Nên KHÔNG chớp gắt: hào quang cam
+   trôi rất chậm (4,2s), biên độ nhỏ. Người chơi phải cảm thấy nó dai chứ không
+   thấy nó đau — đúng bản chất "tiền để trong ví tự teo" mà hướng dẫn đã dạy. */
+.skBaoMon::after { border-color: var(--o-mau); animation: nhipQuanh 4200ms ease-in-out infinite; }
+
+/* BONG BÓNG — cố ý ĐẸP. Đây là chỗ dễ thiết kế sai nhất: vẽ nó đáng sợ là dạy
+   ngược, vì bài học của bong bóng chính là nó trông TUYỆT VỜI lúc đang phồng.
+   Tím óng, trôi LÊN, nhịp vừa phải — hưng phấn, không báo động. Cú sập sẽ do
+   thẻ SAU kể; thẻ này chỉ được phép quyến rũ. */
+.skPhong::after { border-color: var(--o-mau); animation: nhipQuanh 1400ms ease-in-out infinite; }
+.skPhong { animation: oThoNhe 2600ms ease-in-out infinite, skNoiLen 2200ms ease-in-out infinite; }
+@keyframes skNoiLen {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skPhong { animation: none; }
+  .skTot::after, .skXau::after, .skBaoMon::after, .skPhong::after { animation: none; opacity: 0.85; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * BẢN CHẤT THẺ ĐỌC ĐƯỢC TRƯỚC KHI ĐỌC CHỮ (founder 23/08)
+ * ══════════════════════════════════════════════════════════════════════════
+ *
+ * *"các thẻ cũng phải có hiệu ứng/khung viền riêng để cho giống thẻ bài hơn và
+ * thể hiện bản chất của thẻ đang xuất hiện mà player chưa phải nhìn rõ thẻ.
+ * Ví dụ: Nhóm thẻ Chiến tranh hay các thẻ thiên nga đen thì rung khi xuất hiện
+ * và thêm hiệu ứng tro bay/cháy nhẹ, hạ lãi suất thì thi thoảng lại lóe xanh lá
+ * như kim loại, tăng lãi suất thì rung nhẹ khi xuất hiện và lấp lóe đỏ, sập sàn
+ * thì làm hiệu ứng như bị nhiễu và giật giật hình ảnh."*
+ *
+ * ⭐ HAI THÌ, và tách chúng ra mới là phần khó:
+ *   · **XUẤT HIỆN** — một lần, mạnh, lúc thẻ vừa lật: cú RUNG. Nó nói "có
+ *     chuyện" trong khoảnh khắc mắt còn chưa lấy nét.
+ *   · **BẢN CHẤT** — lặp mãi, NHẸ: tro bay · loé kim loại · lấp loé · nhiễu.
+ *     Nó nói "chuyện gì" cho người liếc lại sau đó.
+ * Gộp hai thì vào một animation là hỏng cả hai: cú xuất hiện thành nhàm sau
+ * lần thứ ba, còn bản chất thì trôi mất trong 300ms đầu.
+ *
+ * ⚠ TẤT CẢ chỉ chạm `transform` và `opacity` — tập giao ba runtime. Tro bay và
+ * nhiễu dựng bằng `box-shadow` NHIỀU ĐIỂM trên pseudo-element rồi dịch bằng
+ * `transform`; không `filter`, không `background-position`.
+ * ⚠ Thẻ ĐÃ QUA không chạy gì (`.qua` không mang lớp tính cách) — cả dải nhấp
+ * nháy bảy kiểu thì không ai đọc được cái nào.
+ */
+
+/* ── CÚ RUNG XUẤT HIỆN — một lần, không lặp ───────────────────────────────
+ * ⚠⚠ RUNG ĐẶT TRÊN `.art`, KHÔNG TRÊN CẢ Ô — và đây là bẫy ghi đè im lặng, bắt
+ * được ngay khi vừa viết: `.skChienTranh`, `.skLoi`, `.skPhong` đã khai
+ * `animation` trên chính `.o` (nhịp thở + lửa/giật/nổi). Thêm một lớp nữa cũng
+ * khai `animation` trên `.o` thì lớp nào đứng SAU TRONG FILE thắng — không phải
+ * lớp nào đứng sau trong `className`. Cú rung mới sẽ nuốt sạch nhịp thở cũ, mà
+ * CSS vẫn hợp lệ và không gì báo.
+ * ⇒ Hai tầng, hai chủ: `.o` giữ BẢN CHẤT LẶP (thở, lửa, nổi lên); `.art` nhận
+ * cú XUẤT HIỆN. Và về thị giác nó còn đúng hơn: khung là LÁ BÀI đứng yên, hình
+ * bên trong là CẢNH đang rung — giống một lá bài thật hơn là cả tấm bìa giật.
+ */
+.rungHien .art { animation: mmRungHien 420ms steps(6, end) 1; }
+.rungNhe .art { animation: mmRungNhe 300ms steps(4, end) 1; }
+
+@keyframes mmRungHien {
+  0%, 100% { transform: translate(0, 0); }
+  15% { transform: translate(-3px, 1px); }
+  35% { transform: translate(3px, -1px); }
+  55% { transform: translate(-2px, -1px); }
+  78% { transform: translate(2px, 1px); }
+}
+
+@keyframes mmRungNhe {
+  0%, 100% { transform: translate(0, 0); }
+  30% { transform: translate(-1.5px, 0); }
+  65% { transform: translate(1.5px, 0); }
+}
+
+/* ── TRO BAY / CHÁY NHẸ — chiến tranh và cả năm mặt đuôi ────────────────────
+   Sáu đốm tro dựng bằng `box-shadow` trên MỘT phần tử, trôi lên rồi tắt dần.
+   Một phần tử cho sáu đốm chứ không sáu thẻ DOM: ô chỉ 116×152px, và cả dải có
+   thể có nhiều ô — sáu node mỗi ô là chi phí hợp thành không đáng. */
+.troBay::before {
+  content: '';
+  position: absolute;
+  left: 12%;
+  bottom: 18%;
+  width: 2px;
+  height: 2px;
+  background: transparent;
+  box-shadow:
+    0 0 0 0 var(--gold-flame), 14px 6px 0 0 #f59e0b, 30px -4px 0 0 var(--gold-flame),
+    48px 8px 0 0 #ea580c, 66px 0 0 0 #f59e0b, 82px 5px 0 0 var(--gold-flame);
+  opacity: 0;
+  animation: mmTro 2600ms steps(10, end) infinite;
+  pointer-events: none;
+}
+
+@keyframes mmTro {
+  0% { transform: translateY(0); opacity: 0; }
+  18% { opacity: 0.85; }
+  100% { transform: translateY(-46px); opacity: 0; }
+}
+
+/*
+ * ── 24/09 (D393) — BA LỚP PHỦ CẢ Ô ĐÃ GỠ: `loeKim` (vệt xanh quét ngang ô) · `loeDo` (nháy
+ * đỏ cả ô) · `nhieu` (vạch cyan + giật). Lá mới (D390) mang hiệu ứng TRÊN CHÍNH NÉT VẼ: ánh
+ * kim của cặp lãi suất là vệt sáng chạy dọc nét (`.vet`, nhịp `data-nhip="kim"` bên dưới),
+ * còn nhiễu thuộc về lá thiên nga (`giat` + `quet`) chứ không thuộc tin thanh khoản nữa.
+ */
+
+/* ── LÁ THIÊN NGA ĐEN — hai hiệu ứng riêng của demo (bên cạnh rung + tro):
+   · `giat`: giật nhiễu CẢ HÌNH (demo `giatLa` 1,9s steps) — đặt trên `svg` trong cửa sổ,
+     KHÔNG trên `.art` (chỗ cú rung xuất hiện) hay `.o` (nhịp thở): ba tầng, ba chủ.
+   · `quet`: dải quét CRT dọc cửa sổ (demo `.hoang .cua::before`, 4,2s). */
+.giat .art > svg { animation: mmNhieuGiat 1900ms steps(1, end) infinite; }
+
+@keyframes mmNhieuGiat {
+  0%, 82%, 100% { transform: translateX(0); }
+  84% { transform: translateX(-4px); }
+  86% { transform: translateX(3px); }
+  88% { transform: translateX(-2px); }
+  90% { transform: translateX(2px); }
+}
+
+.quet .art::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 18%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent,
+    color-mix(in srgb, var(--o-mau, #ef4444) 30%, transparent) 70%,
+    color-mix(in srgb, var(--o-sang, #fca5a5) 55%, transparent) 92%, transparent);
+  transform: translateY(-100%);
+  animation: mmQuetCrt 4200ms ease-in-out infinite;
+}
+
+@keyframes mmQuetCrt {
+  0%, 40% { transform: translateY(-100%); opacity: 0; }
+  45% { opacity: 1; }
+  85%, 100% { transform: translateY(560%); opacity: 0; }
+}
+
+/*
+ * ── NEON + VỆT SÁNG TRÊN NÉT VẼ (D390 — founder: neon chạy trên nét vẽ, không quanh khung).
+ * Art mới (`holdem_art_la.ts`) mang sẵn hai lớp: `.neon` (bản chép nét chính) và `.vet`
+ * (các dải của nét chính, `opacity="0"`, mỗi dải một `--p` = pha trong chu kỳ).
+ * CHỈ ô ĐANG LẬT bật chúng (D121: một thẻ động giữa những thẻ đứng yên); lá ở mọi chỗ
+ * khác đứng yên và trông y hình gốc. Ánh sáng ⇒ ease-in-out, chỉ opacity (luật VFX).
+ * ⚠ Hai keyframe vệt ĐỒNG BỘ với `NHIP_VET` của server: cửa sổ sáng một dải = 12,6% chu
+ * kỳ 4,2s (quét 42%) · 9% chu kỳ 3,4s (nhịp kim, quét 30%). Đỉnh ở giữa cửa sổ, hai sườn
+ * 0,55 — đúng bốn mốc gradient của demo (0 · .42 · .5 · .58 · 1). Bài canh so hai bên.
+ */
+.nay .art :global(.neon) {
+  filter: drop-shadow(0 0 0.9px var(--o-sang, #e8f2fc));
+  opacity: 0.35;
+  animation: laNeonTho 3400ms ease-in-out infinite;
+}
+@keyframes laNeonTho {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+.nay .art :global(.vet) {
+  animation: laVet 4200ms ease-in-out infinite;
+  animation-delay: calc(4200ms * (var(--p, 0) - 1));
+}
+.nay .art :global(svg[data-nhip="kim"] .vet) {
+  animation-name: laVetKim;
+  animation-duration: 3400ms;
+  animation-delay: calc(3400ms * (var(--p, 0) - 1));
+}
+@keyframes laVet {
+  0% { opacity: 0; }
+  5.292% { opacity: 0.55; }
+  6.3% { opacity: 1; }
+  7.308% { opacity: 0.55; }
+  12.6%, 100% { opacity: 0; }
+}
+@keyframes laVetKim {
+  0% { opacity: 0; }
+  3.78% { opacity: 0.55; }
+  4.5% { opacity: 1; }
+  5.22% { opacity: 0.55; }
+  9%, 100% { opacity: 0; }
+}
+
+/* ⚠ Tắt CHUYỂN ĐỘNG, giữ CHẤT LIỆU: tro + neon vẫn hiện ở một khung
+   hình đứng yên nên bản chất thẻ vẫn đọc được, chỉ thôi động đậy. Riêng cú rung
+   xuất hiện thì bỏ hẳn — nó KHÔNG chở tin nào ngoài "có chuyện", mà điều đó đã
+   nằm trong màu và viền. */
+@media (prefers-reduced-motion: reduce) {
+  .rungHien .art, .rungNhe .art, .giat .art > svg { animation: none; }
+  .troBay::before {
+    animation: none;
+    opacity: 0.5;
+  }
+  .quet .art::before { animation: none; opacity: 0; }
+  /* Neon đứng ở độ sáng vừa, vệt tắt hẳn — đúng nhánh giảm chuyển động của demo. */
+  .nay .art :global(.neon) { animation: none; opacity: 0.75; }
+  .nay .art :global(.vet) { animation: none; }
+}
+
+/* ═══ 13/09 — CHIỀU LÊN CHÍNH VẬT, thay hai hộp chữ dưới bản đồ (founder: "thừa thãi").
+   · Ô đang lật: gạch màu ở chân theo chuỗi đang chạy (xanh lên / đỏ xuống) — hàng 12
+     chấm đã bỏ cùng ngày.
+   · Ô kế: gạch màu ở chân theo thiên hướng tin trước — chỉ mô tả, không khuyên (A10).
+   Ánh sáng tĩnh, không animation. ═══ */
+/* 13/09 tối — gạch chân là BORDER-BOTTOM, không phải inset box-shadow: ô đang lật dùng
+   box-shadow để vẽ vòng + quầng (`.nay`), luật gạch chân đặc hiệu cao hơn đã xoá cả hai
+   mỗi khi có chuỗi xu hướng. Viền dưới dày 3px thay cho viền 1,5px của ô — đọc y hệt. */
+.map[data-xu-huong="len"] [data-o-dang-lat] { border-bottom: 3px solid var(--win); }
+.map[data-xu-huong="xuong"] [data-o-dang-lat] { border-bottom: 3px solid var(--lose); }
+.up[data-nghieng] { border-bottom: 3px solid var(--violet); }
+.up[data-nghieng="tang"], .up[data-nghieng="phuc_hoi"] { border-bottom-color: var(--win); }
+.up[data-nghieng="giam"] { border-bottom-color: var(--lose); }
+
+/* ═══ v55 (D409) — trait đọc bản đồ (REEL bỏ ở D588) ═════════════════════════════════════════════════════════════════ */
+/*
+ * D422 — LỚP CHE của riêng người mang trait. MÙ TIN: cửa sổ hình là chính lá MÙ TIN (24×24, pixel 1:1 nhân lên), tên
+ * "TIN BỊ CHE". SƯƠNG MÙ: hai mặt pha cạnh nhau dưới một lớp sương THỞ — ÁNH SÁNG ⇒ ease-in-out (A11.18); chỉ opacity.
+ */
+.oChe .art > svg { width: 70%; image-rendering: pixelated; }
+.haiMat { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 2px; }
+.haiMat > span { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; min-width: 0; }
+.haiMat > span > svg {
+  display: block; width: 100%; height: auto; aspect-ratio: 1; opacity: 0.8;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--o-mau, #5d7290) 65%, transparent));
+}
+/* ⚠ `::before` của CỬA SỔ HÌNH (`.art`), không của ô — cùng tầng với `.quet .art::before` (lá thiên nga không bao giờ là
+   lá sương), nên không tranh lớp phủ `::before` của ô. */
+.art.haiMat::before {
+  content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: linear-gradient(180deg, rgba(191, 209, 230, 0.2), rgba(191, 209, 230, 0.05) 50%, rgba(191, 209, 230, 0.2));
+}
+.nay .art.haiMat::before { animation: suongTho 2400ms ease-in-out infinite; }
+@keyframes suongTho { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+.oSuong .ten { font-size: var(--fs-label); }
+@media (prefers-reduced-motion: reduce) { .nay .art.haiMat::before { animation: none; } }
+/* NỘI GIÁN: chữ PHA/TIN trên mặt ô úp thay dấu hỏi — nhỏ hơn dấu ? 40px để không tràn ô. */
+.upLoai { font-size: var(--fs-human); font-weight: 800; letter-spacing: var(--ls-nhan); opacity: 0.95; color: var(--text-bright, #e2e8f0); }
+
+/* ═══ D442 — NỀN BÀN THẺ ĐỔI THEO XU HƯỚNG ═════════════════════════════════════════════════════════════════════
+ * Founder 27/09 tối (đặc tả ba trạng thái): ĐI NGANG xám kim loại, TĨNH hoàn toàn · ĐI LÊN họ lá HẠ LÃI, vệt lóe mỗi
+ * chu kỳ + quầng viền thở, độ mờ quầng 15–20 % · ĐI XUỐNG họ lá GIẢM, ánh lửa bập bùng ở chân và hai góc + tro siêu nhỏ
+ * bay chậm rồi tan. Đổi trạng thái 0,5 s ease-in-out. Nguồn trạng thái: `lib/moi_truong.ts` (`xu_huong` công khai).
+ *
+ * A11.18 · docs/ui-ux/01-vfx-game-feel.md:
+ *  · NỀN, VỆT LÓE, QUẦNG, LỬA là ÁNH SÁNG ⇒ `ease-in-out`. HẠT TRO là VẬT ⇒ `steps()` (bay từng nấc pixel).
+ *  · Chỉ `transform` / `opacity`: đổi màu nền = BA LỚP chồng nhau đổi `opacity` (không transition `background`);
+ *    quầng = `box-shadow` TĨNH, thứ thở là `opacity` của nó.
+ *  · Một phần tử một chủ: NHÓM giữ transition bật/tắt theo trạng thái, CON giữ animation riêng của nó.
+ *  · `@keyframes` cùng tệp; tên keyframe viết trước trong shorthand. Thời lượng đọc `--nhip-mt-*` (lib/nhip.ts).
+ *  · Giảm chuyển động: tắt vệt lóe, thở, bập bùng, tro — GIỮ màu nền + quầng + ánh lửa đứng yên: trạng thái vẫn đọc được.
+ */
+.mapNen {
+  position: relative;
+  isolation: isolate;
+}
+.nen,
+.nhomQuang {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.nen { overflow: hidden; }
+.nen > i,
+.nhomLen,
+.nhomXuong {
+  position: absolute;
+  inset: 0;
+}
+/* Quầng tràn RA ngoài mép bàn một chút (đặc tả: "co giãn nhẹ nhàng ra không gian xung quanh"). */
+.nhomQuang { inset: -5px; }
+
+.nenNgang,
+.nenLen,
+.nenXuong,
+.nhomLen,
+.nhomXuong,
+.nhomQuang {
+  opacity: 0;
+  transition: opacity var(--nhip-mt-doi, 500ms) ease-in-out;
+}
+.mapNen[data-moi-truong="ngang"] .nenNgang,
+.mapNen[data-moi-truong="len"] .nenLen,
+.mapNen[data-moi-truong="len"] .nhomLen,
+.mapNen[data-moi-truong="len"] .nhomQuang,
+.mapNen[data-moi-truong="xuong"] .nenXuong,
+.mapNen[data-moi-truong="xuong"] .nhomXuong { opacity: 1; }
+
+/* ĐI NGANG — xám kim loại: nền họ `ngang` + hai vệt ánh kim ĐỨNG YÊN (kim loại chải), không một chuyển động nào. */
+.nenNgang {
+  background:
+    linear-gradient(166deg,
+      rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 30%,
+      rgba(255, 255, 255, 0.025) 56%, rgba(255, 255, 255, 0) 78%),
+    linear-gradient(178deg,
+      color-mix(in srgb, var(--ho-ngang) 26%, var(--nen-moi-truong)),
+      color-mix(in srgb, var(--ho-ngang) 20%, var(--nen-moi-truong)) 72%);
+}
+/* ĐI LÊN — họ `len` (họ của lá HẠ LÃI SUẤT). */
+.nenLen {
+  background: linear-gradient(178deg,
+    color-mix(in srgb, var(--ho-len) 28%, var(--nen-moi-truong)),
+    color-mix(in srgb, var(--ho-len) 22%, var(--nen-moi-truong)) 72%);
+}
+/* ĐI XUỐNG — họ `xuong` (họ của lá GIẢM), ấm dần về phía chân bàn — chỗ lửa. */
+.nenXuong {
+  background: linear-gradient(178deg,
+    color-mix(in srgb, var(--ho-xuong) 22%, var(--nen-moi-truong)),
+    color-mix(in srgb, var(--ho-xuong) 30%, var(--nen-moi-truong)) 88%);
+}
+
+/* VỆT LÓE (đi lên) — dải sáng trắng-xanh lướt chéo qua mặt bàn trong ~1/3 chu kỳ đầu rồi nghỉ; đỉnh 18 % độ đậm.
+   ⚠ Tên `vetLoe`, KHÔNG `quet` (D529): `quet` là bản chất mặt lá THIÊN NGA (`.quet .art::before`) gắn lên chính ô — CSS module
+   gộp hai tên trùng thành MỘT class ⇒ ô thiên nga ăn luôn `position:absolute · width:45% · translateX` của vệt này, trượt khỏi
+   chỗ để lại khối đen (D442 → D529), và `display:none` lúc giảm chuyển động. */
+.vetLoe {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 45%;
+  background: linear-gradient(100deg,
+    rgba(0, 0, 0, 0) 0%,
+    color-mix(in srgb, var(--quet-sang) 28%, transparent) 50%,
+    rgba(0, 0, 0, 0) 100%);
+  transform: translateX(-110%);
+  animation: mtQuet var(--nhip-mt-quet, 4200ms) ease-in-out infinite;
+}
+@keyframes mtQuet {
+  0% { transform: translateX(-110%); }
+  32% { transform: translateX(330%); }
+  100% { transform: translateX(330%); }
+}
+
+/* QUẦNG THỞ (đi lên) — bóng TĨNH màu họ `len`; chỉ `opacity` thở trong khoảng 15–20 % đặc tả đòi. */
+.quang {
+  position: absolute;
+  inset: 0;
+  box-shadow: 0 0 14px 3px var(--ho-len), inset 0 0 12px 1px var(--ho-len);
+  opacity: 0.22;
+  animation: mtTho var(--nhip-mt-tho, 3200ms) ease-in-out infinite;
+}
+@keyframes mtTho {
+  0%, 100% { opacity: 0.22; }
+  50% { opacity: 0.34; }
+}
+
+/* ÁNH LỬA (đi xuống) — ba đốm ấm ở chân giữa và hai góc dưới; bập bùng = opacity lệch nhịp, không đều như thở. */
+.lua {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 55% at 50% 118%, color-mix(in srgb, var(--ho-dong) 55%, var(--ho-xuong)) 0%, rgba(0, 0, 0, 0) 70%),
+    radial-gradient(38% 50% at -4% 108%, var(--ho-xuong) 0%, rgba(0, 0, 0, 0) 70%),
+    radial-gradient(38% 50% at 104% 108%, var(--ho-xuong) 0%, rgba(0, 0, 0, 0) 70%);
+  opacity: 0.26;
+  animation: mtLua var(--nhip-mt-lua, 2600ms) ease-in-out infinite;
+}
+@keyframes mtLua {
+  0% { opacity: 0.26; }
+  17% { opacity: 0.38; }
+  31% { opacity: 0.3; }
+  52% { opacity: 0.42; }
+  69% { opacity: 0.32; }
+  84% { opacity: 0.4; }
+  100% { opacity: 0.26; }
+}
+
+/* HẠT TRO (đi xuống) — vuông 1–2 px (pixel, không tròn), bay từ chân bàn lên ~96 px rồi tan; trễ âm để vào trạng thái
+   là đã có vài hạt đang bay. VẬT ⇒ `steps()` — 72 nấc / chu kỳ ≈ 8 nấc mỗi giây, chất pixel mà không giật. */
+.tro {
+  position: absolute;
+  inset: 0;
+}
+.tro > i {
+  position: absolute;
+  left: var(--x);
+  bottom: 2px;
+  width: var(--co);
+  height: var(--co);
+  background: var(--tro-hat);
+  opacity: 0;
+  animation: mtTro var(--nhip-mt-tro, 9000ms) steps(72, end) infinite;
+  animation-delay: calc(var(--nhip-mt-tro, 9000ms) * var(--tre) * -1);
+}
+@keyframes mtTro {
+  0% { transform: translate(0, 0); opacity: 0; }
+  12% { opacity: 0.55; }
+  55% { opacity: 0.32; }
+  75% { transform: translate(5px, -96px); opacity: 0; }
+  100% { transform: translate(5px, -96px); opacity: 0; }
+}
+
+/* ── D442 lượt 2 (founder xem ảnh: *"Tăng độ đậm đi hoặc làm màu hiệu ứng sáng hơn 1 tý (Kiểu tăng giảm cường độ sáng
+   chậm rãi và chỉ shake khi có thay đổi)"*). Nền đậm hơn (các % ở ba lớp nền trên), và: */
+/* THỞ SÁNG (đi lên · đi xuống) — lớp cùng họ màu SÁNG hơn nền, `opacity` lên xuống chậm: ÁNH SÁNG ⇒ ease-in-out. Đi
+   ngang KHÔNG có lớp này — đặc tả giữ nó tĩnh hoàn toàn. */
+.thoLen,
+.thoXuong {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: mtSang var(--nhip-mt-sang, 5200ms) ease-in-out infinite;
+}
+.thoLen {
+  background: radial-gradient(120% 90% at 50% 40%,
+    color-mix(in srgb, var(--ho-len) 40%, var(--nen-moi-truong)),
+    color-mix(in srgb, var(--ho-len) 28%, var(--nen-moi-truong)) 80%);
+}
+.thoXuong {
+  background: radial-gradient(120% 100% at 50% 100%,
+    color-mix(in srgb, var(--ho-xuong) 40%, var(--nen-moi-truong)),
+    color-mix(in srgb, var(--ho-xuong) 30%, var(--nen-moi-truong)) 80%);
+}
+@keyframes mtSang {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.7; }
+}
+
+/* RUNG KHI ĐỔI TRẠNG THÁI — mặt bàn giật ngắn đúng lúc nền đổi (không rung lúc mở màn, không rung khi đứng yên một
+   trạng thái). VẬT ⇒ `steps()`; chỉ `transform`. Hai tên keyframe GIỐNG HỆT: client đổi 'a' ↔ 'b' là hoạt ảnh chạy lại. */
+.mapNen[data-rung="a"] { animation: mtRungA var(--nhip-mt-rung, 150ms) steps(6, end); }
+.mapNen[data-rung="b"] { animation: mtRungB var(--nhip-mt-rung, 150ms) steps(6, end); }
+@keyframes mtRungA {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3px, 1px); }
+  40% { transform: translate(3px, -1px); }
+  60% { transform: translate(-2px, -1px); }
+  80% { transform: translate(2px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes mtRungB {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3px, 1px); }
+  40% { transform: translate(3px, -1px); }
+  60% { transform: translate(-2px, -1px); }
+  80% { transform: translate(2px, 1px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* NHƯỜNG SÂN KHẤU (D442 lượt 3 — founder 28/09: *"Cẩn thận bị quá tải hiệu ứng, phân thứ tự xuất hiện hay thời gian của
+   tất cả các hiệu ứng từ sau khi bấm chốt vòng"*). Suốt nhịp kết quả (chia quỹ → lá lật → tin → MÔI TRƯỜNG → thị trường →
+   lãi/lỗ → phong cách) hiệu ứng nền DỊU còn 25 % và ĐỨNG YÊN — chỉ còn màu nền, và cú đổi màu + rung ở bước MÔI TRƯỜNG của
+   riêng nó. Chuỗi xong ⇒ hiện lại trong 0,5 s (transition sẵn có của nhóm). */
+.mapNen[data-dien][data-moi-truong="len"] .nhomLen,
+.mapNen[data-dien][data-moi-truong="len"] .nhomQuang,
+.mapNen[data-dien][data-moi-truong="xuong"] .nhomXuong { opacity: 0.25; }
+.mapNen[data-dien] .vetLoe,
+.mapNen[data-dien] .thoLen,
+.mapNen[data-dien] .thoXuong,
+.mapNen[data-dien] .quang,
+.mapNen[data-dien] .lua,
+.mapNen[data-dien] .tro > i { animation-play-state: paused; }
+
+/* Trạng thái khác thì hiệu ứng của nó ĐỨNG (nhóm đã mờ về 0) — không tốn khung hình cho thứ không ai thấy. */
+.mapNen:not([data-moi-truong="len"]) .vetLoe,
+.mapNen:not([data-moi-truong="len"]) .thoLen,
+.mapNen:not([data-moi-truong="xuong"]) .thoXuong,
+.mapNen:not([data-moi-truong="len"]) .quang,
+.mapNen:not([data-moi-truong="xuong"]) .lua,
+.mapNen:not([data-moi-truong="xuong"]) .tro > i { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .vetLoe,
+  .quang,
+  .lua,
+  .tro > i,
+  .thoLen,
+  .thoXuong,
+  .mapNen[data-rung="a"],
+  .mapNen[data-rung="b"] { animation: none; }
+  .vetLoe,
+  .tro { display: none; }
+  /* Thở sáng đứng yên ở mức giữa: mất nhịp, GIỮ độ đậm — trạng thái vẫn đọc được bằng màu. */
+  .thoLen,
+  .thoXuong { opacity: 0.35; }
+}

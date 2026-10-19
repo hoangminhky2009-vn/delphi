@@ -1,0 +1,275 @@
+/*
+ * QUẢN TRỊ VỐN — hai cần gạt của lõi vốn (Tái cơ cấu · Khoá nắm giữ).
+ *
+ * Ba điều đáng đọc trước khi sửa:
+ *
+ *  1. KHÔNG @keyframes, KHÔNG `animation:` trong file này. Panel này chỉ đổi
+ *     trạng thái bật/tắt của các viên chọn — mà đổi trạng thái là NHỊ PHÂN, nên
+ *     nó dùng `doiMau` từ styles/pixel.module.css. Cần chuyển động thật thì
+ *     `composes` một lớp có sẵn ở đó (CSS Modules đổi tên keyframe theo file —
+ *     gọi tên keyframe của file khác là hoạt hình CHẾT CÂM).
+ *
+ *  2. Mọi viên bấm được là VẬT (luật 4): góc khấc + bóng cứng, không bo góc,
+ *     không blur. Chúng đến từ `composes: nut` chứ không tự khai `box-shadow` —
+ *     và ở đâu đã `composes` thì KHÔNG khai lại `box-shadow`/`transform`/
+ *     `transition`, vì khai lại là ghi đè IM LẶNG (luật 6).
+ *
+ *  3. 390px: hàng viên mã tự xuống dòng (`flex-wrap`), bảng giá là danh sách dọc.
+ *     Không cột cố định nào ở đây — panel này chữ nhiều, và chữ dài là chỗ tràn
+ *     ngang dễ nhất.
+ */
+
+.hop {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ══════════════ Băng khoá đang chạy ══════════════ */
+
+.bangKhoa {
+  composes: khungNoi from '@/styles/pixel.module.css';
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--gold-amber);
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.bangDau {
+  display: flex;
+  /* 390px: "KHOÁ NẮM GIỮ: Trái phiếu Mỹ" + huy hiệu đếm vòng không đủ chỗ trên
+     một dòng. Cho xuống dòng thay vì để huy hiệu đẩy hàng tràn ngang. */
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--gold-amber);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.demVong {
+  margin-left: auto;
+  padding: 1px 5px;
+  background: rgba(251, 191, 36, 0.2);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* Vòng chốt = vòng nghiệm thu. Đỏ vì đây là vòng duy nhất phá cam kết bị phạt. */
+.demChot {
+  background: rgba(239, 68, 68, 0.22);
+  color: var(--lose);
+}
+
+.loiIch {
+  margin: 0;
+  padding-left: 14px;
+  color: var(--text-dim);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* ══════════════ Một mục (Tái cơ cấu / Khoá nắm giữ) ══════════════ */
+
+.muc {
+  composes: khungNoi from '@/styles/pixel.module.css';
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--border-idle-strong);
+  background: var(--surface-inset);
+}
+
+.mucKhoa {
+  opacity: 0.5;
+}
+
+.mucTen {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-bright);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.mucVi {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: right;
+}
+
+/*
+ * GIÁ — in thẳng, không giấu sau tooltip.
+ *
+ * Thu tiền mà không niêm yết giá trước là lừa, và "báo giá sau khi rê chuột" vẫn
+ * là không báo. Hổ phách vì đây là khoản CHI, cùng màu với mọi con số phải trả
+ * khác trong trận.
+ */
+.gia {
+  padding: 5px 6px;
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--gold-amber);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.giaDo {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--lose);
+}
+
+.nhanBuoc {
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.hangMa {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+/* ══════════════ Viên mã bấm được ══════════════ */
+
+.vien {
+  composes: nut from '@/styles/pixel.module.css';
+  padding: 5px 7px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+/* Mã đang trong chu kỳ khoá — bán nó là phá cam kết, phải nhìn ra ngay. */
+.vienKhoa {
+  composes: vien;
+  border-color: var(--gold-amber);
+  color: var(--gold-amber);
+}
+
+.capMa {
+  margin-left: 3px;
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+/* ══════════════ Lệnh đã chọn + hộp cảnh báo ══════════════ */
+
+.daChon {
+  display: flex;
+  /* Nhãn hai mã dài nhất ("CP Chứng khoán → Trái phiếu Mỹ") cộng nút huỷ vượt bề
+     rộng máy 390px — xuống dòng, không đẩy ngang. */
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  background: rgba(34, 211, 238, 0.12);
+  color: var(--text-bright);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.huy {
+  composes: nut from '@/styles/pixel.module.css';
+  margin-left: auto;
+  padding: 3px 6px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+/*
+ * CẢNH BÁO PHÁ CAM KẾT — hộp chặn, không phải dòng chữ nhỏ.
+ *
+ * Người chơi phải bấm thêm một nút NỮA thì lệnh mới được nhận. Một cảnh báo chỉ
+ * để đọc là cảnh báo bị lướt qua, và ở đây cái bị lướt qua trị giá cả một vòng
+ * bị giam vốn.
+ */
+.canhBao {
+  composes: khungNoi from '@/styles/pixel.module.css';
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--lose);
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--lose);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.hangNut {
+  display: flex;
+  gap: 6px;
+}
+
+.nutPha {
+  composes: nut from '@/styles/pixel.module.css';
+  flex: 1 1 auto;
+  padding: 7px 6px;
+  border-color: var(--lose);
+  background: rgba(239, 68, 68, 0.18);
+  color: var(--lose);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.nutGiu {
+  composes: nutChinh from '@/styles/pixel.module.css';
+  flex: 1 1 auto;
+  padding: 7px 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+/* ══════════════ Băng trạng thái ══════════════ */
+
+/* Vốn bị giam — hậu quả đang chạy, phải hiện chứ không để người chơi tự đoán
+   vì sao nút Tăng cam kết biến mất. */
+.bangGiam {
+  composes: khungNoi from '@/styles/pixel.module.css';
+  padding: 7px 8px;
+  border: 1px solid var(--lose);
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--lose);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* Lệnh vòng trước bị engine từ chối. Im lặng ở đây = người chơi tưởng đã đổi
+   danh mục trong khi không có gì xảy ra. */
+.bangLoi {
+  composes: khungNoi from '@/styles/pixel.module.css';
+  padding: 7px 8px;
+  border: 1px solid var(--lose);
+  background: rgba(239, 68, 68, 0.14);
+  color: var(--lose);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.trong {
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.iconDong {
+  vertical-align: -2px;
+}

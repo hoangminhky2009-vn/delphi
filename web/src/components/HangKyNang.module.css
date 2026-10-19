@@ -1,0 +1,118 @@
+/*
+ * BA DẤU KỸ NĂNG — màu theo VAI sẵn có của app (`styles/tokens.css`), không mã màu mới:
+ *   · VÀNG = giá trị đã có (làm được · chứng minh);
+ *   · chữ mờ = chưa có;
+ *   · LAM chỉ ở dấu `!` — thứ duy nhất trên dấu mang nghĩa "bấm được".
+ * §XI: không bo góc, không blur. Không animation — đây là thứ ĐỌC.
+ */
+.khoi { display: flex; flex-direction: column; gap: 6px; }
+
+.hang {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.dau {
+  position: relative;
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 8px 6px 6px;
+  border: 1px solid transparent;
+  background: var(--surface-inset);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.dauMo { border-color: color-mix(in srgb, var(--gold-amber) 45%, transparent); }
+/* D426 — dấu TĨNH (nắp NÓI · LÀM · TRONG TRẬN): cùng ô + chữ, không viền nút, không `!`. */
+.dauTinh {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px 4px 6px;
+  background: var(--surface-inset);
+}
+/* Khu PFM giữ sàn chữ 12px (`04-mau-va-tuong-phan.md`); hàng ba dấu ở màn trận/THẺ giữ cỡ cũ của nó (đo 13/09, 92px/dấu). */
+.dauTinh .ten, .dauTinh .bac { font-size: 12px; }
+
+/* Ô pixel: rỗng · nửa · đầy · đầy + khung đôi. */
+.o {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border-idle-pill);
+}
+.gap_chua_vung {
+  border-color: var(--gold-amber);
+  background: linear-gradient(90deg, var(--gold-amber) 50%, transparent 50%);
+}
+.lam_duoc { border-color: var(--gold-amber); background: var(--gold-amber); }
+.chung_minh {
+  border-color: var(--gold);
+  background: var(--gold);
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/*
+ * Đo 13/09 trên mặt THẺ ở 375px: mỗi dấu chỉ 92px. Bản đầu (ô 14px · giãn chữ .06em · `!` giữa
+ * cạnh phải) để "chứng minh" và "CHIA GIỎ" đè lên `!` tới 11px. Nên `!` lên GÓC (như `!` trên lá
+ * bài), chữ giãn hẹp lại, và chữ được XUỐNG DÒNG thay vì tràn khi màn còn hẹp hơn (320px).
+ */
+.chu { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.ten {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--text-bright);
+}
+.bac {
+  font-style: normal;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.bacCo { color: var(--gold-amber); }
+
+.hoi {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 11px;
+  height: 11px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-accent);
+  color: var(--accent);
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.giai {
+  padding: 8px 9px;
+  background: var(--surface-inset);
+  border-left: 2px solid var(--gold-amber);
+}
+.giaiTen {
+  margin: 0 0 4px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-bright);
+}
+.giaiDong { margin: 0 0 5px; font-size: 11px; line-height: 1.5; color: var(--text-dim); }
+.khung { margin: 0; font-size: 10px; line-height: 1.45; color: var(--text-muted); }
+.khung b { color: var(--text-dim); font-weight: 700; }
+
+.bc { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 2px 0 7px; }
+.bc div { display: flex; flex-direction: column; align-items: center; padding: 5px 2px; background: var(--surface-inset); }
+.bc b { font-size: 14px; font-variant-numeric: tabular-nums; color: var(--text-bright); }
+.bc i { font-style: normal; font-size: 9px; letter-spacing: 0.08em; color: var(--text-muted); }

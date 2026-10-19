@@ -1,0 +1,97 @@
+/*
+ * KHUNG PFM — vỏ không cuộn của bốn tab (SPEC `pfm-tang-khong-gian`). Luật hình ở docs/ui-ux/09-tang-khong-gian.md.
+ * Chiều cao trừ ĐÚNG ba số của vỏ AppShell (`.shell[data-khung-pfm]`): đầu 12 + đáy 8 + vùng an toàn — đổi ở đó là phải đổi ở đây.
+ */
+.khung {
+  position: relative;
+  width: 100%;
+  max-width: var(--shell-width);
+  margin: 0 auto;
+  /* Màn rộng / Discord: AppShell có thể biến con duy nhất thành lưới — cột điện thoại vẫn đứng GIỮA. */
+  justify-self: center;
+  height: calc(100dvh - 12px - 8px - env(safe-area-inset-bottom, 0px));
+  min-height: 456px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1;
+  /* Demo CHỐT dựng với `line-height: normal`; `body` của app là 1,5 — mỗi dòng nhãn cao thêm ~6 px, khung không-cuộn không còn chỗ. */
+  line-height: normal;
+  font-size: 16px;
+}
+
+.nen {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-vignette);
+  pointer-events: none;
+  box-shadow: var(--nen-vignette);
+}
+
+/* ── dải tab: HUB · 4 tab · bánh răng · ô Oracle ── */
+.dai { flex: 0 0 auto; display: flex; align-items: center; gap: 4px; min-height: 36px; }
+.hub, .banh {
+  flex: 0 0 34px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.hub:focus-visible, .banh:focus-visible, .tab:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+.tab {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 6px 0 6px 1px;
+  font-size: var(--tk-label);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid var(--line);
+  color: var(--chu-phu);
+  -webkit-tap-highlight-color: transparent;
+  transition: color 120ms steps(2, end), border-color 120ms steps(2, end), background-color 120ms steps(2, end);
+}
+.dangXem { border-color: var(--accent); color: var(--accent-bright); background: rgba(34, 211, 238, 0.1); }
+/* Ô giữ sẵn Oracle: cạnh khớp `CANH_ORACLE_NEO` (36). */
+.choOracle { flex: 0 0 36px; width: 36px; height: 36px; }
+
+/* ── thân: một khung cắt — màn lướt ngang trong đây, thân KHÔNG BAO GIỜ cuộn ── */
+.than { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+.man {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cho { flex: 1; }
+.dangTai { margin: 0; font-size: var(--tk-body); color: var(--text-muted); }
+
+/* ĐỔI TAB = LƯỚT NGANG (SPEC mục 4.1). Chuyển động VẬT LÝ ⇒ ease-out mạnh (cùng đường cong `--luot` của demo); chỉ `transform`. */
+.man[data-luot='toi'] { animation: pfmLuotToi var(--nhip-pfm-tab-luot, 340ms) cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+.man[data-luot='lui'] { animation: pfmLuotLui var(--nhip-pfm-tab-luot, 340ms) cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+/* Ô trong màn mới chờ màn lướt tới nơi rồi mới trồi so le (cùng độ trễ của demo). */
+.man[data-luot='toi'], .man[data-luot='lui'] { --tre: 140ms; }
+@keyframes pfmLuotToi { from { transform: translateX(100%); } }
+@keyframes pfmLuotLui { from { transform: translateX(-100%); } }
+
+/* MÀN CŨ LƯỚT RA (demo: cu.style.transform = translateX(−huong × 28%), opacity 0 trong cùng một nhịp lướt). Bản chụp tĩnh — xem `KhungPfm.tsx`. */
+.ra { pointer-events: none; z-index: 0; }
+.ra, .ra * { animation: none !important; }
+.ra[data-ra='toi'] { animation: pfmRaToi var(--nhip-pfm-tab-luot, 340ms) cubic-bezier(0.22, 1, 0.36, 1) forwards !important; }
+.ra[data-ra='lui'] { animation: pfmRaLui var(--nhip-pfm-tab-luot, 340ms) cubic-bezier(0.22, 1, 0.36, 1) forwards !important; }
+@keyframes pfmRaToi { to { transform: translateX(-28%); opacity: 0; } }
+@keyframes pfmRaLui { to { transform: translateX(28%); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .man[data-luot='toi'], .man[data-luot='lui'] { animation: none; }
+  .ra { display: none; }
+  .tab { transition: none; }
+}

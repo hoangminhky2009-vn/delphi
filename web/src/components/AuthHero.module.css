@@ -1,0 +1,249 @@
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ===== Logo lớn ===== */
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logoChip {
+  display: inline-flex;
+  padding: 5px;
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(124, 58, 237, 0.3), rgba(4, 7, 13, 0)),
+    var(--surface-idle);
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  /*
+   * Cùng thứ tự luật 6 với ô logo nhỏ ở AppShell: vát (bề mặt tấm) trước, hắt
+   * sáng tím (offset 0 → ánh sáng) sau. Trước đây tấm này chỉ có hắt sáng nên
+   * nó phẳng lì trong khi bản 20px ở header đã nổi khối — hai chỗ cùng một vật.
+   */
+  box-shadow: var(--px-vien-trong), inset 0 0 16px rgba(124, 58, 237, 0.2);
+}
+
+.logoBig {
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: var(--text-bright);
+}
+
+.logoSlash {
+  color: var(--accent);
+}
+
+.logoSub {
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.live {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9.5px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: var(--win);
+}
+
+.liveDot {
+  composes: dotpulse from '../styles/motion.module.css';
+  width: 6px;
+  height: 6px;
+  border-radius: 0;
+  background: var(--win);
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.8);
+}
+
+/* ===== Dòng lệnh ===== */
+.promptLine {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-bright);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  background: rgba(34, 211, 238, 0.05);
+  border-radius: 0;
+  padding: 8px 11px;
+}
+
+.promptUser {
+  color: var(--win);
+}
+
+.cursor {
+  composes: blink from '../styles/motion.module.css';
+  display: inline-block;
+  width: 8px;
+  height: 13px;
+  margin-left: 4px;
+  background: var(--accent);
+  vertical-align: -2px;
+  box-shadow: var(--glow-cursor);
+}
+
+/* ===== Ticker bảng giá ===== */
+.ticker {
+  overflow: hidden;
+  border-top: 1px dashed var(--border-idle);
+  border-bottom: 1px dashed var(--border-idle);
+  padding: 6px 0;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.tickerInner {
+  display: flex;
+  width: max-content;
+  gap: 18px;
+  /*
+   * Bảng giá chạy theo NẤC NGUYÊN PIXEL. Chữ 10px trôi ở toạ độ lẻ thì trình
+   * duyệt khử răng cưa lại từng khung hình và cả dòng rung mờ — đúng thứ bảng
+   * LED thật không bao giờ làm. Một lượt (7 mục) dài ~650px nên 660 nấc là mỗi
+   * nấc đúng một pixel: mượt y như `linear` nhưng luôn đáp trên lưới.
+   */
+  animation: tickerScroll 24s steps(660, end) infinite;
+}
+
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.tick {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.tickerDup {
+  display: contents;
+}
+
+/* Reduced-motion: marquee đứng yên → bỏ fade mép + ẩn bản sao thừa */
+@media (prefers-reduced-motion: reduce) {
+  .ticker {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+  .tickerDup {
+    display: none;
+  }
+  .tickerInner {
+    flex-wrap: wrap;
+    width: auto;
+  }
+}
+
+.tickName {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+}
+
+.tickDot {
+  font-size: 11px;
+  color: var(--violet);
+}
+
+/* ===== 3 trụ sân chơi ===== */
+.pillars {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.pillar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  min-height: 84px;
+  border-radius: 0;
+  padding: 10px 6px 9px;
+  background: var(--surface-idle);
+  text-align: center;
+}
+
+.pillarCyan {
+  border: 1px solid var(--border-accent-soft);
+  box-shadow: inset 0 0 18px rgba(34, 211, 238, 0.07);
+}
+
+/* 04/08 — đổi tên từ `pillarVioletTeaser`: Đấu trường KHÔNG còn là teaser. */
+.pillarViolet {
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  box-shadow: inset 0 0 18px rgba(139, 92, 246, 0.08);
+}
+
+.pillarGreen {
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  box-shadow: inset 0 0 18px rgba(74, 222, 128, 0.06);
+}
+
+.pillarLabel {
+  font-size: 8.5px;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+/* Thay `.soon` ("SẮP RA MẮT"). Cùng hình dạng, đổi màu sang xanh vì nay nó báo
+   một thứ ĐANG CÓ chứ không phải một lời hứa. */
+.moiRa {
+  font-size: 7.5px;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+  color: var(--accent);
+  border: 1px solid var(--border-accent-soft);
+  border-radius: 0;
+  padding: 1px 6px;
+}
+
+/* Mini LED bars (trụ dự báo) — đúng texture SegBar Mẫu E, dựng dọc */
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 24px;
+}
+
+/*
+ * Thanh LED chỉ rộng 9px, nên `--grad-bar-neutral` (dải cyan→tím trải ngang)
+ * sinh ra 9 màu khác nhau trên 9 cột pixel — mắt đọc ra nhiễu, không đọc ra
+ * nguồn sáng (luật 5). Thay bằng HAI DẢI PHẲNG cắt cứng ở 5px: vẫn là gradient,
+ * nhưng tô khối đúng cách pixel art. Lớp khấc LED chồng lên đã cắt cứng sẵn
+ * (4px trong / 2px tối), giữ nguyên.
+ */
+.bar {
+  width: 9px;
+  border-radius: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(5, 10, 20, 0) 0px, rgba(5, 10, 20, 0) 4px, rgba(5, 10, 20, 0.55) 4px, rgba(5, 10, 20, 0.55) 6px),
+    linear-gradient(90deg, var(--accent) 0 5px, var(--violet) 5px);
+  box-shadow: var(--glow-accent-bar);
+}
+
+.barWin {
+  background:
+    repeating-linear-gradient(0deg, rgba(5, 10, 20, 0) 0px, rgba(5, 10, 20, 0) 4px, rgba(5, 10, 20, 0.55) 4px, rgba(5, 10, 20, 0.55) 6px),
+    linear-gradient(90deg, var(--accent) 0 5px, var(--win) 5px);
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.6);
+  /* Cái đang đổi là ĐỘ MẠNH của quầng, không phải hình thanh → giữ mượt
+     (luật 4). `steps()` ở nhịp thở 2,4s chỉ ra strobe. */
+  animation: barBreath 2.4s ease-in-out infinite;
+}
+
+@keyframes barBreath {
+  0%, 100% { box-shadow: 0 0 6px rgba(74, 222, 128, 0.35); }
+  50% { box-shadow: 0 0 16px rgba(74, 222, 128, 0.8); }
+}

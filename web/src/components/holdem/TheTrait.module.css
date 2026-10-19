@@ -1,0 +1,165 @@
+/*
+ * THẺ TRAIT (v55, D422) — CHÉP từ trang demo đã chốt `docs/ui-ux/demo/the-trait.html` (A11.25; founder 26/09: "t chốt
+ * hết hiệu ứng/ hình ảnh và màu của bản demo"). Token màu + số đo giữ NGUYÊN của demo — đừng diễn giải lại.
+ * Ranh easing A11.18: steps() cho VẬT & nhịp máy (lún, rung cân) · cubic-bezier nảy cho CHUYỂN ĐỘNG vật lý (chia bài,
+ * nhấc thẻ, tấm trượt, hạt) · ease-in-out cho ÁNH SÁNG thở (quầng thẻ đã lấy).
+ */
+
+/*
+ * Bảng màu của demo — gắn lên MỌI gốc (chợ · tấm xác nhận · khay), vì tấm xác nhận được đưa ra body (portal). Mã nào
+ * TRÙNG giá trị một token của app thì gọi token (bài `mau_theo_token`) — cùng số, một nguồn.
+ * ⚠ ƯỚM ĐIỆN THOẠI (D422): app sống trong cột `--shell-width` (390px) kể cả trên máy tính, nên hai biến thể ≥700px của
+ * demo (hình 96px, hộp giữa màn 520px) KHÔNG áp — màn nào cũng là bố cục điện thoại của demo.
+ */
+.bm {
+  --tai-0: #061a0d; --tai-1: #0e3b1e; --tai-2: #16632f; --tai-3: #23a152; --tai-4: var(--win); --tai-5: #c8fad9;
+  --tat-0: #1f0708; --tat-1: #4a0f10; --tat-2: #8c1d1e; --tat-3: #d8302e; --tat-4: var(--lose); --tat-5: #ffd3d1;
+  --t-nen: var(--bg-page); --t-ni: var(--felt); --t-ni-vien: rgba(45, 122, 79, 0.45);
+  --t-chu: var(--text-body); --t-chu-mo: var(--text-muted); --t-khung: var(--accent); --t-xu: var(--gold-amber);
+  --t-xu-sang: var(--gold);
+  --art: 72px;
+}
+.tai { --h0: var(--tai-0); --h1: var(--tai-1); --h2: var(--tai-2); --h3: var(--tai-3); --h4: var(--tai-4); --h5: var(--tai-5); }
+.tat { --h0: var(--tat-0); --h1: var(--tat-1); --h2: var(--tat-2); --h3: var(--tat-3); --h4: var(--tat-4); --h5: var(--tat-5); }
+
+/* ── thẻ trait ─────────────────────────────────────────────────────────────── */
+.the {
+  --rx: 0deg; --ry: 0deg; --nang: 0px; --to: 1;
+  position: relative;
+  width: 100%;
+  padding: 8px 4px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  color: var(--h4);
+  cursor: pointer;
+  background: var(--h0);
+  border: 3px solid var(--h3);
+  border-radius: 0;
+  box-shadow: inset 0 0 0 2px var(--h1), 0 4px 0 0 var(--h1), 0 0 0 1px #000;
+  transform: perspective(600px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(var(--nang)) scale(var(--to));
+  transition: transform 220ms cubic-bezier(0.3, 1.7, 0.5, 1), border-color 120ms steps(2, end);
+}
+.the svg { width: var(--art); height: var(--art); display: block; image-rendering: pixelated; }
+.the .ten {
+  font-size: 15px; font-weight: 800; letter-spacing: 0.06em; line-height: 1.05; text-align: center;
+  min-height: 2.1em; display: flex; align-items: center; color: var(--h4);
+}
+.the .diem {
+  position: absolute; top: -3px; right: -3px; min-width: 28px; padding: 1px 4px; font-size: 15px; font-weight: 800;
+  font-style: normal; background: var(--h3); color: var(--h0); text-align: center;
+}
+.ghim { position: absolute; top: 4px; left: 4px; width: 14px; height: 14px; }
+.the .ghim { width: 14px; height: 14px; }
+.the:focus-visible { outline: 3px solid var(--t-khung); outline-offset: 3px; }
+.the[aria-pressed='true'] { --nang: -7px; --to: 1.04; border-color: var(--h5); }
+.the[aria-pressed='true']::after {
+  content: ''; position: absolute; inset: -6px; pointer-events: none;
+  box-shadow: 0 0 16px 3px var(--h4); opacity: 0.5; animation: tho 1600ms ease-in-out infinite;
+}
+@keyframes tho { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.85; } }
+.the[aria-pressed='true'] .dalay { display: block; }
+.dalay {
+  display: none; position: absolute; left: -3px; right: -3px; bottom: -3px; background: var(--h4); color: var(--h0);
+  font-size: 14px; font-weight: 800; letter-spacing: 0.12em; text-align: center; padding: 1px 0;
+}
+.the:active { transition-duration: 60ms; transition-timing-function: steps(2, end); --nang: 3px; }
+.the:disabled { cursor: default; }
+.vao { animation: chia 460ms cubic-bezier(0.2, 1.25, 0.4, 1) backwards; animation-delay: calc(var(--i) * 70ms); }
+@keyframes chia {
+  0% { opacity: 0; transform: translateY(-34px) rotate(-8deg) scale(0.86); }
+  100% { opacity: 1; transform: perspective(600px) translateY(0) scale(1); }
+}
+
+/*
+ * ── D430: thẻ GỌN — chợ trait nằm vào CHỖ HÀNG LÕI của shop (founder 26/09). Cùng hình, cùng họ màu, cùng cử chỉ; chỉ thu
+ * CỠ để hai hàng TÀI / TẬT (ba thẻ mỗi hàng) vừa khoang ~140px của hàng lõi. Chạm vẫn mở bảng xác nhận cỡ lớn.
+ * Nhấc/quầng khi đã lấy nhỏ lại theo cỡ thẻ — quầng 16px quanh thẻ cao 60px đè lên hàng bên cạnh.
+ */
+.the.gon { --art: 34px; padding: 6px 3px 5px; gap: 3px; border-width: 2px; box-shadow: inset 0 0 0 1px var(--h1), 0 3px 0 0 var(--h1), 0 0 0 1px #000; }
+.the.gon .ten {
+  font-size: 10px; letter-spacing: 0.04em; min-height: 0; max-width: 100%;
+  display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.the.gon .diem { top: -2px; right: -2px; min-width: 22px; padding: 0 3px; font-size: 10px; }
+.the.gon .dalay { font-size: 9px; letter-spacing: 0.1em; left: -2px; right: -2px; bottom: -2px; }
+.the.gon[aria-pressed='true'] { --nang: -3px; --to: 1.02; }
+.the.gon[aria-pressed='true']::after { inset: -3px; box-shadow: 0 0 8px 1px var(--h4); }
+
+/* ── nút 2.5D kiểu máy xèng ─────────────────────────────────────────────────── */
+.nut {
+  font: inherit; font-weight: 800; letter-spacing: 0.1em; font-size: 17px; padding: 8px 14px; cursor: pointer;
+  border: 2px solid var(--nv); border-radius: 0;
+  background: var(--nn); color: var(--nc); box-shadow: 0 4px 0 0 var(--nb); transform: translateY(0);
+  transition: transform 70ms steps(2, end), box-shadow 70ms steps(2, end);
+}
+.nut:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 0 var(--nb); }
+.nut:disabled { opacity: 0.45; cursor: default; }
+.nut:focus-visible { outline: 3px solid var(--t-khung); outline-offset: 3px; }
+.nutPhu { --nv: var(--t-xu); --nn: rgba(0, 0, 0, 0.35); --nc: var(--t-xu-sang); --nb: #6b4a0c; }
+.nutChinh { --nv: var(--accent-bright); --nn: var(--t-khung); --nc: #03222a; --nb: #0e7490; }
+.nutTai { --nv: var(--tai-5); --nn: var(--tai-4); --nc: var(--tai-0); --nb: var(--tai-2); }
+.nutTat { --nv: var(--tat-5); --nn: var(--tat-4); --nc: var(--tat-0); --nb: var(--tat-2); }
+@media (hover: hover) and (pointer: fine) { .nut:hover:not(:disabled) { filter: brightness(1.12); } }
+
+/* ── huy hiệu đang mang (khay) ─────────────────────────────────────────────── */
+.huy {
+  display: flex; align-items: center; gap: 6px; padding: 4px 8px 4px 4px; background: var(--h0);
+  border: 2px solid var(--h3); color: var(--h4); font: inherit; font-weight: 800; letter-spacing: 0.05em;
+  font-size: 15px; cursor: pointer; text-align: left; position: relative;
+}
+.huy svg { width: 48px; height: 48px; display: block; }
+.huy .ghi { font-size: 13px; color: var(--t-chu-mo); font-weight: 700; letter-spacing: 0.04em; }
+.huy.choSau { border-style: dashed; }
+.huy:focus-visible { outline: 3px solid var(--t-khung); outline-offset: 2px; }
+
+/* ── bảng xác nhận ─────────────────────────────────────────────────────────────
+   Tấm trượt từ đáy (bố cục điện thoại của demo), KẸP theo cột app (D374): trải `left/right: 0` rồi `margin-inline: auto`
+   với bề ngang `min(100%, --shell-width)` — không bao giờ `left: 50%` (neo viewport, trôi khỏi cột trên máy tính). */
+.man { position: fixed; inset: 0; background: rgba(2, 4, 8, 0.74); opacity: 0; transition: opacity 200ms ease-in-out; z-index: 90; }
+.man.mo { opacity: 1; }
+.tam {
+  position: fixed; z-index: 91; left: 0; right: 0; bottom: 0; margin-inline: auto; width: min(100%, var(--shell-width));
+  padding: 16px 16px calc(18px + env(safe-area-inset-bottom, 0px)); background: #070b12; border: 3px solid var(--h3);
+  border-bottom: 0; box-shadow: 0 -6px 0 0 var(--h1), inset 0 0 0 2px var(--h1); color: var(--t-chu);
+  font-family: var(--font-mono); font-size: 16px; line-height: 1.35;
+  transform: translateY(106%); transition: transform 320ms cubic-bezier(0.2, 1.25, 0.4, 1);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.tam.mo { transform: translateY(0); }
+.tamDinh { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+.tamArt { background: var(--h0); border: 3px solid var(--h3); box-shadow: inset 0 0 0 2px var(--h1); padding: 6px; position: relative; }
+.tamArt svg { width: 144px; height: 144px; display: block; }
+.tam.mo .tamArt svg { animation: bat 380ms cubic-bezier(0.2, 1.6, 0.4, 1) 90ms backwards; }
+@keyframes bat { 0% { opacity: 0; transform: scale(0.55) rotate(-8deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
+.tamArt .ghim { top: 6px; left: 6px; width: 21px; height: 21px; }
+.tamTen { margin: 0; font-size: 32px; font-weight: 800; letter-spacing: 0.06em; color: var(--h5); text-wrap: balance; }
+.chip { display: inline-block; font-weight: 800; letter-spacing: 0.1em; font-size: 15px; padding: 2px 8px; background: var(--h3); color: var(--h0); }
+.chipVai { display: inline-block; font-weight: 800; letter-spacing: 0.08em; font-size: 14px; padding: 2px 8px; border: 2px solid var(--h3); color: var(--h4); margin-top: 6px; }
+.muc { display: flex; flex-direction: column; gap: 3px; }
+.muc b { font-size: 13px; letter-spacing: 0.16em; color: var(--h4); }
+.muc p { margin: 0; font-size: 17px; line-height: 1.3; }
+.muc.doi p { color: var(--t-chu-mo); }
+.tamCan { margin: 0; font-size: 15px; color: var(--t-chu-mo); border-top: 2px dashed #1b2a3d; padding-top: 10px; }
+.tamNut { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+
+/* ── hạt nổ khi lấy lá · bảng báo ───────────────────────────────────────────── */
+.hat { position: fixed; width: 6px; height: 6px; pointer-events: none; z-index: 95; }
+.toast {
+  position: fixed; left: 0; right: 0; margin-inline: auto; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 92;
+  width: max-content; max-width: calc(min(100%, var(--shell-width)) - 32px);
+  background: #0b1422; border: 2px solid var(--accent); color: var(--text-body); font-family: var(--font-mono); font-weight: 700;
+  font-size: 16px; padding: 8px 14px;
+}
+
+@media (max-width: 380px) {
+  .the .ten { font-size: 14px; }
+  .tamArt svg { width: 120px; height: 120px; }
+  .tamTen { font-size: 28px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .the, .vao, .tam, .man, .nut, .tam.mo .tamArt svg { animation: none !important; transition: none !important; }
+  .the[aria-pressed='true']::after { animation: none; opacity: 0.6; }
+}

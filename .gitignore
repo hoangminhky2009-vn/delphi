@@ -1,0 +1,21 @@
+node_modules/
+dist/
+dist-demo/
+coverage/
+.local/
+.vercel/
+.wrangler/
+
+# Secrets never go in the repository. The example file is the only exception.
+.env
+.env.*
+!.env.example
+
+*.log
+
+# Scratch space
+scratch_tmp/
+.tmp_gen/
+scratch_*.mts
+scratch_*.py
+scripts/_khaosat_*.ts

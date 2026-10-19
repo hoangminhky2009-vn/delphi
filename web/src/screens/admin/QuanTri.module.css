@@ -1,0 +1,198 @@
+/*
+ * Mặt quản trị — công cụ NỘI BỘ, không phải UI sản phẩm.
+ *
+ * ⚠ Vẫn tuân §XI: KHÔNG `border-radius`. File này nằm dưới `web/src` nên test
+ * pixel quét nó như mọi module khác — khác với hồi trang admin còn ở server.
+ * Không phải vì admin cần thẩm mỹ pixel, mà vì một ngoại lệ trong lint là một
+ * ngoại lệ sẽ có ngày lan.
+ *
+ * Bảng màu mượn tokens của app để không đẻ ra một hệ màu thứ hai phải bảo trì.
+ */
+
+.trang {
+  padding: 16px 12px 48px;
+  /*
+   * Không cap 1100px nữa (founder 03/08: *"làm để t xem trên máy tính"*). Bảng
+   * số nhồi vào một cột hẹp trên màn hình lớn là bắt người đọc cuộn ngang từng
+   * cột — mà cuộn ngang thì không so sánh được hai cột cạnh nhau, tức mất đúng
+   * việc mà một bảng sinh ra để làm. Khung ngoài (`AppShell.frameRong`) cũng đã
+   * bỏ trần 390px của app người chơi.
+   */
+  width: 100%;
+  margin: 0 auto;
+  /* D182 — dùng chung một họ chữ với cả app; gõ cứng font ở đây là chỗ duy nhất
+     còn lại lộ font hệ điều hành sau khi bỏ JetBrains Mono. */
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Trên màn rộng thì cho ô số và khối đứng thành nhiều cột hơn, không kéo dài ra. */
+@media (min-width: 1100px) {
+  .hangO { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .luoi  { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+  .trang { font-size: 14px; }
+}
+
+.dau {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--vien, #24303f);
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+
+.tieuDe {
+  font-size: 16px;
+  letter-spacing: 1px;
+  margin: 0;
+  color: var(--neon, #22d3ee);
+}
+
+/* ── Ô số ─────────────────────────────────────────────────────────────── */
+
+.hangO {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.o {
+  border: 1px solid var(--vien, #24303f);
+  padding: 8px 10px;
+  background: var(--nen-2, #0e141d);
+}
+
+.oNhan { font-size: 10px; letter-spacing: 1px; color: var(--mo, #7b8494); }
+.oGt   { font-size: 19px; margin-top: 2px; }
+.oPhu  { font-size: 11px; color: var(--mo, #7b8494); margin-top: 2px; }
+
+/* ── Khối + bảng ──────────────────────────────────────────────────────── */
+
+.khoi {
+  border: 1px solid var(--vien, #24303f);
+  padding: 10px 12px;
+  margin: 12px 0;
+  background: var(--nen-2, #0e141d);
+  overflow-x: auto;
+}
+
+.khoiTieuDe {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--mo, #7b8494);
+  margin: 10px 0 6px;
+  font-weight: 600;
+}
+.khoiTieuDe:first-child { margin-top: 0; }
+
+.luoi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.bang { border-collapse: collapse; width: 100%; }
+.bang th,
+.bang td {
+  border-bottom: 1px solid var(--vien, #24303f);
+  padding: 4px 6px;
+  text-align: left;
+  vertical-align: top;
+}
+.bang th { font-size: 10px; letter-spacing: 1px; color: var(--mo, #7b8494); font-weight: 600; }
+.phai { text-align: right; }
+
+/* ── Điều hướng ───────────────────────────────────────────────────────── */
+
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin: 14px 0 6px; }
+.dayCuaSo { display: flex; gap: 4px; margin-left: auto; }
+
+.tab {
+  background: transparent;
+  color: var(--mo, #7b8494);
+  border: 1px solid var(--vien, #24303f);
+  padding: 5px 10px;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: 1px;
+}
+.tab:hover { color: var(--chu, #d8dee9); }
+
+.tabChon {
+  color: var(--nen, #04070d);
+  background: var(--neon, #22d3ee);
+  border-color: var(--neon, #22d3ee);
+}
+
+.duongDan { margin: 8px 0; }
+
+.chip {
+  background: var(--nen-2, #0e141d);
+  color: var(--chu, #d8dee9);
+  border: 1px solid var(--neon, #22d3ee);
+  padding: 2px 8px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.lienKet {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--neon, #22d3ee);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+}
+
+/* ── Trạng thái + biểu đồ ─────────────────────────────────────────────── */
+
+.mo   { color: var(--mo, #7b8494); font-size: 11px; }
+.loi  { color: var(--do, #f87171); }
+.moc  { color: var(--mo, #7b8494); font-size: 11px; margin: 0 0 10px; }
+.chan { margin-top: 24px; border-top: 1px solid var(--vien, #24303f); padding-top: 8px; }
+
+/* Cột SVG thuần — không thư viện biểu đồ nào lọt vào cửa admin. */
+.bieuDo {
+  width: 100%;
+  height: 56px;
+  display: block;
+  margin-bottom: 10px;
+}
+.bieuDo rect { fill: var(--neon, #22d3ee); }
+
+/* Thanh phễu — hình duy nhất cần cho câu hỏi "rơi ở đâu". Vuông, không bo góc (§XI). */
+.thanh {
+  display: block;
+  height: 10px;
+  min-width: 1px;
+  background: var(--neon, #22d3ee);
+}
+
+/* ── CHIỀU PHIÊN BẢN (founder 31/08) ─────────────────────────────────────────
+ * Dải này CỐ Ý chiếm chỗ và cố ý chói: nó nói mặt đang xem dựng trên bao nhiêu
+ * trận của phiên bản nào. Trước khi có nó, mọi tỷ lệ ở đây gộp 21 bộ luật khác
+ * nhau mà không một pixel nào nói ra điều đó. */
+.dai {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  border: 1px solid var(--vien, #24303f);
+  background: var(--nen-2, #0e141d);
+  padding: 8px 10px; margin: 0 0 12px;
+  font-size: 11px; letter-spacing: 1px;
+}
+.daiNhan { color: var(--mo, #7b8494); }
+.daiVer  { color: var(--neon, #22d3ee); }
+/* Mẫu mỏng: KHÔNG ẩn con số (mùa 0.0 ẩn hết thì mặt trắng trơn) — chỉ chặn
+ * việc đọc nó như một kết luận. */
+.daiMong { color: var(--vang, #fbbf24); }
+.daiChet { color: var(--do, #f87171); }
+.chonVer {
+  background: var(--nen, #04070d); color: var(--chu, #d8dee9);
+  border: 1px solid var(--vien, #24303f); padding: 3px 6px; font: inherit;
+}
+.hangChet td { color: var(--do, #f87171); opacity: .75; }

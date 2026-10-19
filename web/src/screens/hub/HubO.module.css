@@ -1,0 +1,121 @@
+/*
+ * RUỘT CÁC Ô THÔNG TIN CỦA HUB (Tài chính · Mùa) — mỗi ô chỉ TÊN + MỘT số hoặc icon, chi tiết dồn vào lớp trượt. Chung cho
+ * phần vẽ ở gói chính (`Hub.tsx`: Mùa · chỗ giữ sẵn) và chunk nạp trễ (`HubTaiChinh.tsx`) — một bản CSS, không lệch nhau.
+ * Bám demo CHỐT; màu chỉ token (vai: lam = bấm được · vàng = tiền · tím nhạt = nhãn · xám = còn lại).
+ */
+.nhan {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--tk-label);
+  letter-spacing: 0.16em;
+  color: var(--violet-soft);
+}
+
+.soTo {
+  /* SỐ TO (40 px): ở cỡ này `--elsh` 1 + `--elgr` 1,4 của cả app hiện ra từng ô vuông rời (số trông như bị rây). Demo CHỐT dùng nét liền —
+     đặt lại HAI biến cho riêng khối số (KHÔNG 0: `ELSH` 0 làm Handjet vẽ rỗng — tokens.css). `*` đọc lại biến nên con (`small`) theo. */
+  --elsh: 2;
+  --elgr: 1;
+  margin-top: 8px;
+  font-size: var(--tk-hero);
+  line-height: 0.9;
+  color: var(--text-title);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.soTo small { margin-left: 2px; font-size: var(--tk-body); color: var(--text-muted); }
+.tien { color: var(--gold); }
+/* CHỖ GIỮ SẴN: cùng khung với số thật, nên khi dữ liệu về không khối nào nhảy; gạch nói "chưa có", không phải số 0 (D62). */
+.cho { color: var(--tk-dim); }
+.duoi {
+  display: block;
+  font-size: var(--tk-label);
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Dải 7 ngày chi: cột cuối (hôm nay) vàng đậm, sáu cột trước nhạt. Cột 0 vẫn có vạch 4 %. */
+.cot {
+  display: flex;
+  gap: 4px;
+  flex: 1 1 auto;
+  min-height: 40px;
+  max-height: 120px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+.cot > span {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--tk-dim);
+  text-align: center;
+}
+.cot i {
+  display: block;
+  background: color-mix(in srgb, var(--gold-amber) 32%, transparent);
+  box-shadow: var(--o-vien);
+}
+.cot > span:last-child { color: var(--gold); }
+.cot > span:last-child i { background: var(--gold-amber); }
+
+/* Thanh ô nấc: hũ gom tới mức · việc tuần · phần tiền đã đi. `--so-nac` do người vẽ đặt. */
+.nac {
+  display: grid;
+  grid-template-columns: repeat(var(--so-nac, 4), 1fr);
+  gap: 3px;
+  margin-top: 8px;
+}
+.nac i {
+  height: 10px;
+  background: rgba(93, 114, 144, 0.25);
+  box-shadow: var(--o-vien);
+}
+.nac i.xong { background: var(--violet-soft); }
+
+.chip {
+  /* Founder 11/10 (góp ý vùng ngón cái): ĐIỂM DANH là dải hết bề ngang ô, cao 48 px, đáy ngang hàng VÀO TRẬN — không còn nhãn nhỏ lệch góc. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-height: 48px;
+  gap: 6px;
+  margin-top: auto;
+  padding: 4px 8px;
+  font-size: var(--tk-label);
+  letter-spacing: 0.1em;
+  border: 1px solid color-mix(in srgb, var(--gold-amber) 50%, transparent);
+  color: var(--gold-amber);
+}
+.chip.xong { border-color: var(--border-idle); color: var(--tk-dim); }
+
+.iconGiua {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  margin: auto 0;
+  color: var(--text-muted);
+  font-size: var(--tk-label);
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+/* Lỗi tải: nói rõ + nút thử lại — không im, không số 0 giả. */
+.loi {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  margin: auto 0;
+  font-size: var(--tk-label);
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-align: center;
+}
+.loi b { color: var(--lose-soft); font-weight: 600; letter-spacing: 0.1em; }

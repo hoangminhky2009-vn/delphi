@@ -1,0 +1,1573 @@
+/*
+ * MÀN SHOP — CUỘN DỌC TỰ NHIÊN (founder 02/08).
+ *
+ * ⚠ Bản gốc là "trọn 1 khung, KHÔNG CUỘN" với `overflow: hidden` làm chốt
+ * chặn — đúng ở thời shop chỉ có 40 đầu + 172 tài sản + 172 chiến thuật +
+ * 134 danh mục = 542px. Từ đó shop mọc thêm: 6 mã × panel mốc, lệnh khống,
+ * bảng gắn/đổi đích, sức căng, nút CHỐT VÒNG… — nội dung vượt xa một khung,
+ * và `overflow: hidden` biến "vừa khung" thành "bị CẮT không xem được 6 loại
+ * tài sản" (founder: "không lướt lên xuống được, khá khó chịu").
+ *
+ * Nay: thân shop CUỘN; hai thứ neo tại chỗ là ĐẦU MÀN (`.dau` sticky top —
+ * nút ✕ và số vòng không trôi mất) và nút CHỐT VÒNG (`.nutChotShop` sticky
+ * bottom — hành động chính không bao giờ phải đi tìm).
+ */
+
+/*
+ * ── CHUYỂN CẢNH MỞ / ĐÓNG (D68 §3) ────────────────────────────────────────
+ *
+ * Shop là một lớp phủ TOÀN MÀN. Không có chuyển cảnh thì nó thay cả màn hình
+ * trong một khung hình, và mắt mất phương hướng — người chơi phải đọc lại header
+ * để biết mình đang ở đâu. Một nhịp 180ms là đủ để não bám được "cùng một chỗ,
+ * vừa mở ra thêm một lớp".
+ *
+ * ⚠ CHỈ `transform` + `opacity`. Shop có hàng chục thẻ; animate bất cứ thứ gì
+ * bắt tính lại bố cục là tính cho toàn bộ chúng, mỗi khung hình.
+ * ⚠ Thời lượng `.phuDong` phải khớp `SHOP_DONG_MS` trong TSX — có test canh.
+ *
+ * ⚠ `steps()` CHỨ KHÔNG `cubic-bezier` — §XI luật 3, và file này `composes` lớp
+ * pixel nên khai lại một nhịp mượt là GHI ĐÈ IM LẶNG luật đó (bản đầu của khối
+ * này dính đúng vậy, `web/tests/pixel_nguyen_thuy` bắt được). Chuyển động pixel
+ * nhảy theo nấc; mượt là ngôn ngữ của vector.
+ */
+.phu {
+  animation: shopVao 180ms steps(6, end) both;
+  position: fixed;
+  inset: 0;
+  /*
+   * ⚠ KẸP THEO KHUNG APP — sửa lỗi founder chụp được 27/07 trên desktop.
+   *
+   * Cả app nằm trong cột `--shell-width: 390px` (AppShell), nhưng overlay này
+   * `position: fixed` nên THOÁT khỏi cột đó và trải hết viewport. Trên máy
+   * 1920px, cột lưới = ~630px, thẻ `aspect-ratio: 3/4` phình theo thành ~840px
+   * mỗi lá → lưới 2 hàng tràn khỏi `.muc` (overflow visible) và ĐÈ LÊN mục
+   * LÕI CHIẾN THUẬT — đúng tấm ảnh founder gửi. Trên điện thoại (≤390px) thì
+   * `min()` không đổi gì cả.
+   */
+  width: min(100%, var(--shell-width));
+  margin-inline: auto;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, #0b0818 0%, #06040f 100%);
+  /*
+   * ⭐ D321 (13/09) — HẾT CUỘN. Founder bấm demo bố cục mới: *"tôi vẫn phải lướt
+   * lên lướt xuống và phần ở giữa đang hơi trống"*. Thân shop nay là BỐN TẦNG
+   * cố định: đầu · nỉ (`.ni`, flex:1 — lấp hết chỗ còn lại) · hàng chip · hàng
+   * hành động. Cuộn là dấu hiệu có một bản sao đang chiếm chỗ (dải ĐANG GIỮ
+   * kể lại thứ cọc chip trên lá đã nói; khối TAY kể lại thứ ô cược đã nói).
+   * Máy thấp hơn 700px thì riêng `.ni` được cuộn — xem @media cuối khối.
+   * Chú thích cũ (02/08 "phải cuộn được") KHÔNG còn đúng từ D321.
+   */
+  overflow: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;   /* cuộn hết shop không kéo lây trang trận phía sau */
+}
+
+/* Đóng: chạy ngược nhịp vào. Component tự nuốt 180ms rồi mới gỡ khỏi cây. */
+.phuDong {
+  animation: shopRa 180ms steps(5, end) both;
+}
+
+/*
+ * Trượt lên 12px + mờ. KHÔNG scale: shop chứa lưới pixel, mà scale không nguyên
+ * làm pixel nhoè đúng thứ §XI cấm — cạnh phải sắc ở mọi khung hình.
+ */
+@keyframes shopVao {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes shopRa {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(10px); opacity: 0; }
+}
+
+/*
+ * Tiết kiệm chuyển động: bỏ hẳn hai nhịp. Component cũng đã đóng NGAY ở nhánh
+ * này (không chờ 180ms) — hai chỗ phải cùng chiều, nếu không thì người bật
+ * reduced-motion nhìn shop đứng im 180ms rồi biến mất, tệ hơn cả có hoạt ảnh.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .phu,
+  .phuDong {
+    animation: none;
+  }
+}
+
+/*
+ * ══════════════════════════════════════════════════════════════════════════
+ * MÀN NGANG — shop THÔI CHE, đứng thành panel bên phải (founder 04/08)
+ * ══════════════════════════════════════════════════════════════════════════
+ *
+ * ⭐ ĐÂY MỚI LÀ PHẦN MANG GIÁ TRỊ CỦA MÀN NGANG, không phải việc giãn ra cho
+ * thoáng. Trên điện thoại, mở shop là CHE HẾT — người chơi phải nhớ bản đồ
+ * trong đầu rồi mới quyết mua. Trên màn rộng thì thẻ, map và dải đối thủ đứng
+ * cạnh nhau, nên quyết định mua có BỐI CẢNH.
+ *
+ * ⚠ Và chính vì nó đổi lượng thông tin người chơi thấy, nó là một BIẾN CỦA
+ * HÀNH VI — đó là lý do mỗi vòng nộp lên đều mang cờ `bo_cuc` vào `events`
+ * (xem `web/src/lib/bo_cuc.ts`). Ship panel mà quên cờ là làm hỏng vĩnh viễn
+ * mọi phép so sánh hành vi của mùa 0.0.
+ *
+ * ⚠ NGƯỠNG 900px PHẢI KHỚP `NGUONG_NGANG_PX` trong `lib/bo_cuc.ts`. Hai ngưỡng
+ * lệch nhau thì cờ nói một đằng màn hình hiện một nẻo — hỏng im lặng, và chỉ lộ
+ * ra ở tầng phân tích nhiều tháng sau. Có test khoá hai số này bằng nhau.
+ *
+ * Dưới 900px KHÔNG một dòng nào ở trên bị đụng: điện thoại giữ nguyên lớp phủ.
+ */
+@media (min-width: 900px) {
+  .phu {
+    /* Neo mép PHẢI của khung trận (trần 1100px, canh giữa) thay vì mép màn hình:
+       dán vào mép một màn 27 inch thì shop cách bản đồ cả gang tay. */
+    inset: 0 auto 0 50%;
+    margin-inline: 0;
+    transform: translateX(calc(min(1100px, 100vw - 24px) / 2 - 100%));
+    width: min(420px, 38vw);
+    border-left: 1px solid rgba(139, 92, 246, 0.32);
+    /* Nền đục hơn một chút vì nay nó đứng CẠNH nội dung chứ không đè lên. */
+    background: linear-gradient(180deg, #0b0818 0%, #06040f 100%);
+  }
+}
+
+/* ── Đầu màn ─────────────────────────────────────────────────────────────── */
+.dau {
+  position: sticky;   /* neo đầu khi cuộn — ✕ và số vòng không trôi mất (02/08) */
+  top: -8px;          /* bù đúng padding-top của .phu để dán sát mép */
+  z-index: 3;
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+  align-items: center;
+  height: 40px;
+  margin: -8px -8px 0;
+  padding: 8px 8px 4px;
+  background: #0b0818;   /* sticky đè lên nội dung cuộn nên phải có nền đặc */
+}
+
+.dauVong {
+  padding: 4px 9px;
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  border-radius: 0;
+  color: var(--violet-soft);
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+/* Flex vì dòng này có thể mang icon ổ khoá 16px đứng cạnh chữ 10,5px. */
+.dauNhip {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+  align-items: center;
+  color: var(--gold-amber, var(--gold-amber));
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+}
+
+/* ⚠ Ba nút của màn này (`nutDong`, `nutRoll`, `ganO`) nay đều là nút pixel dùng
+   chung. KHÔNG khai lại `transition` / `transform` / `box-shadow` bên dưới —
+   composes đặt lớp pixel vào TRƯỚC, khai lại là ghi đè im lặng. */
+.nutDong {
+  composes: nut from '@/styles/pixel.module.css';
+  width: 34px;
+  height: 34px;
+  border-color: rgba(226, 232, 240, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  color: rgba(226, 232, 240, 0.9);
+  font-size: 15px;
+}
+
+/* ── Hai mục shop ────────────────────────────────────────────────────────── */
+.muc {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 6px;
+  height: 172px;
+}
+
+/*
+ * Mục TÀI SẢN — lưới 2 hàng nên KHÔNG dùng chiều cao cứng 172px của `.muc`.
+ *
+ * ⚠ Founder 02/08: "vòng nào có chọn chiến thuật thì tài sản bị che mất
+ * không đổi được" — thủ phạm là bản cũ `flex-shrink: 1` + `overflow: hidden`
+ * (chiến lược "co và cắt" của thời shop KHÔNG cuộn: màn ngắn + vòng lõi thì
+ * mục này tự cắt hàng 2 để không đè mục dưới). Từ khi shop CUỘN ĐƯỢC (D47),
+ * co-và-cắt hết lý do tồn tại mà vẫn chạy — hàng VÀNG/USD/TPCP biến mất
+ * đúng các vòng lõi. Nay: chiếm đủ chiều cao thật, cả shop cuộn.
+ */
+.mucCao {
+  height: auto;
+  flex-shrink: 0;
+}
+
+/* Mục chưa tới lượt: mờ nhưng VẪN ĐỌC ĐƯỢC. Làm mờ ≠ giấu — thông tin vẫn
+   hiện vô điều kiện, không nằm sau thao tác nào (D26/R1). */
+.mucKhoa {
+  opacity: 0.42;
+  filter: saturate(0.4);
+}
+
+.mucDau {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+  align-items: baseline;
+  height: 22px;
+}
+
+.mucTen {
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.mucPhu {
+  flex: 1;
+  color: var(--text-muted, rgba(148, 163, 184, 0.9));
+  font-size: 9px;
+}
+
+.nutRoll {
+  composes: nut from '@/styles/pixel.module.css';
+  padding: 3px 10px;
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(251, 191, 36, 0.1);
+  color: var(--gold-amber, var(--gold-amber));
+  font-weight: 800;
+  font-size: 10px;
+}
+
+.nutRoll:disabled {
+  border-color: rgba(148, 163, 184, 0.28);
+  background: transparent;
+  color: rgba(148, 163, 184, 0.55);
+}
+
+.hangThe {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.hangThe > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/*
+ * Lưới cho mục TÀI SẢN — 6 mã (spec 01 §4). Ba cột × hai hàng.
+ *
+ * `minmax(0, 1fr)` chứ không phải `1fr`: giá trị mặc định của grid item là
+ * `min-width: auto`, nên một lá có chữ dài sẽ tự nong cột ra và đẩy vỡ hàng —
+ * đúng lớp lỗi đã gặp ở BetBar hôm 26/07 (D27), chỉ khác là ở trục kia.
+ */
+.luoiThe {
+  position: relative;   /* D540 — neo PHIẾU LỆNH */
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+  /* ⭐ QUẦY BÀI (31/08) — mặt nỉ thứ hai: chỗ lá được CHIA ra. Cùng lý lẽ
+     an toàn với `.map` — chữ đều nằm trong lá, không nằm trên mặt này. */
+  padding: 6px;
+  background:
+    var(--felt-det-ban),
+    radial-gradient(120% 100% at 50% 0%, var(--felt-sang), var(--felt) 75%);
+  /* Mép bàn hai nấc — một cái bàn thật đọc ra là bàn nhờ có MÉP, không nhờ vân.
+     blur = 0 ⇒ đây là VẬT chứ không phải ánh sáng (§XI luật 2). */
+  box-shadow: inset 0 0 0 1px var(--felt-vien), inset 0 0 0 3px rgba(0, 0, 0, 0.26);
+}
+
+/*
+ * ⚠⚠ LÓT ĐỤC DƯỚI TỪNG LÁ — cùng lớp lỗi đã bắt ở `MarketMap.khung`, nhưng ở
+ * đây NẶNG HƠN vì có HAI đường rò chồng nhau:
+ *   1. lá chưa đủ tiền chạy `opacity: .4`;
+ *   2. nền lá bản thân nó là gradient NỬA TRONG SUỐT (rgba .13 → …), nên kể cả
+ *      lá sáng rõ opacity 1 vẫn cho nền dưới ăn lên.
+ * ⇒ Dán nỉ vào là sáu lá tài sản ám lục — thấy rõ trên stack: lá BTC/VÀNG/USD
+ * xanh rêu, trong khi hai lá chiến thuật ngay dưới (KHÔNG nằm trên nỉ) vẫn đúng
+ * màu. Đây là lý do một mặt bàn có màu KHÔNG BAO GIỜ là "thêm một dòng nền":
+ * nó đi qua mọi thứ trong suốt nằm trên nó.
+ */
+.luoiThe > * {
+  background: var(--bg-page);
+}
+
+/*
+ * ── CHIA BÀI SO LE (founder 11/08) ────────────────────────────────────────
+ *
+ * Lá đáp xuống LẦN LƯỢT thay vì hiện cùng một khung hình. Đó là toàn bộ khác
+ * biệt giữa "màn hình vừa refresh" và "người ta vừa chia bài cho tôi".
+ *
+ * `--i` do TSX đổ vào (thứ tự lá trong hàng). `adTheVao` bay từ +46px bên
+ * phải — đúng hướng nút ⟳ đổi bài, nên nguồn chia bài đọc ra được.
+ *
+ * ⚠ TRẦN TỔNG ĐỘ TRỄ ~360ms: tối đa 6 lá × 60ms. Chia bài lâu hơn thế là bắt
+ * người chơi CHỜ trong một vòng đang chạy đồng hồ (D38) — hoạt ảnh ăn mất
+ * chính thứ nó tô điểm.
+ * ⚠ Chỉ `transform` + `opacity` (D68). 8 lá là dư xa dưới trần 48 phần tử.
+ */
+/*
+ * ⚠⚠ `.laVao.laVao` — LỚP NHÂN ĐÔI LÀ CỐ Ý, VÀ NÓ SỬA MỘT LỖI IM LẶNG.
+ *
+ * `composes` sinh ra HAI tên lớp trên cùng phần tử: `_laVao_` và `_adTheVao_`.
+ * Lớp thứ hai khai `animation:` dạng RÚT GỌN, mà shorthand RESET mọi longhand
+ * nó không nêu — gồm `animation-delay`. Và `motion.module.css` nằm SAU trong
+ * bundle, nên nó thắng: đo trên stack thật 23/08, cả 6 lá đều
+ * `animation-delay: 0s`. Tức nhịp "CHIA BÀI SO LE" của D78 đã CHẾT — sáu lá bay
+ * vào cùng một lúc, đúng thứ D78 dựng ra để chữa.
+ * Nhân đôi lớp đẩy độ ưu tiên lên (0,2,0) > (0,1,0) ⇒ thắng bất kể thứ tự file.
+ */
+.laVao {
+  composes: adTheVao from '../../styles/motion.module.css';
+}
+.laVao.laVao {
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /*
+   * `backwards` của adTheVao giữ lá TÀNG HÌNH suốt thời gian trễ — tắt animation
+   * mà quên chỗ này là lá không bao giờ hiện ra. Ép hiện thẳng.
+   */
+  .laVao { animation: none; opacity: 1; transform: none; }
+}
+
+/*
+ * Dòng hẹn lõi chiến thuật (TFT-style) — thay cho cả khối CHIẾN THUẬT bị xám.
+ * Một dòng 10px, không viền đậm: nó là lời hẹn, không phải một mục để nhìn chằm.
+ */
+.henLoi {
+  flex-shrink: 0;
+  padding: 5px 9px;
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+  color: var(--text-dim, #94a3b8);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+/* ── Cảnh báo xung đột ───────────────────────────────────────────────────── */
+.canhBao {
+  flex-shrink: 0;
+  padding: 6px 9px;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  border-radius: 0;
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--lose-tag);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+/* ── Danh mục của mình ───────────────────────────────────────────────────── */
+.kho {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 6px;
+  height: 134px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(139, 92, 246, 0.22);
+}
+
+.khoDau {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+/*
+ * DANH MỤC — bê nguyên giao diện thẻ của khối "BỘ BÀI CỦA BẠN" cũ.
+ *
+ * Founder 20/07: "hai cái chẳng khác gì nhau và việc giữ nó ở đấy chỉ làm phần
+ * danh mục trong shop trở lên thừa thãi khi UI-UX không đẹp bằng phần Bộ bài
+ * của bạn".
+ *
+ * Đúng: lượt trước tôi gỡ khối cũ đi rồi GIỮ cái lưới ô vuông tự bịa trong
+ * shop — tức là vứt bản đẹp, giữ bản xấu. Nay ngược lại: giữ bản có artwork
+ * thật, hai nhóm tách bằng vạch dọc, và bỏ hẳn lưới cũ.
+ */
+.khoHai {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  align-items: start;
+  min-height: 0;
+}
+
+.vline {
+  align-self: stretch;
+  width: 1px;
+  background: rgba(139, 92, 246, 0.32);
+}
+
+.nhomNhan {
+  margin-bottom: 5px;
+  color: var(--text-muted);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-align: center;
+}
+
+.pcards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+}
+
+.pc {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 62px;
+  height: 84px;
+  padding: 3px;
+  border: 1.5px solid var(--bd);
+  border-radius: 0;
+  background: linear-gradient(168deg, var(--gl), rgba(8, 6, 20, 0.95));
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.pcArt {
+  display: block;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 0;
+}
+
+.pcArt > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Huy hiệu CẤP — stack tới 3 bản nên phải hiện SỐ, không dùng ký hiệu ² nữa. */
+.pcCap {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  padding: 0 4px;
+  border-radius: 0;
+  background: rgba(251, 191, 36, 0.9);
+  color: #1a1206;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.trong {
+  color: var(--text-muted);
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+/* Máy thấp (360×640): rút chiều cao hai mục shop, danh mục giữ nguyên vì nó
+   là thứ người chơi phải đọc để quyết có dồn thêm hay không. */
+@media (max-height: 700px) {
+  .muc { height: 142px; }
+  .kho { height: 118px; }
+
+  /*
+   * ⚠⚠ VÁ 04/08 — ĐO TRÊN CHÍNH CHROME CỦA FOUNDER, KHÔNG PHẢI SUY TỪ ẢNH.
+   *
+   * Founder chụp panel shop chữ chồng chữ ở màn ngang. Chẩn đoán ĐẦU của tôi
+   * sai: tôi đổ cho panel rộng ra (420px) làm thẻ cao quá `.muc { 172px }`, và
+   * vá bằng một luật đặt ở đầu file. Đo lại bằng `getComputedStyle` trên máy
+   * thật thì ra chuyện khác hẳn:
+   *
+   *     ô cao 172px · nội dung 435px · TRÀN 263px
+   *     cửa sổ 1280 × 551  ⇒  RƠI VÀO ĐÚNG MEDIA QUERY NÀY
+   *
+   * Nguyên nhân thật: `.mucCao` (mục TÀI SẢN — lưới 6 lá, HAI HÀNG) khai
+   * `height: auto` chính vì nó không vừa một hàng. Nhưng khối `max-height`
+   * này đứng SAU nó trong file và đặt lại `height: 142px` cho MỌI `.muc` —
+   * `.mucCao` không có gì để tự vệ, nên hai hàng thẻ bị nhét vào 142px và
+   * phần thừa TRÀN ĐÈ xuống LÕI CHIẾN THUẬT rồi DANH MỤC.
+   *
+   * ⇒ Không phải lỗi màn RỘNG mà là lỗi màn THẤP: bất cứ cửa sổ nào dưới
+   * 700px chiều cao đều dính, kể cả trước khi có màn ngang. Điện thoại dọc
+   * (~800px) không dính — nên nó sống sót tới tận hôm nay.
+   *
+   * ⚠ BÀI HỌC VỀ THỨ TỰ: `.mucCao { height: auto }` nằm ở dòng ~337, khối này
+   * ở ~381. Cùng độ đặc hiệu thì luật SAU thắng — nên một override đúng ý
+   * nhưng đặt sai chỗ là một luật KHÔNG LÀM GÌ. Bản vá đầu của tôi mắc đúng
+   * lỗi đó, và nó im lặng: build sạch, không cảnh báo, chỉ có màn hình vẫn vỡ.
+   */
+  .mucCao { height: auto; }
+}
+
+/* Nhãn thay chỗ nút roll ở mục TÀI SẢN. Hiện rõ là KHOÁ CÓ LÝ DO, không phải
+   nút hỏng — 3 lá tài sản chung cả bàn là nguồn của cơ chế tranh mua. */
+.khongRoll {
+  padding: 3px 9px;
+  border: 1px dashed rgba(148, 163, 184, 0.4);
+  border-radius: 0;
+  color: rgba(148, 163, 184, 0.75);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ── D3 — GẮN THẺ VÀO MÃ ──────────────────────────────────────────────────
+   Hiện NGAY DƯỚI hai mục thẻ, tức đúng chỗ mắt vừa rời khi chọn xong thẻ.
+   Không đặt trong hộp riêng phải mở: attachment là một phần của quyết định mua,
+   tách ra thành bước hai là người chơi quên mất mình chưa gắn. */
+.ganKhung {
+  border: 1px solid var(--violet);
+  border-left-width: 3px;
+  background: rgba(139, 92, 246, .08);
+  padding: var(--pad-block);
+  margin-top: var(--gap-item);
+}
+
+.ganDau {
+  font-size: var(--fs-label);
+  letter-spacing: .08em;
+  color: var(--violet);
+  margin-bottom: var(--gap-tight);
+}
+
+.ganHang {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-tight);
+}
+
+.ganO {
+  composes: nut from '@/styles/pixel.module.css';
+  padding: 6px 10px;
+  background: transparent;
+  font-size: var(--fs-micro);
+  letter-spacing: .05em;
+}
+
+.ganChon {
+  border-color: var(--violet);
+  background: rgba(139, 92, 246, .2);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.ganChu {
+  margin-top: var(--gap-tight);
+  font-size: var(--fs-micro);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ── v10 NAV — panel lệnh theo mốc ─────────────────────────────────────────
+   Nút mốc là NÚT thật (không gõ số — founder). Cùng ngôn ngữ pixel: vuông,
+   không bo, viền 1px. ALL-IN nổi hơn — nó là cú bấm dứt khoát, không phải
+   một nấc thường. */
+.lenhKhung {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  border: 1px solid rgba(34, 211, 238, 0.4);
+  background: rgba(34, 211, 238, 0.06);
+}
+
+.lenhDau {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--text-dim, #94a3b8);
+}
+
+.lenhHang {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.lenhNhan {
+  width: 30px;
+  flex-shrink: 0;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim, #94a3b8);
+}
+
+/* ── NÚT MỐC — phải thấy như ĐẨY CHIP, không như chọn ô trong biểu mẫu ────
+   Founder 04/08: *"thao tác đi vốn (25-50-75-allin) cảm giác như đặt lệnh bảng
+   điện tử chứ không giống chơi game bài"*. Chữa bằng ba thứ, không thêm luật:
+
+   1. Nút LÚN khi bấm rồi BẬT lại — có phản lực, tay biết mình vừa làm gì.
+   2. Chỉ chạy `transform` (+ `background-color` lúc nghỉ, không phải mỗi khung
+      hình). Đây là ranh giới mượt/giật trên máy tầm trung: animate width/height
+      hay box-shadow là bắt trình duyệt tính lại bố cục MỖI KHUNG HÌNH.
+   3. ALL-IN nặng hơn hẳn ba nút kia. Trước đây nó chỉ là nút thứ tư trong hàng
+      — mà đó là nước đi đổi đời hoặc ra đê, không được trông như một lựa chọn
+      ngang hàng với 25%. */
+.nutMoc {
+  padding: 5px 9px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  border-radius: 0;
+  background: rgba(15, 23, 42, 0.85);
+  color: #e2e8f0;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  /* `transform` tách riêng khỏi `background-color`: cú lún phải NHANH (bấm là
+     thấy ngay), còn màu thì được phép thong thả. Một transition chung ép cả hai
+     đi cùng tốc độ và cú bấm mất độ đanh. */
+  transition: transform 60ms ease-out, background-color 160ms ease-out,
+              border-color 160ms ease-out;
+  touch-action: manipulation; /* bỏ trễ 300ms của trình duyệt di động */
+}
+
+.nutMoc:active:not(:disabled) {
+  transform: translateY(2px) scale(0.94);
+  background: rgba(34, 211, 238, 0.22);
+  border-color: rgba(34, 211, 238, 0.9);
+}
+
+.nutMoc:disabled { opacity: 0.35; cursor: default; }
+
+.nutMocAll {
+  padding: 5px 12px;
+  border-color: rgba(251, 191, 36, 0.8);
+  border-width: 2px;
+  color: var(--gold-amber);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: rgba(251, 191, 36, 0.1);
+}
+
+.nutMocAll:active:not(:disabled) {
+  /* Lún SÂU hơn nút thường: nước đi nặng thì phản lực cũng phải nặng. */
+  transform: translateY(3px) scale(0.9);
+  background: rgba(251, 191, 36, 0.35);
+  border-color: var(--gold-amber);
+}
+
+/* Máy người dùng xin ít chuyển động thì bỏ cú lún, GIỮ đổi màu — vẫn phải có
+   phản hồi "tôi vừa bấm trúng", chỉ là không nhún nhảy. */
+@media (prefers-reduced-motion: reduce) {
+  .nutMoc { transition: background-color 120ms ease-out; }
+  .nutMoc:active:not(:disabled),
+  .nutMocAll:active:not(:disabled) { transform: none; }
+  .lenhTag { animation: none; }
+}
+
+.lenhDaXep {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/*
+ * CHIP ĐÁP XUỐNG BÀN (founder 08/08: "giống chơi bài và đặt chip hơn là đặt
+ * lệnh trên app chứng khoán"). Tag lệnh mới không hiện tức thì nữa — nó BAY
+ * từ phía nút mốc lên và đáp phịch: rơi 8px, nảy 1px, đứng. `steps()` vì đây
+ * là HÌNH CỦA VẬT trên lưới pixel (chuẩn motion của repo); chỉ transform +
+ * opacity nên không bắt tính lại bố cục (luật khung hình D68).
+ */
+@keyframes chipDap {
+  0% { transform: translateY(9px); opacity: 0; }
+  55% { transform: translateY(-1px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Lệnh đã xếp = tag bấm-để-xoá: một cử chỉ, không cần nút ✕ riêng 8px. */
+.lenhTag {
+  animation: chipDap 150ms steps(3) both;
+  padding: 3px 6px;
+  border: 1px solid rgba(34, 211, 238, 0.6);
+  border-radius: 0;
+  background: rgba(34, 211, 238, 0.12);
+  color: var(--accent-bright);
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+
+/* Lỗi cú khớp — một dòng, chiếm trọn hàng, đọc được ngay cạnh nút vừa bấm. */
+.khopLoi {
+  flex-basis: 100%;
+  font-size: 9px;
+  color: var(--lose);
+}
+
+/* Tile danh mục BẤM ĐƯỢC (founder 01/08) — reset button về hình dạng .pc. */
+.pcBam {
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  background: transparent;
+}
+.pcBam:hover { filter: brightness(1.25); }
+.pcGia { color: var(--neon-vang, #ffd54a); font-size: 10px; }
+
+/* Chú thích hàng CƯỢC GIÁ XUỐNG (founder 02/08 — "trừ tiền" trông như mất
+   tiền; phải nói rõ đó là tiền cọc). Chữ nhỏ, vàng nhạt, không tranh chỗ nút. */
+.khongChu {
+  margin-top: 4px;
+  padding: 5px 6px;
+  border-left: 2px solid rgba(251, 191, 36, 0.6);
+  background: rgba(251, 191, 36, 0.07);
+  color: var(--text-bright, #e2e8f0);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* Nút chốt vòng NGAY TRONG SHOP (founder 01/08). Sticky đáy từ 02/08 — shop
+ * nay cuộn được, hành động chính không bao giờ phải cuộn xuống tìm. */
+.nutChotShop {
+  position: sticky;
+  bottom: calc(-8px - env(safe-area-inset-bottom, 0px));
+  z-index: 3;
+  font: inherit;
+  letter-spacing: 1px;
+  padding: 10px;
+  border: 1px solid var(--accent-bright, #a78bfa);
+  background: #17102e;   /* sticky đè nội dung cuộn — nền phải ĐẶC, không bán trong */
+  color: inherit;
+  cursor: pointer;
+  width: 100%;
+}
+.nutChotShop:hover { box-shadow: 0 0 8px rgba(139, 92, 246, 0.6); }
+
+/* ── §7.4 — XEM TRƯỚC: danh mục sau lệnh + giá của lệnh ─────────────────
+   Không bo góc (§XI pixel UI, lint canh). Bảng ba cột cố định để hai con số
+   thẳng hàng — lệch cột thì mắt phải dò, mà đây là thứ phải đọc trong 2 giây. */
+.xemTruoc {
+  flex-shrink: 0;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--border-idle);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.xtDau {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.xtBang { list-style: none; margin: 0; padding: 0; }
+
+.xtHang {
+  display: grid;
+  grid-template-columns: 1fr auto 14px auto;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.xtTienMat { border-top: 1px solid var(--border-idle); margin-top: 3px; padding-top: 3px; }
+.xtTen { color: var(--text-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.xtTruoc { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.xtMuiTen { color: var(--text-muted); text-align: center; }
+.xtLen { color: var(--win); font-variant-numeric: tabular-nums; }
+.xtXuong { color: var(--lose); font-variant-numeric: tabular-nums; }
+
+.xtPhi {
+  margin-top: 5px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-idle);
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.xtPhi b { color: var(--gold-amber); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BÀN CƯỢC (16/08, thiết kế 07) — phần trận nav. Hàng chip nằm ở
+   HangChip.module.css, cọc ở CocChip.module.css; đây là phần còn lại của vỏ:
+   đầu màn, TAY, chip bay, nhắn nổi, cú ALL-IN toàn màn, khoá lúc chốt.
+   Chỉ transform/opacity/màu (D68) · steps() cho hình của vật (§XI luật 3).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* VÍ · NAV ở đầu màn (thay số vòng — bộ đếm vòng đã có ngoài bàn). */
+.dauVi {
+  color: var(--text-dim, #bfd1e6);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.dauVi b { color: var(--text-max, #f2f8ff); font-size: 13px; letter-spacing: 0; }
+
+/* Cọc KHOÁ lúc CHỐT (dealer gạt cược): cả lá sáng lên một nhịp — 3 nấc. */
+@keyframes laKhoa {
+  0%, 100% { filter: none; }
+  50% { filter: brightness(1.6) saturate(1.4); }
+}
+/*
+ * ⚠⚠ `.laKhoa.laKhoa` — CÙNG LÝ DO NHÂN ĐÔI NHƯ `.laVao` NGAY TRÊN, và ở đây
+ * cái giá đắt hơn: nhịp này CHƯA TỪNG CHẠY MỘT KHUNG HÌNH NÀO.
+ *
+ * `.laKhoa` chỉ được dán KÈM `.laVao` (ShopManHinh.tsx: `${s.laVao} ${s.laKhoa}`),
+ * mà `.laVao` composes `adTheVao` — và lớp composed đứng SAU trong bundle. Ba
+ * lớp, một thuộc tính `animation`, lớp cuối thắng ⇒ bấm CHỐT VÒNG thì các lá
+ * đang KHOÁ CỌC không nhấp một cái nào. Không lỗi, không test đỏ, class CÓ mặt
+ * trên DOM — đúng hình dạng "cơ chế trang trí" khó thấy nhất.
+ */
+.laKhoa.laKhoa { animation: laKhoa 300ms steps(3, end) 1; }
+
+/*
+ * Rung toàn shop MỘT nhịp nhẹ khi đặt chip. Chỉ transform.
+ * ⚠ `rungManh` (320ms, biên độ 5px, dành riêng cho cú ALL-IN) ĐÃ GỠ 22/08 cùng
+ * cụm toàn màn: rung cả shop là hiệu ứng của MÀN, không phải của cái nút —
+ * đúng thứ founder bảo bỏ. Cú bấm ALL-IN nay mạnh lên ở chính nút (`allDang`
+ * + `allXung` trong HangChip.module.css) và ở cột chip vàng bay lên lá.
+ */
+/* ⚠⚠ CẢ KEYFRAMES LẪN LỚP `.rungNhe` ĐÃ GỠ 23/08 — cú rung nay do WAAPI lái từ
+   `rungShop()` trong ShopManHinh.tsx (lý do dài ghi tại đó: dán lớp lên `.phu`
+   là ghi đè `animation: shopVao` của CHÍNH lớp phủ, nên mỗi cú đặt chip làm cả
+   màn chạy lại hoạt ảnh VÀO).
+   ⚠ Gỡ luôn keyframes chứ không giữ "cho chắc": WAAPI đọc mảng bước trong JS,
+   không đọc `@keyframes`, nên để lại đây là dựng đúng cái bẫy CSS-CHẾT mà cả
+   đợt rà này đi gỡ. */
+
+/* TAY — dựng trên khối GẮN (.ganKhung/.ganO) sẵn có. */
+.tay { flex-shrink: 0; }
+.tayPhu { float: right; color: var(--text-muted); font-size: 9px; letter-spacing: 0.06em; }
+.tayLa { display: flex; align-items: center; gap: 6px; }
+/*
+ * ⚠ `.tayTinh` GỠ 24/08 — lá lõi đã cầm NAY LÀ NÚT (mở tờ giải thích). Lớp
+ * này khai `cursor: default; box-shadow: none` tức nói thẳng "đừng bấm", và
+ * đó chính là thứ đóng luôn cửa ĐỌC LẠI TÁC DỤNG mà founder đi tìm.
+ */
+/* Bọc lá GHIM + dấu (!) — dấu là sibling absolute nên cần mốc neo. */
+.tayBoc { position: relative; display: inline-flex; }
+/*
+ * Dấu (!) của lá GHIM: nhỏ hơn bản trên quầy (22px) vì hàng TAY chật ở 375px.
+ * ⚠ TÊN PHẢI KHÁC `.tayHoi` — lớp đó ĐÃ CÓ cho nút `?` ở header khối TAY
+ * (dòng ~994). Bản đầu của khối này trùng tên và bị cái sau trong file ĐÈ SẠCH,
+ * im lặng — đúng lớp lỗi vừa đi vá cả ngày, bắt được bằng cách đọc className
+ * thật trên stack chứ không bằng đọc code.
+ */
+.tayHoiLa {
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+}
+.tayArt { display: block; flex: none; width: 28px; height: 21px; overflow: hidden; }
+.tayArt > svg { display: block; width: 100%; height: 100%; }
+.tayTen { color: var(--text-dim, #bfd1e6); }
+.tayTen small { color: var(--text-muted); font-size: 8px; letter-spacing: 0; }
+.tayDich { color: var(--accent-soft, #a5f3fc); }
+/* Đang cầm để chạm: nhấc lên, viền vàng — cùng cử chỉ với chip đang cầm. */
+.tayCam {
+  border-color: var(--gold-amber, var(--gold-amber));
+  background: rgba(251, 191, 36, 0.14);
+  color: var(--gold-amber, var(--gold-amber));
+  transform: translate(0, calc(-1 * var(--px-do-day)));
+}
+.tayKhong { border-color: rgba(248, 113, 113, 0.7); background: rgba(248, 113, 113, 0.1); color: #fecaca; }
+
+/* CHIP BAY — sinh ngoài cây React, tự huỷ; z-index trên shop (70). */
+.bay {
+  position: fixed;
+  z-index: 80;
+  width: 15px;
+  height: 5px;
+  background: var(--accent, #22d3ee);
+  box-shadow: inset 1px 1px 0 rgba(248, 250, 252, 0.4), inset -1px -1px 0 rgba(10, 6, 24, 0.75);
+  pointer-events: none;
+}
+.bayVang { background: var(--gold-amber, var(--gold-amber)); }
+.bayLai { background: var(--win, var(--win)); }
+.bayLo { background: var(--lose, var(--lose)); }
+
+/* NHẮN NỔI — một dòng, tự tắt sau ~1s (cha gỡ). */
+/* D374 — trục X rời khỏi `transform` (xem `.thongBao`): keyframe nay chỉ còn trượt DỌC. */
+@keyframes hienTB {
+  0% { opacity: 0; transform: translateY(8px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(0); }
+}
+/*
+ * ⭐ D374 — KẸP THEO CỘT APP. Cùng cái bẫy đã cắn `.phu` (27/07), `.viSaoTam` và khung thoại
+ * Oracle: `fixed` + `left: 50%` căn giữa theo VIEWPORT, mà app sống trong cột `--shell-width`
+ * — trên desktop hai tâm ấy không trùng nhau nên lời báo trôi ra khỏi shop.
+ * `width: fit-content` giữ nguyên hình dạng "vừa đúng chữ" mà `nowrap` đang dựng.
+ */
+.thongBao {
+  position: fixed;
+  z-index: 85;
+  bottom: 150px;
+  right: 0;
+  left: 0;
+  width: fit-content;
+  max-width: min(92vw, var(--shell-width));
+  margin-inline: auto;
+  padding: 8px 14px;
+  border: 1px solid var(--gold-amber, var(--gold-amber));
+  background: rgba(11, 8, 24, 0.96);
+  color: var(--gold-amber, var(--gold-amber));
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: hienTB 1000ms steps(6, end) both;
+}
+
+/*
+ * ⚠⚠ CỤM ALL-IN TOÀN MÀN ĐÃ GỠ HẲN 22/08 (chỉ thị founder: *"xóa hiệu ứng all
+ * in đi, chỉ cải tiến hiệu ứng khi bấm nút all in thôi, không còn hiện all in
+ * toàn màn hình nữa"*). Ở đây từng có:
+ *   · `.loe`   — lớp phủ vàng `inset:0` loé 400ms trên toàn viewport;
+ *   · `.dauAll`— chữ "ALL-IN" 26px đóng dấu giữa màn 780ms, che bàn.
+ * KHÔNG dựng lại. Cú ALL-IN nay nói bằng CHÍNH cái nút (HangChip: `.allDang`
+ * lún–bật + `.allXung` vòng xung lan ra từ mép nút) + 8 chip vàng bay lên lá +
+ * một nhịp rung nặng. Người chơi vẫn biết mình vừa dồn hết, mà bàn không bị che.
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* `.rungNhe` gỡ khỏi đây cùng lớp: `rungShop()` tự kiểm reduced-motion. */
+  .laKhoa, .laKhoa.laKhoa { animation: none; }
+  .thongBao { animation: none; opacity: 1; transform: translate(-50%, 0); }
+  .tayCam { transform: none; }
+}
+
+/* ── CAM KẾT GIỮ (khoá tài sản) — D104 ─────────────────────────────────────
+   Một lựa chọn cạnh cú mua, không phải một thao tác bắt buộc. Trạng thái ĐANG
+   CAM KẾT phải đọc được từ xa: đây là lời hứa duy nhất trong trò mà bẻ thì mất
+   tiền, nên nó không được trông giống một dòng chú thích. §XI: 0 bo góc. */
+.camKet {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 7px 9px; margin: 6px 0 0;
+  border: 2px solid var(--vien, #2b3242);
+  background: var(--nen-2, #12161f);
+}
+.camKetChay {
+  border-color: var(--vang, #f0b429);
+  background: color-mix(in srgb, var(--vang, #f0b429) 10%, var(--nen-2, #12161f));
+}
+.camKetNhan {
+  font-size: 12px; font-weight: 700; letter-spacing: 1px;
+  color: var(--vang, #f0b429);
+}
+.camKetPhu { font-size: 10px; color: var(--mo, #7b8494); line-height: 1.35; }
+.nutCamKet {
+  align-self: flex-start;
+  padding: 6px 10px;
+  border: 2px solid var(--vien, #2b3242);
+  background: transparent;
+  color: var(--chu, #d8dee9);
+  font: inherit; font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  cursor: pointer;
+}
+.nutCamKet:hover { border-color: var(--vang, #f0b429); }
+.nutCamKetBat {
+  border-color: var(--vang, #f0b429);
+  color: var(--vang, #f0b429);
+  background: color-mix(in srgb, var(--vang, #f0b429) 14%, transparent);
+}
+
+/* ── v34 — VAI CỦA BẠN (thẻ vai ngay dưới header shop) ─────────────────── */
+/*
+ * VAI — THU CÒN MỘT NÚT (founder 23/08). Khối cũ là lưới hai cột luôn bày đủ
+ * QUYỀN + GIÁ, ăn ~140px mỗi lần mở chợ để nói một điều không bao giờ đổi.
+ * Nay: một hàng nút; chi tiết nằm dưới và chỉ dựng khi người chơi chạm.
+ */
+.vaiKhoi {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vaiNut {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 3px 8px;
+  border: 1px solid rgba(250, 204, 21, 0.45);
+  border-radius: 0;
+  background: rgba(250, 204, 21, 0.06);
+  color: var(--gold-amber, var(--gold-amber));
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.vaiMo { color: var(--text-dim, #94a3b8); font-size: 9px; }
+
+/* Nút `?` của khối TAY — nhỏ, đứng cuối hàng tiêu đề, không tranh chỗ với lá. */
+.tayHoi {
+  margin-left: auto;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-dim, #94a3b8);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.vaiChiTiet {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  padding: 5px 9px;
+  border: 1px solid rgba(250, 204, 21, 0.28);
+  background: rgba(250, 204, 21, 0.04);
+  font-size: 10px;
+  line-height: 1.35;
+}
+.vaiTen {
+  color: #fde68a;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.vaiNhan { color: var(--text-dim, #94a3b8); letter-spacing: 0.04em; }
+.vaiChu { color: var(--text-body, #e2e8f0); }
+.vaiGia { color: var(--lose-tag); }
+
+/* Mandate bị chạm: chuỗi đang xếp sẽ bị từ chối — nói trước khi bấm CHỐT. */
+.mandateLoi {
+  flex-shrink: 0;
+  padding: 6px 9px;
+  border: 1px solid rgba(248, 113, 113, 0.55);
+  border-radius: 0;
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--lose-tag);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+/* ── 22/08 — đồng hồ trên header shop (shop che mặt đồng hồ chính) ──────── */
+.dauGio {
+  flex-shrink: 0;
+  min-width: 34px;
+  padding: 1px 5px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  border-radius: 0;
+  color: var(--text-body, #e2e8f0);
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+.dauGioGap { border-color: rgba(244, 63, 94, 0.7); color: #fda4af; }
+.dauGioKhan { border-color: #f43f5e; background: rgba(244, 63, 94, 0.22); color: #fecdd3; }
+.dauGioHet { border-color: rgba(148, 163, 184, 0.6); color: var(--text-dim, #94a3b8); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * D321 (13/09) — BỐN TẦNG KHÔNG CUỘN · MẶT NỈ · TẤM TRƯỢT
+ * Demo chốt: docs/ui-ux/demo/shop-khung-co-dinh.html (bản 3) — demo chỉ định
+ * hình BỐ CỤC (founder: "đừng áp nguyên si"); token màu/đo vẫn của tệp này.
+ * Bố cục: .dau (đầu, vai chip nằm trong) · .ni (nỉ, flex:1 — lá kỹ năng chia
+ * lên trên, sáu ô cược lấp phần còn lại) · HangChip (rack chip + hành động).
+ * Hệ phụ (ngân hàng) = tấm trượt từ đáy (.tam), không còn chiếm chiều cao.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── NỈ — lấp hết chỗ còn lại giữa đầu màn và rack; KHÔNG cuộn ── */
+.ni {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+/* Máy thấp (iPhone SE 667px): sáu ô + hai lá không đủ chỗ ⇒ riêng nỉ được
+   cuộn. Đây là phao, không phải bố cục — trên 700px không bao giờ kích hoạt. */
+@media (max-height: 700px) {
+  .ni { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+}
+
+/* ── VAI CHIP nằm trong đầu màn; chi tiết QUYỀN/GIÁ thả xuống dưới đầu ──
+   DOM giữ nguyên (data-testid vai-cua-ban · nút aria-expanded · .vaiChiTiet)
+   để `vai_ui.test` và telemetry không đổi — chỉ đổi chỗ đứng và cách mở. */
+.dau .vaiKhoi {
+  position: relative;
+  flex: 0 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.dau .vaiNut {
+  padding: 3px 7px;
+  max-width: 112px;
+}
+/* Tiêu đề vòng co theo chỗ còn lại, không đẩy VÍ xuống dòng — đo 13/09 trên 375px. */
+.dau .dauNhip {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.dau .dauVi {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.dau .vaiNut .vaiTen {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dau .vaiChiTiet {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 6;
+  width: min(300px, calc(var(--shell-width) - 32px));
+  padding: 8px 10px;
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  background: linear-gradient(178deg, #0a1524, #060c17);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
+}
+
+/* ── MỤC TÀI SẢN = SÁU Ô CƯỢC lấp phần còn lại của nỉ ──
+   `.muc` gốc ghim 172px cho MỘT hàng; `.mucCao` trước là height:auto (cuộn).
+   Trong nỉ: mục tài sản là thứ phình, hai hàng chia đều, GameCard bỏ tỉ lệ 3/4
+   để lấp ô — art của nó `flex:1; min-height:0` nên co giãn được (docstring
+   GameCard.module.css). Vòng không có lá kỹ năng ⇒ ô tự cao hơn = "nhấn bằng
+   cỡ" thành hệ quả bố cục, không phải luật riêng. */
+.ni .mucCao {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+}
+.ni .luoiThe {
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.ni .luoiThe > * {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+/*
+ * ⚠ 13/09 — GameCard BỌC nút trong `.wrap`; con trực tiếp của lưới là cái bọc, còn
+ * NÚT `.card` bên trong mới là thứ giữ tỉ lệ 3/4. Bản đầu chỉ mở tỉ lệ ở cái bọc ⇒
+ * bọc cao 250px, nút vẫn 149px, thừa ra một khoảng đen dưới mỗi lá (founder:
+ * "chừa ra mấy khoản đen làm gì?"). Phải mở ở NÚT. Chọn theo thuộc tính `data-card`
+ * chứ không theo tên lớp vì lớp của GameCard băm theo module — (0,3,1) thắng `.card`.
+ * ⚠⚠ D427 — PHẢI là `button[data-card]`, không phải mọi `button`: khung lá còn hai nút
+ * con khác là (!) và MUA. Chọn `button` trơn thì (!) ăn `height: auto` ⇒ 22×15 thay vì
+ * 22×22 ở cả sáu lá (không ai để ý), còn ở hàng lõi ngay dưới thì nặng hơn nhiều.
+ */
+.ni .luoiThe > * > button[data-card] {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+/*
+ * ⭐⭐ D374 (founder 21/09) — LÁ KỸ NĂNG THÔI BỊ KÉO MÉO.
+ *
+ * Nguyên văn: *"các thẻ chiến thuật sau khi chia chip cũng bị lỗi tỷ lệ như trên hình"*.
+ *
+ * Gốc: `.hangThe` là flex row, con `flex: 1 1 0` + `align-items: stretch`, còn mục này có
+ * NGÂN SÁCH CHIỀU CAO cố định (172px, D321 "hết cuộn"). Hai ràng buộc ấy ép lá thành một
+ * hình chữ nhật NẰM NGANG — rộng bằng nửa nỉ, cao 172px — trong khi tranh trong lá vẽ cho
+ * khung 3/4 ĐỨNG. Trên điện thoại nửa nỉ ≈ 180px nên méo ít; trên pane ngang ≈ 300px thì
+ * méo hẳn, và đó đúng là tấm ảnh founder gửi.
+ *
+ * Vá: ở hàng này lá lấy CHIỀU CAO làm gốc rồi suy chiều rộng theo tỉ lệ thật. Ngân sách
+ * 172px không đổi, bố cục bốn tầng không cuộn cũng không đổi — chỉ thôi kéo giãn một chiều.
+ *
+ * ⚠⚠ D427 (founder 26/09, ảnh shop vòng lõi) — BẢN D374 CHỌN MỌI `button` CON của khung lá,
+ * và D374 tự ghi là "CHƯA SOI BẰNG MẮT". Khung lá có BA nút: thân lá, (!) và MUA. Đo ở
+ * 375px: (!) lẽ ra 22×22 ở góc thành ô 108×144 đè lên lá; MUA thành ô 53×71 chồng lên;
+ * thân lá bị ép còn 60×74. Sống trên prod từ D374.
+ * Vá lại:
+ *   · chỉ thân lá (`button[data-card]`) giữ tỉ lệ; (!) và MUA về đúng lớp của GameCard;
+ *   · khung lá thành lưới hai hàng [lá · MUA] cao trọn hàng, rồi CO VỀ ĐÚNG BỀ RỘNG LÁ —
+ *     để (!) (absolute, góc khung) nằm đúng góc lá; cặp lá căn giữa hàng.
+ * Đo lại ở 375px: lá 83×111 (3/4), MUA 83×27 ngay dưới, (!) 22×22 ở góc lá.
+ * Không dùng `@container` để suy bề rộng — lý do ở `DongHoVong.module.css` (D401).
+ */
+.ni .hangThe {
+  justify-content: center;
+}
+.ni .hangThe > * {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  height: 100%;
+}
+.ni .hangThe > * > button[data-card] {
+  width: auto;
+  height: 100%;
+  justify-self: center;
+  aspect-ratio: 3 / 4;
+}
+
+/* Mục lá kỹ năng giữ ngân sách 172px như cũ — nó là hàng ngang hai lá. */
+.ni .muc:not(.mucCao) {
+  flex: 0 0 auto;
+}
+
+/* ── TAY GỌN — một hàng: lá kỹ năng đang cầm + khống + ? + nút ngân hàng ──
+   Trước là khối `ganKhung` có đệm/lề riêng, ăn ~60px kể cả khi trống. */
+.ni .tayGon {
+  flex: 0 0 auto;
+  margin-top: 0;
+  padding: 3px 6px;
+  min-height: 28px;
+}
+.ni .tayGon .ganDau {
+  margin-bottom: 2px;
+  align-items: center;
+}
+.nutTam {
+  composes: nut from '@/styles/pixel.module.css';
+  margin-left: auto;
+  padding: 2px 8px;
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(251, 191, 36, 0.08);
+  color: var(--gold-amber, var(--gold-amber));
+  font-weight: 800;
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+}
+.nutTam[aria-expanded="true"] {
+  background: rgba(251, 191, 36, 0.2);
+}
+
+/* ── TẤM TRƯỢT hệ phụ (ngân hàng) — từ đáy shop lên, dưới tờ (!) (z 80) ──
+   VẬT ⇒ `steps()` (A11.18); chỉ transform/opacity. */
+.tamNen {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: rgba(3, 5, 12, 0.6);
+}
+.tam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
+  max-height: 72%;
+  overflow-y: auto;
+  padding: 8px 10px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(34, 211, 238, 0.4);
+  background: linear-gradient(178deg, #0a1524, #060c17);
+  animation: tamLen 180ms steps(5, end) both;
+}
+@keyframes tamLen {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.tamKeo {
+  width: 36px;
+  height: 3px;
+  margin: 0 auto 8px;
+  background: rgba(93, 114, 144, 0.35);
+}
+.tamDong {
+  composes: nut from '@/styles/pixel.module.css';
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px;
+  border-color: rgba(34, 211, 238, 0.5);
+  background: rgba(34, 211, 238, 0.1);
+  color: var(--accent-bright, #67e8f9);
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tam { animation: none; }
+}
+
+
+/* v55 — nút mở CHỢ TRAIT ở mép nỉ gỡ ở D430: chợ nay đứng ở chỗ hàng lõi (`ChoTrait.module.css`). */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * D432 — MÀN CHỌN riêng + BÀN CƯỢC gọn (founder 27/09: "Quá nhiều thứ trên 1 màn hình", phương án B)
+ * Bàn cược bỏ: tiêu đề thường trực · khối TAY rỗng · dòng hẹn lõi khung đứt · phụ đề mục tài sản · nhãn CHUNG BÀN ·
+ * dòng mời · dòng mẫu số chip · bảng DANH MỤC SAU LỆNH. Số sau lệnh in lên lá + VÍ; phí ở đầu hàng lệnh (HangChip).
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/* Tên vai vẫn nằm trong nút (tên truy cập được; bài vai_ui đọc textContent) nhưng không chiếm bề ngang — founder 23/08:
+   "chỉ còn 1 icon pixel … bấm vào để đọc". */
+.vaiTenAn {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Số SAU LỆNH: họ lam của cọc "đang xếp, chờ chốt" — cùng nghĩa, cùng màu. `.dauVi b` là (0,1,1) nên cần (0,2,0);
+   `.giaTriSau` đứng cạnh `gc.giaTri` của GameCard (khác tệp — thứ tự bundle không đoán được) nên nhân đôi lớp. */
+.dauVi .viSau { margin-left: 3px; color: var(--accent-bright, #67e8f9); }
+.giaTriSau.giaTriSau { color: var(--accent-bright, #67e8f9); }
+
+/* Hẹn lõi kế — thay dòng khung đứt "◆ LÕI CHIẾN THUẬT tiếp theo…": chữ mờ ở ô bên phải đầu mục TÀI SẢN, không khung. */
+.henLoiTag {
+  color: var(--text-dim, #94a3b8);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+/* Nút ◆ QUAY LẠI MÀN CHỌN — áo nút ĐỔI (vàng = việc riêng của vòng này), chữ nói đích + trạng thái lượt chọn. */
+.nutVeChon {
+  composes: nutRoll;
+  max-width: 62%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nutVeChonLech.nutVeChonLech {
+  border-color: var(--lose, #f87171);
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--lose, #f87171);
+}
+
+/* Hàng TRAIT ĐANG GIỮ trong TAY (founder 27/09: "hiện lõi đang nắm và trait đang giữ"). */
+.tayTrait { margin-top: 3px; }
+
+/* ── MÀN CHỌN ──────────────────────────────────────────────────────────────
+   Nỉ mang MỘT việc: lượt chọn đứng giữa, không căng hết chiều cao — khoảng thở quanh lá là chủ ý (màn này chỉ có một
+   quyết định, như màn chọn lõi của TFT). Lá lõi TO: 290px cho mục ⇒ lá ~172×229 ở 375px (vừa hai lá + khe trong 359px). */
+.niChon { justify-content: flex-start; gap: 10px; }
+/* Lượt chọn đứng GIỮA phần nỉ còn lại (dưới hàng TAY nếu có) — lề tự động chia đều khoảng thở trên/dưới. */
+.manChon {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  margin: auto 0;
+}
+.ni .manChon .muc {
+  flex: 0 0 auto;
+  height: 290px;
+}
+
+/* Đáy màn chọn — cùng áo rack bàn cược (dán đáy, nền đặc, an toàn đáy). ĐỔI LẠI bên trái (vàng), nút chính bên phải. */
+.dayChon {
+  composes: day from './HangChip.module.css';
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+.dayChon > button { min-height: 48px; }
+/* D526 — đáy màn chọn chỉ còn NÚT CHÍNH (hai nút ĐỔI vào trong khung lõi / chợ) ⇒ nó trải hết bề ngang. */
+.dayChon > .nutVaoBan { flex: 1 1 auto; }
+/*
+ * D526 — NÚT ĐỔI (lõi · trait), founder 05/10: *"Nút đổi trông lạc quẻ với UI-UX thế?"*. Bản trước mượn `nutRoll` — chip viền
+ * vàng mờ 10px của thanh đầu mục, đứng giữa mặt nỉ đọc ra như một nhãn web. Nay theo luật HUD của app (memory "bàn đấu là game
+ * HUD"): HÀNH ĐỘNG = TẤM NỔI có bóng pixel cứng, LAM = thứ bấm được (khối lam ĐẶC vẫn chỉ của nút chính — nút này lam VIỀN), VÀNG =
+ * tiền ⇒ giá đứng riêng thành một mẩu đồng xu vàng. Lún "cạch cạch" bằng steps (VẬT — A11.18). Không `composes: nut` của pixel
+ * (bẫy thứ tự bundle: lớp gốc thắng màu).
+ */
+.doiLoiDuoi { display: flex; justify-content: center; padding-top: 10px; }
+.doiLoiDuoi > .nutDoi { min-width: 64%; }
+.nutDoi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--accent-bright);
+  background: var(--surface-inset);
+  border: 2px solid var(--accent);
+  border-radius: 0;
+  box-shadow: 0 4px 0 0 #0e7490;
+  cursor: pointer;
+  transform: translateY(0);
+  transition: transform 70ms steps(2, end), box-shadow 70ms steps(2, end);
+}
+.nutDoi:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 0 transparent; }
+.nutDoi:focus-visible { outline: 3px solid var(--accent-bright); outline-offset: 3px; }
+.nutDoi:disabled {
+  cursor: default;
+  color: var(--text-muted);
+  border-color: var(--border-idle-strong);
+  box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.45);
+}
+@media (hover: hover) and (pointer: fine) { .nutDoi:hover:not(:disabled) { filter: brightness(1.15); } }
+@media (prefers-reduced-motion: reduce) { .nutDoi { transition: none; } }
+/* Mũi xoay — khối, không phải ký tự chữ nhỏ. */
+.nutDoiXoay { font-size: 16px; line-height: 1; }
+/* Giá: mẩu VÀNG (tiền) tách khỏi chữ lam; MIỄN PHÍ cũng nằm trong mẩu này để mắt luôn tìm giá ở một chỗ. */
+.nutDoiGia {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  font-size: 11px;
+  color: var(--gold-amber);
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(251, 191, 36, 0.55);
+}
+.nutDoi:disabled .nutDoiGia { color: var(--text-muted); border-color: var(--border-idle-strong); }
+.nutDoiXu {
+  width: 9px;
+  height: 9px;
+  display: inline-block;
+  background: var(--gold-amber);
+  box-shadow: inset -2px -2px 0 0 #b7791f;
+}
+.nutVaoBan {
+  composes: nutChot from './HangChip.module.css';
+}
+.nutVaoBan:disabled { opacity: 0.55; cursor: default; }
+
+/*
+ * D432 — TÊN LÁ TÀI SẢN XUỐNG HAI DÒNG thay vì bị cắt ("CP CHỨNG KHOÁ…", "TRÁI PHIẾU MỸ" mất chữ đầu): nút lá mặc áo
+ * `nut` của pixel (không xuống dòng) và dấu (!) 22px đè góc trên-phải. Bỏ dòng tiếng Anh (D432) nên lá dư chỗ cho dòng
+ * thứ hai; đệm hai bên bằng nhau để tên vẫn căn giữa và né (!). Chọn TÊN = `div` đầu tiên trong thân lá (lớp của
+ * GameCard băm theo module — cùng cách D427 chọn thân lá bằng `button[data-card]`).
+ */
+.ni .luoiThe > * > button[data-card] > div:first-of-type {
+  padding-right: 18px;
+  padding-left: 18px;
+  white-space: normal;
+}
+
+/* D540 — PHIẾU LỆNH nổi trên lưới tài sản: thẻ ở hàng trên ⇒ phiếu đè nửa trên hàng dưới (mũi lên); thẻ hàng dưới ⇒ đè nửa dưới hàng trên. */
+.phieuNoi { position: absolute; left: 6px; right: 6px; z-index: 6; }
+/* ⚠ `.ni .luoiThe > *` (lá trên nỉ) ép mọi con của lưới `height: 100%` + flex + nền ⇒ phiếu phải thắng bằng độ ưu tiên ngang nó, không `!important`. */
+.ni .luoiThe > .phieuNoi, .luoiThe > .phieuNoi { display: block; height: auto; background: transparent; }
+.phieuDuoi { top: calc(50% + 6px); }
+/* ⚠ con định vị tuyệt đối của LƯỚI: chỉ đặt `bottom` thì hộp bị kéo giãn theo vùng lưới (đo 06/10: phiếu nhảy lên y −251) ⇒ neo `top` + dịch lên. */
+.phieuTren { top: calc(50% - 6px); transform: translateY(-100%); }
+
+/*
+ * ═══ D569 (founder 10/10) — SÁU LÁ THÔI LẤP CẢ NỈ ════════════════════════════
+ * Nguyên văn: *"Tên asset bé quá. Tỷ lệ phân bổ cũng ko đồng đều, kiểu đang bị kéo dài theo chiều dọc và cả màn hình
+ * full là ảnh, nên thu bớt diện tích để nơi hiển thị lõi/trait đang nắm và trạng thái danh mục, thẻ sự kiện đang lật"*.
+ * Trước: lưới `flex: 1` + hai hàng `1fr` ⇒ ở vòng 1 (tay trắng) mỗi lá ~111×320 trên 375px. Nay lá giữ tỉ lệ 3:4 (lưới
+ * cao theo bề rộng, không theo chỗ trống; 3:4 = khung art của lá, đo 375px: 111×148) và nỉ dành phần đầu cho TÌNH HÌNH + TAY — hai khối luôn có mặt, nên chiều cao
+ * lưới không đổi giữa các vòng. Khối này đứng CUỐI tệp: cùng độ ưu tiên với các luật `.ni .luoiThe` ở trên, sau thì thắng.
+ */
+.ni .mucCao { flex: 0 0 auto; }
+.ni .luoiThe {
+  flex: 0 0 auto;
+  grid-template-rows: none;
+  grid-auto-rows: auto;
+}
+.ni .luoiThe > * { height: auto; }
+.ni .luoiThe > * > button[data-card] {
+  flex: 0 0 auto;
+  aspect-ratio: 3 / 4;
+}
+/* Tên lá: 11,5px → 14px, vẫn xuống hai dòng (D432) và né dấu (!) bằng đệm hai bên bằng nhau. */
+.ni .luoiThe > * > button[data-card] > div:first-of-type {
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+/* ── TÌNH HÌNH: thẻ vừa lật ▸ ô sắp lật · lăng kính danh mục ── */
+.tinhHinh {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(8, 14, 26, 0.72);
+}
+.theLat {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+.theLatO {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 4px;
+  border: 1px solid var(--ho, rgba(148, 163, 184, 0.35));
+  background: rgba(0, 0, 0, 0.28);
+}
+.theLatArt {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  overflow: hidden;
+}
+.theLatArt > svg { display: block; width: 100%; height: 100%; }
+.theLatUp {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+.theLatChu {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.theLatChu small {
+  color: var(--text-muted);
+  font-size: var(--fs-micro);
+  letter-spacing: 0.08em;
+}
+.theLatChu b {
+  color: var(--ho, var(--text-body));
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+.theLatMui {
+  align-self: center;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+/* TAY tay trắng: một dòng nói lõi tới ở vòng nào (thay vì khối biến mất). */
+.tayTrong {
+  color: var(--text-muted);
+  font-size: var(--fs-meta);
+}

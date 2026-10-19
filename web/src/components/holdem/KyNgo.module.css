@@ -1,0 +1,245 @@
+/*
+ * KỲ NGỘ — §XI Modern Pixel UI: radius 0, không blur, không gradient.
+ *
+ * Chỉ animate `transform`/`opacity` (D68) và tôn `prefers-reduced-motion`.
+ * Màu mượn token sẵn có, KHÔNG bịa bảng màu mới cho một cơ chế mới — bảng màu
+ * của trò đang mã hoá HƯỚNG (xanh thuận · đỏ nghịch · tím phồng), thêm một họ
+ * màu nữa là làm hỏng phép đọc đó.
+ */
+.khoi {
+  border: 1px solid var(--accent, #22d3ee);
+  border-radius: 0;
+  background: rgb(0 0 0 / 35%);
+  padding: 8px;
+  display: grid;
+  gap: 8px;
+}
+
+.dau {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.nhan {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--accent, #22d3ee);
+}
+
+/*
+ * ⚠⚠ ĐỔI TÊN TỪ `.phu` (24/08) — VA CHẠM TÊN LỚP, và gốc của nó là MỘT TỪ ĐỒNG ÂM.
+ *
+ * Đây là PHỤ ĐỀ một dòng của chip kỳ ngộ, nó CẦN cắt cụt bằng ellipsis. Nhưng lớp
+ * phủ toàn màn ở cuối file cũng tên `.phu` — *phụ* (đề) và *phủ* (lớp) viết không
+ * dấu thành cùng một chuỗi. CSS Modules băm theo TÊN, nên cả hai rule dán lên CÙNG
+ * một lớp, và `white-space: nowrap` ở đây KHÔNG có ai tranh trong rule kia nên nó
+ * sống sót và **kế thừa xuống mọi đoạn chữ trong lớp phủ**: cả màn kỳ ngộ thành
+ * những dòng không xuống hàng, chạy quá mép phải rồi bị `overflow-x: hidden` (cũng
+ * từ rule này) CẮT CỤT giữa chữ. Founder chụp được trên máy thật, prod.
+ *
+ * ⚠ Không lỗi, không cảnh báo, `tsc` xanh, lint xanh — CSS hoàn toàn hợp lệ. Đây là
+ * họ lỗi cascade đã đốt cả D122 (`animation` bị lớp khác chiếm) và D123 (`.tayHoi`
+ * trùng tên), nay ở dạng nguy hiểm nhất vì nó ĐI XUYÊN qua kế thừa.
+ */
+.dauPhu {
+  font-size: 10px;
+  color: var(--text-dim, #7b8494);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dan {
+  display: grid;
+  gap: 6px;
+}
+
+/* Lá nhiệm vụ. `button` KHÔNG kế thừa màu chữ — khai tường minh (bài học D74). */
+.the {
+  appearance: none;
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  border: 1px solid var(--line, #24304a);
+  border-radius: 0;
+  background: rgb(255 255 255 / 3%);
+  color: var(--text-body, #e2e8f0);
+  cursor: pointer;
+  transition: transform 90ms steps(2), opacity 90ms linear;
+}
+
+.the:active { transform: translateY(1px); }
+
+.theChon {
+  border-color: var(--accent, #22d3ee);
+  background: rgb(34 211 238 / 12%);
+}
+
+.theDau {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.theTen {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+.theMoTa {
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--text-dim, #7b8494);
+}
+
+.theQua {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  border-top: 1px solid var(--line, #24304a);
+  padding-top: 4px;
+}
+
+.theQuaTen {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--win, #4ade80);
+}
+
+.theQuaMoTa {
+  font-size: 10px;
+  color: var(--text-dim, #7b8494);
+}
+
+.chu {
+  margin: 0;
+  font-size: 10px;
+  color: var(--text-dim, #7b8494);
+}
+
+/* ── Chip tiến độ ───────────────────────────────────────────────────────── */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px;
+  border: 1px solid var(--line, #24304a);
+  border-radius: 0;
+  background: rgb(0 0 0 / 30%);
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.chipXong { border-color: var(--win, #4ade80); }
+
+.chipTen {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent, #22d3ee);
+}
+
+.chipXong .chipTen { color: var(--win, #4ade80); }
+
+.chipSo {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-body, #e2e8f0);
+}
+
+.chipQua {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--win, #4ade80);
+}
+
+.chipPhu { color: var(--text-dim, #7b8494); }
+
+@media (prefers-reduced-motion: reduce) {
+  .the { transition: none; }
+  .the:active { transform: none; }
+}
+
+/* ── LỚP PHỦ KỲ NGỘ (16/08, doc 06 §12) — khuôn augment: tối bàn, ba lá to ── */
+.phu {
+  position: fixed;
+  inset: 0;
+  z-index: 66;               /* trên bàn (thanh hành động 45), dưới coach (80) */
+  width: min(100%, var(--shell-width, 390px));
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 10px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: rgba(4, 7, 13, 0.94);
+  overflow-y: auto;
+  animation: phuVao 180ms steps(6, end) both;
+}
+@keyframes phuVao { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.phuDau { display: flex; align-items: baseline; gap: 10px; }
+.phuNhan { font-size: 14px; font-weight: 800; letter-spacing: 0.2em; color: var(--accent, #22d3ee); }
+.phuHoi { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: var(--gold-amber, #fbbf24); }
+.phuDongHo { margin-left: auto; font-size: 10px; letter-spacing: 0.08em; color: var(--text-dim, #bfd1e6); font-variant-numeric: tabular-nums; }
+.phuChu { margin: 0; font-size: 10.5px; line-height: 1.45; color: var(--text-dim, #bfd1e6); }
+.phuDan { display: grid; gap: 8px; }
+/* Lá to: art icon 40 + tên + một mặt (nhiệm vụ | đặc quyền). button không kế thừa màu (D74). */
+.la {
+  appearance: none;
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  grid-template-rows: auto auto auto;
+  column-gap: 10px;
+  align-items: start;
+  width: 100%;
+  min-height: 108px;
+  padding: 10px;
+  border: 2px solid var(--border-idle, rgba(93, 114, 144, 0.3));
+  border-radius: 0;
+  background: linear-gradient(178deg, #0a1524, #060c17);
+  color: var(--text-body, #e8f2fc);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 rgba(10, 6, 24, 0.7);
+  transition: transform 90ms steps(2, end), border-color 120ms steps(2, end);
+}
+.la:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(10, 6, 24, 0.7); }
+.laLat { border-color: var(--accent, #22d3ee); }
+.laChon { border-color: var(--gold-amber, #fbbf24); background: rgba(251, 191, 36, 0.08); box-shadow: 0 0 0 1px var(--gold-amber, #fbbf24), 3px 3px 0 rgba(10, 6, 24, 0.7); }
+.laIcon { grid-row: 1 / 4; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border: 1px solid var(--border-accent, rgba(34, 211, 238, 0.4)); background: rgba(34, 211, 238, 0.06); }
+.laTen { font-size: 13px; letter-spacing: 0.08em; }
+.laMat { display: grid; gap: 2px; font-size: 10.5px; line-height: 1.4; color: var(--text-dim, #bfd1e6); }
+.laQuaTen { font-weight: 800; letter-spacing: 0.08em; color: var(--win, #4ade80); }
+.laQuaMoTa { color: var(--text-dim, #bfd1e6); }
+.laChan { font-size: 9px; letter-spacing: 0.1em; color: var(--text-muted, #93aac8); }
+.laChon .laChan { color: var(--gold-amber, #fbbf24); }
+.phuNut { display: flex; gap: 8px; margin-top: 4px; }
+.nutBoQua { flex: 1; padding: 10px; font-size: 11px; letter-spacing: 0.1em; font-weight: 700; }
+/* Thanh gọn trên bàn — thay panel 410px. */
+.thanh {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--accent, #22d3ee);
+  border-radius: 0;
+  background: rgb(0 0 0 / 35%);
+  color: var(--text-body, #e2e8f0);
+  text-align: left;
+  cursor: pointer;
+}
+.thanhChon { border-color: var(--gold-amber, #fbbf24); }
+.thanhChu { flex: 1; min-width: 0; font-size: 10px; color: var(--text-dim, #bfd1e6); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.thanhMo { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--accent, #22d3ee); }
+@media (prefers-reduced-motion: reduce) {
+  .phu { animation: none; }
+  .la, .la:active { transition: none; transform: none; }
+}

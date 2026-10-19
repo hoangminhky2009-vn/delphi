@@ -1,0 +1,208 @@
+/*
+ * DÂY CHUYỀN CHẤM ĐIỂM — chips × mult.
+ *
+ * Đây VỪA là bảng giải thích "vì sao" (yêu cầu cứng D26 §18.5) VỪA là kịch bản
+ * hoạt hình. Một dữ liệu, không dựng hai hệ thống.
+ *
+ * ĐÁP ÁN TRƯỚC, GIẢI THÍCH SAU: PnL hiện ngay, các mắt xích chạy sau. Không xây
+ * hồi hộp ở đây — hồi hộp nằm ở lật thẻ và TIN GIẢ.
+ */
+
+/*
+ * Cỡ chữ là HÌNH của vật → nhảy theo nấc. Trượt mượt từ 44px lên 66px đi qua
+ * hàng chục cỡ trung gian, mỗi cỡ là một lần trình duyệt hint lại nét chữ — nhìn
+ * ra đúng là "chữ đang phồng", không phải "con số vừa vỡ khuôn".
+ * `text-shadow` thì giữ mượt: đó là ĐỘ MẠNH của quầng, tức ánh sáng (luật 4).
+ */
+.tong {
+  padding: 10px;
+  font-size: 44px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  transition: font-size 300ms steps(4, end), text-shadow 300ms ease-out;
+}
+.lai { color: var(--win); }
+.lo { color: var(--lose); }
+/* VỠ KHUÔN khi cực đậm — giao diện trông như không chứa nổi con số */
+.voKhung {}
+
+.nhan {
+  padding: 8px 12px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.mx {
+  composes: adMatXich from '../../styles/motion.module.css';
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  padding: 9px 11px;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 12px;
+}
+/*
+ * Quầng màu hắt ra từ vạch trái — ÁNH SÁNG, nên giữ blur. Nhưng bỏ offset −8px:
+ * phép thử máy móc của luật 4 là NHÌN OFFSET, và một bóng lệch trái đọc thành
+ * "vật dày về bên trái", trong khi thứ này chỉ là màu thắng/thua rỉ ra không
+ * gian. Offset 0 nói đúng điều nó muốn nói, và hình mắt xích không đổi.
+ */
+.pos { border-left: 3px solid var(--win); box-shadow: 0 0 20px -12px var(--win); }
+.neg { border-left: 3px solid var(--lose); box-shadow: 0 0 20px -12px var(--lose); }
+/* Mắt xích NHÂN là đỉnh dây chuyền — to hơn, đậm hơn, có nền riêng.
+   Chuyển sắc giữ mềm: nó trải ngang cả bề rộng hàng (~370px) nên là NỀN hắt
+   sáng từ vạch trái, không phải bề mặt một núm nhỏ. Cắt cứng ở đây sẽ đẻ ra một
+   đường nối dọc giữa hàng, mắt đọc thành lỗi render. */
+.mul {
+  border-left: 3px solid var(--violet);
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.2), rgba(255, 255, 255, 0.03));
+  font-size: 14px;
+  font-weight: 800;
+}
+
+/* D336 — đơn vị của các dòng VÌ SAO, nhỏ và xám: nhãn phụ, không phải tiêu đề thứ hai. */
+.nhanPhu {
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/* D336 — PHẦN TIỀN CỦA BẠN theo mã: cùng khuôn một dòng VÌ SAO (vạch trái xanh/đỏ),
+   số là chip có icon đồng xu như dòng QUỸ VÒNG ở chân tấm. */
+.tienMa { margin-bottom: 4px; }
+.tienMaDong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  padding: 8px 11px;
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 12px;
+}
+.tienMaDong b {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+/* D400 — số nhuộm theo LOẠI khoản, cùng màu hộp chữ nổi (`KhoanNoi`): lãi xanh · lỗ đỏ · trượt giá cam (founder
+   23/09: *"Tách riêng dòng: Trượt giá … (màu đỏ/cam)"*). Chỉ dòng PHẦN TIỀN — dòng % giá trong VÌ SAO giữ nguyên. */
+.tienMaDong.pos b { color: var(--win); }
+.tienMaDong.neg b { color: var(--lose); }
+.truot { border-left: 3px solid var(--gold-flame); box-shadow: 0 0 20px -12px var(--gold-flame); }
+.tienMaDong.truot b { color: var(--gold-flame); }
+
+.chan {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(139, 92, 246, 0.32);
+}
+.quy {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+.delta { font-weight: 800; }
+
+.tinGia {
+  composes: adRung from '../../styles/motion.module.css';
+  margin: 8px 0;
+  padding: 14px;
+  border: 2px solid var(--lose);
+  border-radius: 0;
+  color: var(--lose);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+/* Hàng tiêu đề của tờ tin giả: lưới icon 16px và chữ 22px chỉ canh giữa được
+   với nhau bằng flex, `text-align` của khối cha không với tới. */
+.tinGiaDau {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+.tinGiaPhu {
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.6;
+}
+
+/* Chớp sáng toàn màn — dấu chấm câu cho cú ăn/mất đậm. Không bắt sự kiện chuột
+   nên không bao giờ chặn thao tác, kể cả lúc đang chạy. */
+.chop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+}
+
+/* Lớp nhận chạm để BỎ QUA dây chuyền (doc §6 bắt buộc có skip). */
+.boc {
+  display: contents;
+}
+
+/* Nhắc nhỏ, chỉ hiện khi đang diễn — hết diễn thì biến, không thành rác. */
+.nhacBoQua {
+  composes: doiMau from '@/styles/pixel.module.css';
+  align-self: flex-end;
+  padding: 2px 6px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--fs-micro);
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0.7;
+  cursor: pointer;
+}
+.nhacBoQua:hover { opacity: 1; color: var(--accent-bright); }
+
+/* ── MẮT XÍCH CỦA LÁ (08/08 lần 2) — nổi ngay trong VÌ SAO, không mục riêng ──
+   Founder chỉ đích danh dòng "Đòn Bẩy 2×" làm mẫu: mọi mắt xích thuộc một lá
+   chiến thuật nay ăn `.mul` (nền tím, chữ to đậm) + con số nhuộm thắng/thua. */
+.mulLai b { color: var(--win); }
+.mulLo b { color: var(--lose); }
+
+/*
+ * D88 — ỐNG KÍNH CON ĐƯỜNG. Một dòng, đứng yên (§XI: radius 0, không animation
+ * — cao trào của màn này là số tổng, ống kính là BỐI CẢNH đọc sau).
+ */
+.ongKinh {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 8px;
+  border: 1px solid var(--accent, #22d3ee);
+  border-radius: 0;
+  background: rgb(34 211 238 / 8%);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.okNhan {
+  letter-spacing: 0.12em;
+  color: var(--accent, #22d3ee);
+}
+
+.okSo {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-body, #e2e8f0);
+}

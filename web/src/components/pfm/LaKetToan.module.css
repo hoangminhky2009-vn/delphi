@@ -1,0 +1,77 @@
+/*
+ * LÁ KẾT TOÁN — xem `LaKetToan.tsx`. Chuyển động VẬT LÝ (lá lật có quán tính) ⇒ `cubic-bezier` nảy nhẹ, KHÔNG
+ * `steps()` (ranh D182). Chỉ `transform`. Không mã hex rời — chỉ biến đã có.
+ * ⚠ Bố cục HAI MẶT nằm trọn ở đây (một khuôn cho màn HŨ + thẻ NHÌN LẠI) — đừng tô thêm ở CSS của màn gọi.
+ */
+.la {
+  perspective: 900px;
+  margin-top: 10px;
+}
+
+.than {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform var(--nhip-lat-la, 560ms) cubic-bezier(0.34, 1.35, 0.64, 1);
+}
+.than.lat { transform: rotateY(180deg); }
+
+.mat,
+.lung {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  padding: 11px 12px 12px;
+  background: var(--surface-card);
+  border: 1px solid var(--gold);
+  box-shadow: var(--px-bong), inset 0 1px 0 rgba(255, 255, 255, .06);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--chu-sang);
+}
+.lung {
+  transform: rotateY(180deg);
+  border-color: var(--accent);
+}
+
+.nhan {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  color: var(--gold);
+}
+.lung .nhan { color: var(--accent); }
+
+.dieu { margin: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.dieu b { color: var(--gold); font-weight: 700; font-variant-numeric: tabular-nums; }
+.chac {
+  padding: 1px 6px 0 7px;
+  font-size: 11px;
+  letter-spacing: .8px;
+  white-space: nowrap;
+  color: var(--gold);
+  border: 1px solid rgba(253, 224, 71, .55);
+}
+.phu { margin: 6px 0 0; font-size: 12px; color: var(--chu-phu); }
+
+/* Kết quả: CHỮ TO, một màu cho cả TỚI lẫn CHƯA TỚI (A10 — không đỏ-xanh). */
+.ket {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  line-height: 1.15;
+  color: var(--accent-bright);
+}
+.dem {
+  margin: 7px 0 0;
+  padding-top: 6px;
+  border-top: 1px dashed var(--line-2);
+  font-size: 12px;
+  letter-spacing: .3px;
+  color: var(--chu-than);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .than { transition: none; }
+}

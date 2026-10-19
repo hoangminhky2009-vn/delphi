@@ -1,0 +1,223 @@
+/*
+ * MÀN ĐIỀU PHỐI BUỔI ĐO (D333) — ba tầng theo luật HUD 13/09, không viền riêng cho từng khối:
+ *   · chữ dẫn + nhãn = phẳng trên nền khung;
+ *   · TẠO BUỔI ĐO = tấm NỔI (bóng pixel) — thứ duy nhất tạo ra việc;
+ *   · mỗi BUỔI ĐO = giếng LÕM (bóng rơi vào trong) — bối cảnh để đọc.
+ * Màu theo vai (`styles/tokens.css`, không mã màu mới): lam chỉ ở thứ bấm được · vàng ở bậc "làm được"
+ * đúng như ba dấu kỹ năng trên THẺ · còn lại xám. Không xanh/đỏ: không có lời lỗ nào ở đây.
+ * Không animation — đây là màn đọc và quản lý, không phải màn chơi.
+ */
+.dan {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.phu {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.nhanKhoi {
+  margin: 0 0 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+}
+
+.nhanO {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+.soSang { color: var(--text-bright); }
+
+/* ── Tấm nổi: TẠO BUỔI ĐO ─────────────────────────────────────────────────── */
+.tao {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--surface-panel);
+  box-shadow: 3px 3px 0 rgba(10, 6, 24, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.chonDe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.de {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-accent-soft);
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.de:hover { border-color: var(--border-accent); }
+.deChon {
+  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.12);
+  color: var(--accent-soft);
+}
+
+/* ── Danh sách: mỗi buổi một giếng lõm ────────────────────────────────────── */
+.ds {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.ban {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 2px 7px rgba(0, 0, 0, 0.6);
+}
+
+.banDau {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.banNhan {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+
+.trangThai {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+.trangThaiMo { color: var(--text-dim); }
+
+.banMa {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+/* Mã bàn in TO: người điều phối đọc to cho cả phòng, hoặc chiếu lên bảng. */
+.ma {
+  font-family: var(--font-mono);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--text-max);
+  font-variant-numeric: tabular-nums;
+}
+
+.dem {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.dem b {
+  font-size: 15px;
+  color: var(--text-bright);
+  font-variant-numeric: tabular-nums;
+}
+.cham { color: var(--text-muted); }
+
+.hangNut {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ── Bức tranh nhóm ───────────────────────────────────────────────────────── */
+.nhom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.nangLuc {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nl {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nlTen {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--text-bright);
+}
+
+.khung {
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+.thanh {
+  display: flex;
+  height: 14px;
+  background: var(--surface-track);
+}
+.thanh i { display: block; flex-basis: 0; min-width: 0; }
+.vLamDuoc { background: var(--gold-amber); }
+/* "Chưa vững" = nửa vàng, đúng hình ô nửa-đầy của dấu kỹ năng. */
+.vChuaVung {
+  background: repeating-linear-gradient(90deg, var(--gold-amber) 0 3px, transparent 3px 6px);
+}
+.vChuaGap { background: transparent; }
+
+.nlSo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.nlSo b {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.soLamDuoc b { color: var(--gold-amber); }
+
+.phuongPhap {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 6px 0 0;
+  padding: 0 0 0 14px;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}

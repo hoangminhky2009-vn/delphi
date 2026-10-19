@@ -1,0 +1,434 @@
+/*
+ * BÀN TIỀN — chép từ demo đã chốt (A11.25). Mỗi khối dưới đây giữ nguyên chú thích gốc
+ * của demo ở những chỗ nó ghi lại một cái giá đã trả; đừng "dọn cho gọn".
+ */
+
+/* Mặt bàn NỔI lên khỏi trang, có MÉP sáng ở cạnh trên — đó là thứ khiến mắt đọc ra "một
+   tấm bàn đặt lên", chứ không phải "nền đổi màu tí". */
+/*
+ * ⚠⚠ GHIM ĐÁY — demo để `.day{flex:none}` trong một khung `height:100%` nên nó LUÔN nằm
+ * đáy màn; repo thì cả trang cuộn, nên phải `sticky` mới ra cùng hành vi. Không phải
+ * chuyện đẹp xấu: cả ngữ pháp "cầm tiền rồi chạm đích" dựa vào việc vùng bấm **không xê
+ * dịch giữa hai cú bấm liên tiếp**. Để nó cuộn theo nội dung là hỏng luồng ghi 2 chạm.
+ * ⚠ 65px là ĐO trên trình duyệt thật, không phải ước: `BottomNav` cao theo nội dung và
+ *   repo không có token chiều cao cho nó. `env()` cộng thêm cho máy có thanh gesture.
+ */
+.day {
+  position: sticky;
+  bottom: calc(65px + env(safe-area-inset-bottom, 0px));
+  z-index: 4;
+  flex: none;
+  margin: 12px -10px 0;
+  border-top: 2px solid var(--mep-ban);
+  background: var(--mat-ban);
+}
+.day[data-cam='co'] { border-top-color: var(--accent); }
+
+/* ── KHAY ─────────────────────────────────────────────────────────────────── */
+.khay {
+  /* Đúng demo bản 6 (`.khay`): cao CỐ ĐỊNH 44px — số TO bên trái, nhãn/tờ cầm bên phải; mặt bàn không cao thêm khi cầm tiền (luật D410). */
+  height: 44px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 11px;
+  border-bottom: 1px dashed rgba(93, 114, 144, .16);
+}
+/* TỔNG: chữ to vàng bên trái — chỉ ĐỌC. `.nhay` (gắn ở `bayTo`) làm số nhảy khi tờ chạm khay. */
+.tongSo { flex: none; font-size: 26px; font-weight: 400; color: var(--v-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.moi { margin-left: auto; padding-left: 8px; font-size: var(--tk-label, 12px); letter-spacing: .12em; color: var(--n-7); white-space: nowrap; }
+.toCam {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  /*
+   * ⚠ `position:relative` KHÔNG có trong demo và không đổi một pixel nào của hình — nó chỉ
+   * làm khay thành `offsetParent` của các chip, để `offsetLeft` đọc ra toạ độ TRONG NỘI
+   * DUNG khay (so thẳng được với `scrollLeft`). Demo đo bằng `getBoundingClientRect`; ta
+   * cần con số đo được ngoài trình duyệt để phép đếm tờ khuất có bài canh thật.
+   */
+  position: relative;
+  /*
+   * Mờ ở ĐẦU NÀO CÒN TỜ KHUẤT đầu ấy — mờ trái nghĩa là "sau lưng còn", mờ phải nghĩa là
+   * "phía trước còn". Hai biến do JS đặt nên chỉ cần MỘT luật, không tổ hợp lớp.
+   */
+  --mL: 0px;
+  --mR: 0px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--mL),
+      #000 calc(100% - var(--mR)), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 var(--mL),
+      #000 calc(100% - var(--mR)), transparent 100%);
+}
+.toCam::-webkit-scrollbar { display: none; }
+/* Tràn ⇒ con trỏ nói ra là kéo được. Đang kéo thì cấm bôi chữ, không thì mỗi cú kéo lại
+   quét xanh cả dải. */
+.toCam.tran { cursor: grab; }
+.toCam.keo { cursor: grabbing; user-select: none; }
+.toCam.keo * { pointer-events: none; }
+
+/* Ô "+N": đếm số tờ đang nằm ngoài khung.
+   ⚠ Nó là con của `.khay`, KHÔNG phải của `.toCam` — để trong vùng cuộn thì chính cái báo
+   tràn cũng trôi đi mất.
+   ⚠ Repo không có reset toàn cục cho `<button>` (mọi nút khác đi qua `pixel.module.css`),
+   nên `padding:0` phải khai tay — thiếu nó thì ô phình theo padding mặc định của trình
+   duyệt và nó ăn thêm bề ngang của vùng cuộn. */
+.themNua {
+  /* ⚠ Neo cho lớp phủ 44px dưới đây — thiếu dòng này thì `::before` bám vào một tổ tiên
+     khác và vùng chạm nở ra ở SAI CHỖ, im lặng. */
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 26px;
+  height: 28px;
+  padding: 0;
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: .5px;
+  color: var(--chu-phu);
+  background: var(--mat-ban);
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+/*
+ * ⭐⭐ VÙNG CHẠM 44px, HÌNH VẪN 26×28 (demo sửa 06/09 — chép nguyên).
+ *
+ * ⚠⚠ Đây đúng **LỖI #2 của D236** đã ghi thành luật: *"Ô 26px — 44px là sàn, không phải
+ * mục tiêu."* Và ô `+N` không phải một nút trang trí: nó là đường điều khiển **DUY NHẤT
+ * bằng ngón tay** cho khay tràn (kéo chuột và lăn chuột đều là đường của CHUỘT). Trượt
+ * ngón khỏi một ô 26px là mất luôn cách xem mấy tờ đang khuất.
+ * ⚠ Nới bằng lớp phủ TRONG SUỐT chứ không nới `min-width`/`height`: vùng đáy có chiều cao
+ *   đã chốt ở demo, phóng cái ô lên 44px là đẩy cả khay. Hình giữ nguyên, tay được thêm.
+ */
+.themNua::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+}
+/* ⚠ `--chu-sang`, KHÔNG phải `--chu`: demo từng viết `var(--chu)` — một BIẾN CSS MA không
+   khai ở đâu cả, nên cú `:active` không đổi màu chữ (không lỗi, không cảnh báo, họ D106/
+   D74). Đã sửa ở demo 06/09 (D290); đây chép bản đã sửa. */
+.themNua:active { background: var(--mat-phim); color: var(--chu-sang); }
+
+.xoa { color: var(--lose); font-size: 19px; padding: 4px 6px; }
+
+.lap {
+  padding: 6px 9px 6px 10px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--gold);
+  /*
+   * ⚠ NỀN LÀ BẮT BUỘC, KHÔNG PHẢI TRANG TRÍ (vá 08/09, founder báo "lỗi màu").
+   * Lớp này đặt `color` + `border` mà QUÊN `background`, nên nút rơi về nền mặc
+   * định của trình duyệt — TRẮNG — giữa một app nền tối. Không lỗi, không cảnh
+   * báo; chỉ một ô trắng chói giữa bàn phím số. `.tongNut` ngay dưới làm đúng
+   * (`rgba(34,211,238,.08)`); đây là cùng nếp, đổi màu theo vai vàng.
+   */
+  background: rgba(253, 224, 71, .08);
+  border: 1px solid rgba(253, 224, 71, .45);
+  box-shadow: var(--px-bong);
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.lap:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+
+/*
+ * CHIP MẪU MỘT CHẠM (D453) — khoản đã lưu mẫu, nằm TRONG vùng cuộn của khay khi khay rỗng. Cùng họ với nút LẶP (vàng =
+ * thứ của CHÍNH người dùng đã đặt), cùng chiều cao hàng khay — mặt bàn không cao thêm (luật bàn tiền cố định D410).
+ * ⚠ Nền bắt buộc (bài học `.lap` 08/09: thiếu nền là ô trắng chói). Chữ ≥ 12px. Lún bằng `steps` (nhịp máy).
+ */
+.chipMau {
+  flex: none;
+  max-width: 132px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px 0 9px;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: .5px;
+  color: var(--chu-than);
+  background: rgba(253, 224, 71, .08);
+  border: 1px solid rgba(253, 224, 71, .45);
+  border-radius: 0;
+  box-shadow: var(--px-bong);
+  cursor: pointer;
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.chipMau b { flex: none; font-size: 14px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.tenMau { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chipMau:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+
+/* Tờ vừa chạm khay ⇒ tổng NHẢY một nhịp máy (SPEC `pfm-tang-khong-gian`; nhịp ở `NHIP.PFM_KHAY_NHAY`). Gỡ bằng hẹn giờ ở `bayTo`. */
+.nhay { animation: pfmTongNhay var(--nhip-pfm-khay-nhay, 240ms) steps(3, end) 1; }
+@keyframes pfmTongNhay { 40% { transform: scale(1.12); } }
+
+/* ── TỜ TIỀN ──────────────────────────────────────────────────────────────────
+   ⚠⚠ MỖI TỜ LÀ MỘT BẢNG SẮC ĐỘ, KHÔNG PHẢI MỘT MÀU (founder 04/09). Màu phẳng đứng cạnh
+   nhau chín ô thì mắt đọc ra chín mảng chói, không đọc ra chín cái VẬT. Nên mặt phím pha
+   6% sắc của bậc, vạch đáy giữ mã nguyên, và SỌC là kênh thứ hai của bậc. */
+.to {
+  --soc: 4px;
+  --bam: var(--n-5);
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-weight: 700;
+  /* ⚠ CHỮ LUÔN TRẮNG, mọi ô mọi trạng thái. Ràng buộc BẤT DI, không phải biến để đánh
+     đổi — app nền đen thì chữ tối là thứ đầu tiên bị loại. */
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .55);
+  background-color: color-mix(in srgb, var(--m) 6%, var(--mat-phim));
+  background-image: repeating-linear-gradient(180deg,
+      rgba(255, 255, 255, .06) 0 1px, rgba(255, 255, 255, 0) 1px var(--soc));
+  /* ⚠ KHÔNG viền bao. Ranh giới ô do VẠCH ĐÁY giữ — vừa là chỉ dấu bậc, vừa là đường vẽ
+     ra hình cái ô. Bỏ khung cũng giải phóng chỗ để phóng chữ. */
+  border: 0;
+  border-bottom: 3px solid var(--m);
+  border-radius: 0;
+  /* GỜ PHÍM — cạnh cứng, đèn trên-trái: thứ khiến ô "mời bấm" thay vì "mời đọc". */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16),
+    inset 1px 0 0 rgba(255, 255, 255, .07),
+    inset -1px 0 0 rgba(0, 0, 0, .30);
+  height: 28px;
+  min-width: 36px;
+  padding: 0 6px 0 6.3px;
+  font-size: 13px;
+  letter-spacing: .3px;
+  cursor: pointer;
+}
+
+/* Chip khay: TÔ CẢ Ô bằng mã nguyên ⇒ giữ trọn ΔE00 11,40, không pha loãng. Nền sáng nên
+   mực đảo sang tối. Không gờ phím — chip là tờ đang CẦM, không phải phím để bấm. */
+.oChip {
+  position: relative;
+  flex: none;
+  display: block;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+.oChip .to {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 4px 0 6px;
+  min-width: 34px;
+  border-bottom: 0;
+  background-color: var(--m);
+  color: var(--n-1b);
+  font-weight: 600;
+  text-shadow: none;
+  background-image: repeating-linear-gradient(180deg,
+      rgba(0, 0, 0, .10) 0 1px, rgba(0, 0, 0, 0) 1px var(--soc));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .34), inset 0 -2px 0 rgba(0, 0, 0, .20);
+}
+/* Ô ĐẾM: vật RIÊNG đè lên góc thẻ, nằm TRỌN trong biên (khay là vùng cuộn nên trục dọc
+   cũng xén — nhô ra ngoài là bị cắt ngang). */
+.dem {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  min-width: 17px;
+  height: 15px;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: .2px;
+  color: var(--gold);
+  background: var(--n-0);
+  border: 1.5px solid var(--gold);
+  /* VÒNG TỐI ngoài cùng gánh việc tách khỏi thẻ; viền vàng lùi vào trong, nơi nó có nền
+     gần-đen để nổi. */
+  box-shadow: 0 0 0 2px var(--n-0);
+}
+/* Chỉ thẻ CÓ ô đếm mới chừa chỗ — thẻ một tờ giữ nguyên bề rộng, không ai phải trả giá
+   cho trạng thái của người khác. */
+.nhieu .to { padding-right: 23px; }
+
+/* Lưới 3×3: thấy hết chín tờ, và MỖI HÀNG LÀ MỘT BẬC (nghìn lẻ · chục nghìn · trăm
+   nghìn) nên vị trí một tờ nhớ được bằng cơ bắp, không phải đọc lại mỗi lần. */
+.tien {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  padding: 8px 9px 7px;
+}
+.tien .to {
+  height: 44px;
+  font-size: 20px;   /* bỏ viền ⇒ có chỗ phóng chữ */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16),
+    inset 1px 0 0 rgba(255, 255, 255, .07),
+    inset -1px 0 0 rgba(0, 0, 0, .30),
+    var(--px-bong);
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end),
+    background-color 90ms steps(2, end), color 90ms steps(2, end);
+}
+/* ⭐ BẤM = CẢ NỀN BỪNG LÊN bằng màu của bậc, và GỜ ĐẢO CHIỀU (tối lên trên, sáng xuống
+   dưới) — phím LÚN THẬT vào trong, không phải chỉ đổi màu nền. */
+.tien .to:active {
+  transform: translate(var(--px-day), var(--px-day));
+  background-color: var(--bam);
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, .35), inset 0 -1px 0 rgba(255, 255, 255, .14);
+}
+
+.day[data-phim='co'] .tien { display: none; }
+
+/* ── HAI ĐÍCH CỐ ĐỊNH — D410 ────────────────────────────────────────────────────
+ * Luôn nằm đây, khay rỗng thì tắt (mờ + không bấm được) — không bao giờ mọc ra hay biến mất, nên chiều cao mặt bàn
+ * giữa hai cú chạm tờ KHÔNG đổi. Cùng chất liệu phím tiền (mặt · bóng cứng · cú lún `steps()` — nhịp máy D182). */
+.dongQuy {
+  height: 18px;
+  margin: 0;
+  padding: 3px 11px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11.5px;
+  letter-spacing: .3px;
+  color: var(--chu-phu);
+}
+.nhanQuy { margin-right: 6px; font-weight: 400; letter-spacing: 1.2px; color: var(--gold); }
+.hangChieu { display: grid; grid-template-columns: .8fr 1fr 1fr; gap: 5px; padding: 2px 9px 9px; }
+.nutChieu {
+  height: 46px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 16px;
+  letter-spacing: 1.5px;
+  padding-left: 1.5px;
+  border: 0;
+  border-radius: 0;
+  color: var(--chu-than);
+  background: var(--mat-phim);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16),
+    inset 1px 0 0 rgba(255, 255, 255, .07),
+    inset -1px 0 0 rgba(0, 0, 0, .30),
+    var(--px-bong);
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end), opacity 120ms steps(2, end);
+}
+.nutChieu:active:not(:disabled) {
+  transform: translate(var(--px-day), var(--px-day));
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, .35), inset 0 -1px 0 rgba(255, 255, 255, .14);
+}
+.nutChieu:disabled { opacity: .38; cursor: default; }
+.nutChieu.chi { color: var(--accent-bright); border-bottom: 3px solid var(--accent); }
+.nutChieu.thu { color: var(--win); border-bottom: 3px solid var(--win); }
+
+/* ── BÀN PHÍM 4×3 ─────────────────────────────────────────────────────────────
+   Cùng chiều cao ĐÚNG BẰNG lưới tiền, nên lật giữa tờ và bàn phím thì lưới đích phía
+   trên không xê dịch một pixel nào. */
+.phim { display: none; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 9px 9px 7px; }
+.day[data-phim='co'] .phim { display: grid; }
+/* D420 — bàn phím dùng lại ở khay GÕ SỐ màn HŨ (một bản `BanPhim`): hiện luôn, cao hơn `.phim` một bậc ưu tiên. */
+.phim[data-luon-hien] { display: grid; padding: 8px 0 0; }
+
+/*
+ * D420 — BÀN TIỀN THU XUỐNG (chạm ra ngoài): chỉ còn hàng khay làm tay nắm. ⚠ Đứng SAU luật `data-phim` ngay trên —
+ * cùng độ ưu tiên nên luật sau thắng; thu bằng thuộc tính HTML `hidden` thì thua `display: grid` của `.phim` (app không
+ * có luật `[hidden]` chung).
+ */
+.day[data-thu='co'] .dongQuy,
+.day[data-thu='co'] .hangChieu,
+.day[data-thu='co'] .tien,
+.day[data-thu='co'] .phim { display: none; }
+.day[data-thu='co'] .khay { cursor: pointer; }
+/* "Làm luôn cho cả phần nhập số thủ công" — phím số dùng ĐÚNG chất liệu phím tiền: cùng
+   mặt, cùng bóng cứng, cùng cú lún. Một hệ, không hai. */
+.phim button {
+  height: 46px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  border: 0;
+  border-radius: 0;
+  color: #fff;
+  background: var(--mat-phim);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16),
+    inset 1px 0 0 rgba(255, 255, 255, .07),
+    inset -1px 0 0 rgba(0, 0, 0, .30),
+    var(--px-bong);
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.phim button:active {
+  transform: translate(var(--px-day), var(--px-day));
+  box-shadow: inset 0 2px 0 rgba(0, 0, 0, .35), inset 0 -1px 0 rgba(255, 255, 255, .14);
+}
+/* ⌫ và 000 là phím PHỤ: cùng mặt bàn (thấp hơn phím số một tầng) nên đọc ra "không phải
+   chữ số", mà không cần thêm màu nào.
+   ⚠ Bản đầu của demo cho phím phụ dùng ĐÚNG màu mặt bàn ⇒ đo ra 1,00 — nó thành cái LỖ
+   chứ không thành phím. Phím phụ vẫn phải NỔI, chỉ nổi ít hơn phím số. */
+.phim .phu2 { background: var(--mat-phim-phu); color: var(--chu-phu); font-size: 15px; }
+
+/* ── TOAST HOÀN TÁC ───────────────────────────────────────────────────────────
+   ⚠⚠ HAI LỖI ĐÃ ĐO BẰNG ẢNH TRONG DEMO, KHÔNG PHẢI SUY LUẬN:
+   1. `position:fixed` + `left:50%` để không gian khả dụng chỉ còn NỬA màn bên phải, nên
+      hộp bị bó rồi NGẮT DÒNG — "HOÀN / TÁC" hai dòng, đọc ra là lệch. `width:max-content`
+      + căn bằng left/right/margin auto thì hộp rộng theo chữ.
+   2. Nó đè lên lưới tiền, che mất hàng 10k–50k đúng lúc người ta định bấm tiếp. Neo vào
+      MÉP TRÊN của vùng đáy thay vì mép dưới màn. */
+.toast {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: max-content;
+  max-width: calc(100% - 20px);
+  white-space: nowrap;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  font-size: 13px;
+  border: 1px solid var(--accent);
+  background: var(--mat-the);
+  box-shadow: 0 0 20px rgba(34, 211, 238, .28);
+}
+.toast button {
+  display: grid;
+  place-items: center;
+  min-height: 36px;
+  padding: 0 12px 0 13px;
+  font: inherit;
+  color: var(--gold);
+  letter-spacing: 1px;
+  border: 1px solid rgba(253, 224, 71, .45);
+  border-radius: 0;
+  background: none;
+  cursor: pointer;
+  box-shadow: var(--px-bong);
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.toast button:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+
+/* Tờ tiền đang bay — gắn vào `body` nên nằm ngoài mọi `overflow:hidden` của khay. */
+.bay { position: fixed; z-index: 20; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bay { display: none; }
+}
+

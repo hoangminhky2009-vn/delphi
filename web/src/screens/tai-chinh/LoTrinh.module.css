@@ -1,0 +1,256 @@
+/*
+ * PFM — MÀN LỘ TRÌNH. Số đo/màu theo demo đã chốt (`#man-lt`), dùng bảng token
+ * thật của app. Chặng KHOÁ vẫn ĐỌC ĐƯỢC, chỉ mờ đi — khoá mà giấu nội dung thì
+ * người chơi không biết mình đang tiến tới cái gì, tức mất đúng tác dụng của
+ * một lộ trình.
+ */
+.the {
+  background: var(--surface-idle);
+  border: 1px solid var(--border-idle);
+  border-radius: 0;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.nhan {
+  margin: 0 0 9px;
+  font-size: 10.5px;
+  letter-spacing: 1.6px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.giai {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+.giai + .giai { margin-top: 7px; }
+
+/* 13/09 — nhãn thẻ mang nút (?) ở mép phải; lời giới thiệu mở ngay dưới nhãn. */
+.nhanHang {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* NÚT (?) — cùng hình với `Hu.module.css`: một cửa hỏi ngay cạnh thứ cần hỏi. */
+.hoi {
+  flex: none;
+  width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  cursor: pointer;
+}
+.hoi[aria-expanded='true'] { border-color: var(--accent); color: var(--accent); }
+.tomTat {
+  margin: 9px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+/* ── Một chặng ─────────────────────────────────────────────────────────────── */
+.chang {
+  border: 1px solid var(--border-idle);
+  background: var(--surface-idle);
+  margin-bottom: 8px;
+}
+/* Khoá = MỜ, không phải ẩn. Xem chú thích đầu tệp. */
+.changKhoa {
+  opacity: 0.62;
+  border-style: dashed;
+}
+
+.changDau {
+  font: inherit;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 12px;
+  cursor: pointer;
+  text-align: left;
+  border: 0;
+  background: none;
+  color: inherit;
+}
+.changDau:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.changSo {
+  width: 21px;
+  height: 21px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--bg-deep);
+  background: var(--accent);
+}
+.changTen {
+  flex: 1;
+  font-size: 12.5px;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+.changTrang {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+  color: var(--win);
+}
+.changKhoaNhan {
+  font-size: 9.5px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.changRuot {
+  padding: 0 12px 12px;
+  border-top: 1px solid var(--border-idle);
+  padding-top: 10px;
+}
+
+/* Cổng: nói RÕ còn thiếu bao nhiêu và VÌ SAO chặng này cần thế. */
+.cong {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  border-left: 3px solid var(--gold);
+  padding-left: 9px;
+}
+.congVi {
+  color: var(--text-muted);
+  font-size: 11.5px;
+}
+
+/* ── Một khối trong chặng ──────────────────────────────────────────────────── */
+.khoi {
+  border: 1px solid var(--border-idle);
+  padding: 9px 10px;
+  margin-bottom: 8px;
+}
+.khoiDau {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.khoiMa {
+  flex: none;
+  padding: 1px 6px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  color: var(--accent);
+  border: 1px solid var(--border-accent-soft);
+}
+.khoiTen {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+.khoiPhu {
+  margin: 0 0 5px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+/* Dòng VÌ SAO — nền học thuật hoặc chính câu người chơi đã trả lời. Nhỏ nhưng
+   KHÔNG được bỏ: nó là thứ phân biệt "gợi ý" với "lời phán".
+   13/09 — vẫn không bỏ, nhưng nằm sau nút (?) của khối (founder: chữ là tầng bách khoa). Ngoài
+   khối vẫn giữ khung "mẫu": nhãn SỬA ĐƯỢC HẾT ở đầu màn + nút BỎ ở mỗi khối. */
+.khoiVi {
+  margin: 0 0 7px;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.khoiNut {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.nutNho {
+  font: inherit;
+  font-size: 10.5px;
+  letter-spacing: 0.6px;
+  padding: 6px 9px;
+  cursor: pointer;
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid var(--border-idle);
+}
+.nutNho:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Mở hết ────────────────────────────────────────────────────────────────── */
+.moHet {
+  font: inherit;
+  width: 100%;
+  font-size: 10.5px;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+  padding: 10px;
+  margin-top: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  background: none;
+  border: 1px dashed var(--border-idle);
+}
+.moHet[aria-pressed='true'] {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.canh {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  border-left: 3px solid var(--gold);
+  padding-left: 9px;
+}
+.day {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.boQua {
+  font: inherit;
+  font-size: 11.5px;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+}
+
+/*
+ * Ô LỖI — chép ĐÚNG khuôn `.loi` của `PhongVan.module.css`/`CamKet.module.css` (D360), không dựng kiểu thứ ba.
+ * A11.25: đây là áp một mẫu ĐÃ CHỐT trong cùng khu PFM, không phải thiết kế mới.
+ */
+.loi {
+  margin: 8px 0 0;
+  font-size: 12.5px;
+  color: var(--lose-soft);
+}

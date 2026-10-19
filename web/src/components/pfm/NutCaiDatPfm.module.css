@@ -1,0 +1,38 @@
+/*
+ * Bánh răng TRẦN — không viền, không nền, không vát (founder 07/09: *"ko cần
+ * button đâu, biểu tượng cái bánh răng thôi"*). Cố ý KHÔNG `composes` lớp
+ * `pixel.nut`: đó chính là bộ áo vừa bị bác.
+ *
+ * ⚠ Vùng chạm vẫn phải 44px dù hình chỉ ~16px — WCAG, và ngón cái không nhắm được
+ * một biểu tượng 16px ở sát mép màn. Nên nút to, hình nhỏ: `width/height` cho
+ * vùng chạm, `font-size` cho hình. Lề âm kéo nó sát mép khung để không đội dòng
+ * breadcrumb cao lên.
+ */
+.banhRang {
+  font: inherit;
+  font-size: 16px;
+  line-height: 1;
+  width: 44px;
+  height: 44px;
+  margin: -14px -12px -14px 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.banhRang:hover {
+  color: var(--accent);
+}
+.banhRang:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -8px;
+}
+/* Quay nhẹ khi chạm — vật cơ khí thì xoay, và `steps()` cho đúng nhịp máy
+   (A11.18: steps cho VẬT & nhịp máy, không phải ánh sáng). */
+@media (prefers-reduced-motion: no-preference) {
+  .banhRang:active {
+    transform: rotate(45deg);
+    transition: transform 120ms steps(3, end);
+  }
+}

@@ -1,0 +1,767 @@
+<title>Hub tầng không gian</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Handjet:wght@400..700&display=swap">
+<style>
+/* Bố cục: khung máy 390×812, KHÔNG cuộn — đầu sảnh (người chơi trái · tài sản phải) → lưới bento → thanh đáy.
+   Ba lớp: nền (vignette) · ô nổi (bóng pixel) · lớp trượt đè khi chạm. Màu NGUYÊN từ web/src/styles/tokens.css.
+   Vai màu: lam = bấm được · vàng = tiền · tím nhạt = khung/nhãn · đồng = hạng · xám = còn lại. */
+:root{
+  color-scheme:dark;
+  --bg-page:#04070d;
+  --surface-card:linear-gradient(178deg,#0b1628 0%,#060c17 70%);
+  --surface-well:#03060c;
+  --text-title:#eef6ff; --text-body:#e8f2fc; --text-muted:#93aac8; --text-dim:#5d7290;
+  --accent:#22d3ee; --accent-bright:#67e8f9; --accent-on:#03141a;
+  --violet-soft:#a78bfa;
+  --gold:#fde047; --gold-amber:#fbbf24;
+  --bronze:#d08a4e; --bronze-dim:#7a4a26;
+  --felt:#072b17;
+  --border-idle:rgba(93,114,144,.3); --border-accent:rgba(34,211,238,.4);
+  --px-bong:3px 3px 0 rgba(10,6,24,.75);
+  --px-vien:inset 1px 1px 0 rgba(248,250,252,.12), inset -1px -1px 0 rgba(10,6,24,.6);
+  --nay:cubic-bezier(.34,1.56,.64,1); /* back-ease-out: overshoot rồi co lại (VFX nhóm 1) */
+  --font:'Handjet','Handjet Variable',ui-monospace,SFMono-Regular,monospace;
+  --fs-micro:11px; --fs-label:13px; --fs-body:15px; --fs-title:19px; --fs-hero:40px;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg-page);color:var(--text-body)}
+body{font-family:var(--font);font-weight:600;padding-inline:16px;padding-block:14px 28px;display:flex;flex-direction:column;align-items:center;gap:12px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent-bright);outline-offset:2px}
+
+/* ── bảng điều khiển demo (ngoài khung máy) ── */
+.ctl{display:flex;flex-wrap:wrap;gap:8px 12px;justify-content:center;width:100%;max-width:390px}
+.seg{display:flex;border:1px solid var(--border-idle);box-shadow:var(--px-bong)}
+.seg button{padding:7px 11px;font-size:var(--fs-label);letter-spacing:.12em;color:var(--text-muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-on)}
+.so-do{width:100%;max-width:390px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-variant-numeric:tabular-nums}
+.so-do div{border:1px solid var(--border-idle);padding:6px 8px;display:flex;flex-direction:column;gap:2px}
+.so-do b{font-size:var(--fs-title);color:var(--text-title)}
+.so-do span{font-size:var(--fs-micro);letter-spacing:.1em;color:var(--text-muted)}
+.so-do .tot b{color:var(--accent-bright)}
+.luat{width:100%;max-width:390px;border:1px solid var(--border-idle);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.luat h2{margin:0;font-size:var(--fs-label);letter-spacing:.16em;color:var(--violet-soft);font-weight:600}
+.luat ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:var(--fs-body);font-weight:500;color:var(--text-body);line-height:1.25}
+.luat b{color:var(--text-title);font-weight:600}
+.chu-thich{max-width:390px;font-size:var(--fs-label);color:var(--text-muted);line-height:1.35;text-align:center;margin:0}
+
+/* ── khung máy ── */
+.may{position:relative;width:100%;max-width:390px;height:min(812px,calc(100dvh - 40px));min-height:600px;
+  border:1px solid var(--border-idle);overflow:hidden;display:flex;flex-direction:column;
+  background:radial-gradient(120% 70% at 50% 0%,rgba(34,211,238,.07),transparent 60%),
+             radial-gradient(90% 60% at 100% 60%,rgba(139,92,246,.07),transparent 60%),var(--bg-page)}
+.may::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 90px rgba(0,0,0,.75);z-index:3}
+.than{flex:1 1 auto;min-height:0;position:relative;z-index:1}
+.nav{flex:0 0 auto;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid rgba(93,114,144,.2);background:#050a13;position:relative;z-index:2;padding-bottom:4px}
+.nav span{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0 4px;font-size:var(--fs-micro);letter-spacing:.12em;color:var(--text-dim);position:relative}
+.nav span.dang{color:var(--accent-bright)}
+.nav span.cham::before{content:"";position:absolute;top:6px;left:calc(50% + 7px);width:6px;height:6px;background:var(--gold-amber)}
+
+/* ══ BẢN MỚI ══ */
+.moi{height:100%;display:flex;flex-direction:column;gap:10px;padding:10px 14px 8px}
+/* đầu sảnh: người chơi sát trái · tài sản phải (chuẩn sảnh game) */
+.dau{display:flex;align-items:center;gap:10px;min-height:48px}
+.anh{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;background:var(--surface-well);box-shadow:var(--px-vien);border:1px solid rgba(139,92,246,.45)}
+.dau .ten{font-size:var(--fs-title);color:var(--text-title);line-height:1}
+.dau .phu{font-size:var(--fs-micro);color:var(--text-muted);letter-spacing:.08em}
+.dau .nguoi{display:flex;flex-direction:column;gap:3px;min-width:0}
+.tai-san{margin-left:auto;display:flex;align-items:center;gap:8px}
+.hang{position:relative;width:46px;height:46px;display:grid;place-items:center}
+.hang svg{position:absolute;inset:0}
+.vi.nhan-xuong,.hang.nhan-xuong{transform:translate(2px,2px);filter:brightness(1.25)}
+.hang b{position:relative;font-size:var(--fs-label);color:var(--bronze);letter-spacing:.04em}
+.vi{display:flex;align-items:center;gap:6px;height:32px;padding:0 10px;border:1px solid rgba(251,191,36,.45);color:var(--gold);font-size:var(--fs-body);font-variant-numeric:tabular-nums;box-shadow:var(--px-bong);background:rgba(251,191,36,.05)}
+
+.luoi{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:1.22fr 1fr;grid-template-rows:1fr auto;gap:10px}
+.cot-phai{display:flex;flex-direction:column;gap:10px;min-height:0}
+.cot-phai .o{flex:1 1 0}
+
+/* ô nổi + LUẬT PHẢN HỒI: nhấn = lún 3px, tắt bóng, viền sáng lam (≤ 0,1 s) · thả = nảy về (overshoot) */
+.o{position:relative;display:flex;flex-direction:column;text-align:left;padding:10px;background:var(--surface-card);
+   border:1px solid var(--border-idle);box-shadow:var(--px-bong),var(--px-vien);min-height:0;
+   transition:transform .26s var(--nay),box-shadow .26s var(--nay),border-color .2s;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.o.nhan-xuong{transform:translate(3px,3px);box-shadow:0 0 0 transparent,var(--px-vien);border-color:var(--accent-bright);transition:transform .05s,box-shadow .05s,border-color .05s}
+.o.nhan-xuong::before{content:"";position:absolute;inset:0;background:rgba(103,232,249,.07);pointer-events:none}
+.o.lac{animation:lac .16s steps(4) 1}
+@keyframes lac{25%{transform:translateX(-3px)}50%{transform:translateX(3px)}75%{transform:translateX(-2px)}}
+/* giữ: thanh nạp pixel chạy dọc đáy ô */
+.o .nap{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--accent-bright);transform:scaleX(0);transform-origin:left;pointer-events:none}
+.o.dang-giu .nap{transform:scaleX(1);transition:transform .45s steps(9)}
+.nhan{font-size:var(--fs-label);letter-spacing:.16em;color:var(--violet-soft);display:flex;align-items:center;gap:6px}
+
+/* ô Đấu trường: banner xoay (vùng ảnh) + nút VÀO TRẬN — hai đích chạm riêng */
+.o-tran{border-color:rgba(139,92,246,.5);padding:10px;cursor:default}
+.banner{position:relative;flex:1 1 auto;min-height:120px;margin:8px 0 10px;background:radial-gradient(80% 70% at 50% 45%,#0b3d22,var(--felt));
+  box-shadow:inset 0 6px 18px rgba(0,0,0,.7),inset 0 -2px 0 rgba(255,255,255,.04);overflow:hidden;cursor:pointer;
+  transition:transform .26s var(--nay),filter .1s}
+.banner::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 6px);z-index:1;pointer-events:none}
+.banner.nhan-xuong{transform:scale(.985);filter:brightness(1.15);transition:transform .05s,filter .05s}
+.canh{position:absolute;inset:0;display:grid;place-items:center;opacity:0;transition:opacity .9s ease-in-out}
+.canh.hien{opacity:1}
+.canh .vat{display:block;transform:scale(1.06);transition:transform 10s linear}
+.canh.hien .vat{transform:scale(1)}
+.canh .hao{position:absolute;width:150px;height:150px;background:radial-gradient(circle,rgba(253,224,71,.16),transparent 65%)}
+.quat{position:relative;width:120px;height:96px}
+.quat-boc{transform:scale(1.3)}
+.la{position:absolute;left:38px;top:6px;width:46px;height:64px;background:linear-gradient(170deg,#0d1a2e,#070d18);border:1px solid rgba(103,232,249,.55);
+  box-shadow:var(--px-bong);display:flex;align-items:center;justify-content:center;transform-origin:50% 120%}
+.la:nth-child(1){transform:rotate(-16deg) translateX(-14px);border-color:rgba(167,139,250,.6)}
+.la:nth-child(3){transform:rotate(16deg) translateX(14px);border-color:rgba(251,191,36,.6)}
+.nen{width:6px;background:currentColor;position:relative}
+.nen::before{content:"";position:absolute;left:2px;width:2px;top:-6px;bottom:-6px;background:currentColor}
+.chu-banner{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;flex-direction:column;gap:4px;padding:28px 9px 8px;background:linear-gradient(180deg,transparent,rgba(2,10,6,.78) 38%,rgba(2,8,5,.92));transition:opacity .35s ease-in-out}
+.chu-banner.doi{opacity:0}
+.chu-banner .hang-tag{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.chu-banner .goi{font-size:16px;font-weight:500;line-height:1.22;color:var(--text-title);text-shadow:1px 1px 0 rgba(0,0,0,.7);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.chu-banner .tag{font-size:var(--fs-micro);letter-spacing:.14em;color:var(--gold-amber)}
+.chu-banner .doc{font-size:var(--fs-label);color:var(--accent-bright);white-space:nowrap}
+.cham-bn{position:absolute;top:8px;right:8px;z-index:2;display:flex;gap:4px}
+.cham-bn i{width:6px;height:6px;background:rgba(255,255,255,.22);transition:background .3s}
+.cham-bn i.on{background:var(--gold-amber)}
+.tien-do{position:absolute;left:0;top:0;height:2px;z-index:2;background:rgba(251,191,36,.7);width:100%;transform-origin:left;transform:scaleX(0)}
+.vao{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px 0;background:var(--accent);color:var(--accent-on);
+  font-size:var(--fs-title);letter-spacing:.2em;box-shadow:0 4px 0 #0e7490,var(--px-bong);transition:transform .2s var(--nay),box-shadow .2s var(--nay)}
+.vao.nhan-xuong{transform:translateY(4px);box-shadow:0 0 0 #0e7490;transition:transform .04s,box-shadow .04s}
+.hat{position:absolute;width:5px;height:5px;background:var(--accent-bright);pointer-events:none;z-index:9;animation:hat .42s steps(7) forwards}
+@keyframes hat{to{transform:translate(var(--dx),var(--dy));opacity:0}}
+
+.so-to{font-size:var(--fs-hero);line-height:.9;color:var(--text-title);font-variant-numeric:tabular-nums;margin-top:8px}
+.so-to.tien{color:var(--gold)}
+.so-to small{font-size:var(--fs-body);color:var(--text-muted);margin-left:2px}
+.duoi{font-size:var(--fs-label);color:var(--text-muted);letter-spacing:.06em}
+.cot{display:flex;gap:4px;flex:1 1 auto;min-height:40px;max-height:120px;margin-top:auto;padding-top:10px}
+.cot>span{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;font-size:10px;color:var(--text-dim);text-align:center}
+.cot i{display:block;background:rgba(251,191,36,.32);box-shadow:var(--px-vien)}
+.cot>span:last-child i{background:var(--gold-amber)}
+.cot>span:last-child{color:var(--gold)}
+.nac{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:8px}
+.nac i{height:10px;background:rgba(93,114,144,.25);box-shadow:var(--px-vien)}
+.nac i.xong{background:var(--violet-soft)}
+.chip{margin-top:auto;align-self:flex-start;display:flex;align-items:center;gap:6px;padding:4px 8px;font-size:var(--fs-label);letter-spacing:.1em;border:1px solid rgba(251,191,36,.5);color:var(--gold-amber)}
+.chip.xong{border-color:var(--border-idle);color:var(--text-dim)}
+.icon-giua{margin:auto 0;display:grid;place-items:center;gap:6px;color:var(--text-muted);font-size:var(--fs-label);letter-spacing:.08em}
+.hang-nho{grid-column:1/3;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.o-nho{flex-direction:row;align-items:center;gap:10px;padding:9px 10px;min-height:56px}
+.o-nho .ten-nho{font-size:var(--fs-label);letter-spacing:.14em;color:var(--text-muted)}
+.o-nho .khoa{margin-left:auto;opacity:.8}
+.o-nho.mo-nhat{opacity:.72}
+.dang-ky{width:100%;padding:11px 0;border:1px solid var(--border-accent);color:var(--accent-bright);font-size:var(--fs-body);letter-spacing:.16em;box-shadow:var(--px-bong);background:rgba(34,211,238,.06)}
+.mien-tru{font-size:var(--fs-micro);color:var(--text-dim);text-align:center;letter-spacing:.04em;margin:0}
+
+/* ══ LỚP TRƯỢT ══ */
+.man-toi{position:absolute;inset:0;z-index:5;background:rgba(2,4,9,.62);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .18s}
+.man-toi.mo{opacity:1;pointer-events:auto}
+.tam{position:absolute;left:0;right:0;bottom:0;z-index:6;max-height:78%;display:flex;flex-direction:column;gap:12px;padding:8px 16px 18px;
+  background:linear-gradient(178deg,#0e1b30,#070d18);border-top:1px solid var(--border-accent);box-shadow:0 -10px 30px rgba(0,0,0,.6),var(--px-vien);
+  transform:translateY(105%);transition:transform .32s var(--nay);touch-action:none}
+.tam.mo{transform:translateY(0)}
+.quai{align-self:center;width:44px;height:5px;background:rgba(147,170,200,.45);margin:2px 0 4px;flex:0 0 auto}
+.tam-dau{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.tam-dau .anh{width:56px;height:56px;flex-basis:56px}
+.tam-ten{font-size:22px;color:var(--text-title);letter-spacing:.08em;line-height:1}
+.tam-tag{font-size:var(--fs-label);color:var(--violet-soft);letter-spacing:.16em}
+.tam-mo{font-size:16px;font-weight:500;line-height:1.35;color:var(--text-body);margin:0}
+.tam-hoi{font-size:var(--fs-body);letter-spacing:.1em;color:var(--gold-amber);margin:0}
+.tam-chi-tiet{display:flex;flex-direction:column;gap:6px;min-height:0;overflow:auto}
+.buoc{display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:start;padding:7px 9px;background:var(--surface-well);box-shadow:var(--px-vien);font-size:16px;font-weight:500;line-height:1.3}
+.buoc b{color:var(--violet-soft);font-weight:600;font-variant-numeric:tabular-nums}
+.ket{padding:8px 10px;border-left:3px solid var(--gold-amber);background:rgba(251,191,36,.06);font-size:16px;line-height:1.3;color:var(--text-title)}
+.dong{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 9px;background:var(--surface-well);box-shadow:var(--px-vien);font-size:var(--fs-body);font-variant-numeric:tabular-nums}
+.dong b{color:var(--text-title);font-weight:600}
+.dong .vang{color:var(--gold)}
+.bac-luoi{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.bac-o{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;background:var(--surface-well);box-shadow:var(--px-vien);text-align:center}
+.bac-o b{font-size:var(--fs-label);letter-spacing:.1em;color:var(--text-title);font-weight:600}
+.bac-o span{font-size:10px;color:var(--text-muted);line-height:1.1}
+.bac-o.dang{outline:2px solid var(--accent-bright);outline-offset:-2px;background:rgba(34,211,238,.08)}
+.bac-o.chua svg{filter:grayscale(1) brightness(.55)}
+.bac-o.chua b{color:var(--text-dim)}
+.sticker-hang{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.sticker{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;background:var(--surface-well);box-shadow:var(--px-vien)}
+.sticker.trong{justify-content:center}
+.sticker .rong{font-size:var(--fs-title);color:var(--text-dim);height:40px;display:grid;place-items:center}
+.chon-hang{display:flex;align-items:center;gap:6px;font-size:var(--fs-label);letter-spacing:.12em;color:var(--text-muted)}
+.chon-hang select{font:inherit;font-size:var(--fs-label);letter-spacing:.08em;color:var(--accent-on);background:var(--accent);border:0;padding:6px 8px;box-shadow:var(--px-bong)}
+.sticker span{font-size:10px;color:var(--text-body);white-space:nowrap}
+.sticker.chua svg{filter:brightness(0) invert(.5)}  /* bóng XÁM đặc, sáng hơn nền rõ ràng — thấy dáng, biết là chưa có */
+.sticker.chua span{color:var(--text-dim)}
+.tam-nut{display:flex;flex-direction:column;gap:8px;flex:0 0 auto}
+.dong-tam{padding:11px 0;border:1px solid var(--border-idle);color:var(--text-muted);letter-spacing:.16em;font-size:var(--fs-body)}
+
+/* ══ BẢN CŨ (chép Hub.tsx hôm nay) ══ */
+.thanh-cu{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid rgba(93,114,144,.18)}
+.logo{font-size:var(--fs-title);letter-spacing:.3em;color:var(--text-title)}
+.logo i{font-style:normal;color:var(--violet-soft)}
+.vi-cu{display:flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid rgba(251,191,36,.45);color:var(--gold);font-size:var(--fs-body)}
+.cu{height:100%;display:flex;flex-direction:column}
+.cu .cuon{flex:1;min-height:0;overflow-y:auto;padding:12px 14px 14px;display:flex;flex-direction:column;gap:11px}
+.cu .bieu{display:grid;place-items:center;padding:18px 0 10px;position:relative}
+.cu .bieu::before{content:"";position:absolute;width:132px;height:132px;background:radial-gradient(circle,rgba(124,58,237,.28),rgba(34,211,238,.1) 45%,transparent 70%)}
+.cu .bieu .ten{position:relative;font-size:var(--fs-title);color:var(--text-title);margin-top:6px}
+.the{display:flex;align-items:center;gap:12px;padding:12px;background:linear-gradient(178deg,#081120,#060c17);border:1px solid var(--border-accent);box-shadow:var(--px-bong);text-align:left}
+.the .khung{width:52px;height:52px;flex:0 0 52px;display:grid;place-items:center;background:rgba(8,12,22,.85);border:1px solid var(--border-idle)}
+.the .chu{display:flex;flex-direction:column;gap:2px;min-width:0}
+.the .t1{font-size:var(--fs-title);color:var(--text-title);letter-spacing:.06em}
+.the .t2{font-size:var(--fs-micro);letter-spacing:.16em;color:#8b5cf6}
+.the .t3{font-size:var(--fs-body);font-weight:500;color:var(--text-muted);line-height:1.25}
+.the .mui{margin-left:auto;color:var(--accent);font-size:22px}
+.cu .nut-dn{padding:12px 0;border:1px solid var(--border-accent);color:var(--accent-bright);letter-spacing:.14em}
+.cu .nhac{font-size:var(--fs-body);color:var(--text-muted);text-align:center;margin:0}
+
+/* BÓNG HUY HIỆU theo bậc (founder 11/10): Sắt/Đồng phẳng · Bạc→Bạch Kim bóng pixel rơi đậm dần · Kim Cương/Elite bóng ĐỘNG */
+.hh{overflow:visible}
+.hh-2{filter:drop-shadow(0 1px 0 rgba(0,0,0,.45))}
+.hh-3{filter:drop-shadow(0 2px 0 rgba(0,0,0,.55))}
+.hh-4{filter:drop-shadow(0 2px 0 rgba(0,0,0,.65)) drop-shadow(0 0 3px rgba(94,234,212,.35))}
+.hh-5{animation:bongKc 2.4s ease-in-out infinite}
+.hh-6{animation:bongElite 2.8s ease-in-out infinite}
+@keyframes bongKc{
+  0%,100%{transform:translateY(0);filter:drop-shadow(0 2px 0 rgba(0,0,0,.7)) drop-shadow(0 0 3px rgba(96,165,250,.45))}
+  50%{transform:translateY(-1.5px);filter:drop-shadow(0 4px 0 rgba(0,0,0,.45)) drop-shadow(0 0 8px rgba(165,243,252,.75))}}
+@keyframes bongElite{
+  0%,100%{transform:translateY(0);filter:drop-shadow(0 3px 0 rgba(0,0,0,.75)) drop-shadow(0 0 4px rgba(167,139,250,.5))}
+  50%{transform:translateY(-2px);filter:drop-shadow(0 5px 0 rgba(0,0,0,.45)) drop-shadow(0 0 10px rgba(251,191,36,.7))}}
+.bac-o.chua .hh{animation:none;filter:grayscale(1) brightness(.55)}
+@media (prefers-reduced-motion:reduce){.hh-5,.hh-6{animation:none}}
+/* ══ TAY BÀI XOÈ (banner cảnh đầu) — founder 11/10: TĨNH, xoè như tay cầm bài, lá trông như lá bài thật, KHÔNG chữ, KHÔNG hiệu ứng.
+   Trái → phải: TĂNG → THIÊN NGA ĐEN → GIẢM (founder 11/10); TĂNG đè trên cùng (rõ nét nhất), GIẢM nằm dưới.
+   Art = lưới 48×48 của chính lá trong game (la-bai-phong-cach.html), in phẳng trên mặt giấy. Lá dựng 150px rồi thu theo banner (--lb-k). ══ */
+.canh[data-i="0"]{padding-bottom:96px}  /* chừa dải "BẠN CÓ BIẾT?" ở đáy banner */
+.canh[data-i="0"] .vat{transform:none!important;transition:none!important}
+.lb-bo{display:block;position:relative;width:calc(350px * var(--lb-k,.6));height:calc(272px * var(--lb-k,.6))}
+.lb-xoay{position:absolute;left:0;top:0;width:350px;height:272px;transform:scale(var(--lb-k,.6));transform-origin:0 0}
+.lb-o{position:absolute;left:100px;top:34px;width:150px;aspect-ratio:5/7;transform-origin:50% 122%;transform:rotate(var(--goc))}
+.lb-la{position:absolute;inset:0;border-radius:10px;padding:10px;
+  background:linear-gradient(170deg,#fdfaf3 0%,#f1e9d8 100%);
+  box-shadow:0 0 0 1px #cdbf9f,-3px 4px 8px rgba(0,0,0,.45)}
+.lb-khung{position:absolute;inset:9px;border-radius:5px;box-shadow:inset 0 0 0 1.5px var(--ho)}
+.lb-hinh{position:absolute;left:50%;top:50%;width:78%;transform:translate(-50%,-50%)}
+.lb-hinh svg,.lb-goc svg{display:block;width:100%;height:auto}
+.lb-goc{position:absolute;width:24px}
+/* hình góc ở TRÊN-PHẢI: tay bài xoè lá trái đè lên, phần lộ của lá dưới là mép PHẢI (như bài thật cầm tay trái) */
+.lb-goc.tr{right:14px;top:14px}
+.lb-goc.bl{left:14px;bottom:14px;transform:rotate(180deg)}
+.lb-tang{--ho:#16a34a} .lb-giam{--ho:#dc2626} .lb-thien_nga{--ho:#1f2937}
+@media (prefers-reduced-motion:reduce){
+  .tam,.man-toi,.o,.vao,.banner,.canh,.canh .vat{transition:none!important}
+  .o.lac,.hat{animation:none}
+}
+</style>
+
+<div class="ctl">
+  <div class="seg" role="group" aria-label="Phiên bản">
+    <button type="button" id="bCu" aria-pressed="false">BẢN CŨ</button>
+    <button type="button" id="bMoi" aria-pressed="true">BẢN MỚI</button>
+  </div>
+  <label class="chon-hang" for="chonHang">HẠNG MẪU
+    <select id="chonHang">
+      <option value="0">SẮT</option><option value="1" selected>ĐỒNG</option><option value="2">BẠC</option><option value="3">VÀNG</option>
+      <option value="4">BẠCH KIM</option><option value="5">KIM CƯƠNG</option><option value="6">ELITE</option>
+    </select></label>
+  <div class="seg" role="group" aria-label="Tài khoản">
+    <button type="button" data-tk="so" aria-pressed="true">CÓ SỔ</button>
+    <button type="button" data-tk="thuong" aria-pressed="false">THƯỜNG</button>
+    <button type="button" data-tk="khach" aria-pressed="false">KHÁCH</button>
+  </div>
+</div>
+
+<div class="may" id="may">
+  <div class="than" id="than"></div>
+  <nav class="nav" aria-label="Menu chính (giả)">
+    <span class="dang"><span data-icon="hall" data-size="16"></span>HUB</span>
+    <span><span data-icon="wallet" data-size="16"></span>TOKEN</span>
+    <span id="navMua" class="cham"><span data-icon="medal" data-size="16"></span>MÙA</span>
+    <span><span data-icon="shop" data-size="16"></span>SHOP</span>
+    <span><span data-icon="user" data-size="16"></span>HỒ SƠ</span>
+  </nav>
+  <div class="man-toi" id="manToi"></div>
+  <section class="tam" id="tam" role="dialog" aria-modal="true" aria-labelledby="tamTen" aria-hidden="true"></section>
+</div>
+
+<div class="so-do" id="soDo"></div>
+
+<section class="luat" aria-labelledby="luatTen">
+  <h2 id="luatTen">LUẬT PHẢN HỒI KHI CHẠM (màn không cuộn ⇒ cảm giác bấm là tất cả)</h2>
+  <ol>
+    <li><b>Nhấn xuống:</b> ô lún 3px, tắt bóng, viền sáng lam, ngay trong 0,05 s. Có rung máy 8 ms nếu điện thoại hỗ trợ.</li>
+    <li><b>Thả tay:</b> ô nảy về, vượt nhẹ rồi co lại.</li>
+    <li><b>Nút chính (VÀO TRẬN):</b> lún 4px, phụt hạt pixel, 0,12 s sau mới chuyển màn.</li>
+    <li><b>Giữ 0,45 s:</b> thanh nạp chạy dọc đáy ô; đầy thì rung máy và bung thông tin. Chỉ dùng cho ô đi thẳng (Predict) và vùng ngoài ảnh của ô Đấu trường.</li>
+    <li><b>Ô khoá:</b> lắc ngang 0,16 s rồi bung lý do.</li>
+    <li><b>Lớp trượt:</b> trồi lên có nảy; nền tối mờ. Vuốt xuống, chạm nền hoặc Esc để đóng.</li>
+  </ol>
+</section>
+<p class="chu-thich">Số liệu là VÍ DỤ. Hạng ĐỒNG chưa có trong dữ liệu /auth/me nên ô này là chỗ giữ sẵn. App chưa có năng lượng nên không vẽ.</p>
+
+<script>
+/* icon + bảng màu chép tự động từ web/src/components/ui/PixelIcon.tsx */
+const PAL={"C": "#cffafe", "D": "#67e8f9", "E": "#22d3ee", "e": "#0e7490", "V": "#ddd6fe", "v": "#a78bfa", "u": "#8b5cf6", "w": "#4c1d95", "W": "#ffffff", "S": "#e2e8f0", "s": "#94a3b8", "x": "#475569", "z": "#1e293b", "R": "#fca5a5", "q": "#ef4444", "Q": "#b91c1c", "r": "#7f1d1d", "Y": "#fef08a", "J": "#fde047", "y": "#fbbf24", "O": "#fb923c", "o": "#c2410c", "N": "#bbf7d0", "G": "#4ade80", "n": "#16a34a", "g": "#14532d", "K": "#1e1b3a", "k": "#0a0618", "A": "#bfdbfe", "L": "#60a5fa", "l": "#2563eb", "a": "#1e3a8a", "H": "#fbcfe8", "P": "#f472b6", "p": "#db2777", "h": "#831843", "T": "#c8a27a", "b": "#92400e", "B": "#78350f", "t": "#451a03"};
+const ICONS={"arena": ["................", "................", ".......s...s....", ".......s..NGG...", "...s..RRq.NGG...", "...s..qqQ.NGG...", "..NGG.qqQ.NGG...", "..NGG.qqQ.NGG...", "..NGG.qqQ.NGG...", "..NGG..s..NGG...", "..NGG..s..NGG...", "..NGG..s...s....", "...s...s...s....", ".xxxxxxxxxxxxxx.", "................", "................"], "vault": ["................", "..ssssssssssss..", ".sSSSSSSSSSSSSs.", ".sSzzzzzzzzzzSs.", ".sSz..SSSS..zSs.", ".sSz.SJJJJS.zSs.", ".sSz.SJyyJS.zSs.", ".sSz.SJyyJS.zSs.", ".sSz.SJJJJS.zSs.", ".sSz..SSSS..zSs.", ".sSz........zSs.", ".sSzzzzzzzzzzSs.", ".sSSSSSSSSSSSSs.", "..ssssssssssss..", "...s........s...", "................"], "chart": ["................", "................", ".....vvv........", ".....vvu........", ".....vvu........", ".eee.vvu........", ".eee.vvu.DDD....", ".eee.vvu.DDD.EEE", ".eee.vvu.DDD.EEE", ".eee.vvu.DDD.EEE", ".eee.vvu.DDD.EEE", ".eee.vvu.DDD.EEE", ".eee.vvu.DDD.EEE", ".eee.vuu.DDD.EEE", "................", "................"], "analyze": ["................", ".........SSSS...", "........S....S..", ".......S......S.", ".......S..D...S.", ".......S.DDD..S.", "........S....S..", ".........SSSS...", "............SS..", ".DD..........SS.", ".DD..DD.......SS", ".DD..DD..DD....S", ".DD..DD..DD.....", "xxxxxxxxxxxx....", "................", "................"], "lock": ["................", "......SSSS......", ".....SW..xx.....", ".....SW..xx.....", ".....SW..xx.....", ".....SW..xx.....", "...WWWWWWWWWW...", "...WSSSSSSSSx...", "...WSSllllSSx...", "...WSSlaaaSSx...", "...WSSSlaSSSx...", "...WSSSlaSSSx...", "...WSSSSSSSSx...", "...xxxxxxxxxx...", "................", "................"], "hall": ["................", ".......E........", "......EEE.......", ".....EEEEE......", "....EEEEEEE.....", "...EEEEEEEEE....", "..EEEEEEEEEEE...", "..E.........E...", "..E.D.D.D.D.E...", "..E.D.D.D.D.E...", "..E.D.D.D.D.E...", "..E.D.D.D.D.E...", "..E.D.D.D.D.E...", "..EEEEEEEEEEE...", ".EEEEEEEEEEEEE..", "................"], "wallet": ["................", ".....JJJJJJ.....", "...JJOOOOOOJJ...", "..JOOOOOOOOOOJ..", "..JOOyJJJJyOOy..", ".JOOy.Jyyy.JOOJ.", ".JOOy.J..J.JOOy.", ".JOOy.JJJy.JOOy.", ".JOOy..Jy..JOOy.", ".JOOy..Jy..JOOy.", "..JOOJJJJJJOOy..", "..JOOOOOOOOOOy..", "...yOOOOOOOOo...", "....yooooooo....", "................", "................"], "medal": ["................", ".qq..........qq.", ".qQ..........qQ.", "..qq........qQ..", "...qq......qQ...", "....qq....qQ....", ".....JJJJJJ.....", "....JJJyyJJJ....", "...JJJySSJJJJ...", "...JJySWWSJJy...", "...JJJJSSJJJy...", "....JJJJJJJy....", ".....Jyyyyy.....", "................", "................", "................"], "shop": ["................", ".....vv..vv.....", "....vu....vv....", "....vu....vu....", "...vvvvvvvvvv...", "..vuuuuuuuuuuv..", "..vuvvuuuuvvuw..", "..vuvvuuuuvvuw..", "..vuuuuuuuuuuw..", "..vuuuuvvuuuuw..", "..vuuuvvvvuuuw..", "..vuuuuvvuuuuw..", "..vuuuuuuuuuuw..", "...vwwwwwwwww...", "................", "................"], "user": ["................", "......vvvv......", ".....vuuuuv.....", "....vuSSSSvv....", "....vuSWWSvu....", ".....SSWWSS.....", ".....S.SS.S.....", "......SWWS......", ".......SS.......", "....vvvvvvvv....", "...vuuuuuuuuv...", "..vuuvvvvvvuuv..", "..vuvvvvvvvvuw..", "..vuvvvvvvvvuw..", "..vwuuuuuuuuww..", "................"]};
+/* 8 mục NỀN TẢNG chép tự động từ web/src/lib/bach_khoa/ (muc_*.ts · luoi.ts) — mục đầu luôn đi với cảnh quạt lá */
+const BK=[{"id": "thien_nga", "ten": "THIÊN NGA ĐEN", "anh": "BLACK SWAN", "icon": "thien_nga", "grid": ["................", "................", "....xW..........", "...Oxxx.........", ".....xx.........", "......x.........", "......x.........", ".....xx.........", ".....xxxxxxxx.x.", "....xxxxxxxxxxx.", "....xxxxxxxxxxx.", ".....zzzzzzzzz..", "..aaaaaaaaaaaa..", "................", "................", "................"], "nhac": "Cú sốc không ai lường trước — và vì thế không in lên tấm thẻ nào.", "ngoai": "Nhà thống kê, nhà văn Nassim Taleb gọi những biến cố hiếm, không ai ngờ tới nhưng tác động khổng lồ là \"thiên nga đen\" — vì người châu Âu từng tin mọi con thiên nga đều trắng, cho tới khi gặp thiên nga đen ở Úc. Sau khi xảy ra, ai cũng giải thích được; trước đó thì không ai nói tới.", "viDu": "", "chuoi": null}, {"id": "lai_suat", "ten": "LÃI SUẤT", "anh": "INTEREST RATE", "icon": "can_lai", "grid": ["................", ".......WW.......", ".......ss.......", ".ssssssssssssss.", ".s.....ss.....s.", "s.s....ss....s.s", "s.s....ss....s.s", "JJJJ...ss...WWWW", ".yy....ss....SS.", ".......ss.......", ".......ss.......", ".....ssssss.....", "....xxxxxxxx....", "................", "................", "................"], "nhac": "Giá thuê tiền. Rẻ thì tiền chảy ra chợ, đắt thì tiền quay về ngân hàng.", "ngoai": "Lãi suất là giá của việc dùng tiền của người khác. Gửi tiết kiệm là cho ngân hàng thuê tiền — vì thế ngân hàng trả lãi cho bạn; đi vay là thuê tiền của ngân hàng — vì thế bạn trả lãi. Ngân hàng trung ương — ở Việt Nam là Ngân hàng Nhà nước — đặt lãi suất điều hành, và lãi của các ngân hàng thương mại nhích theo nó.", "viDu": "Gửi 100 triệu, lãi 6% một năm thì mỗi năm được 6 triệu. Lãi xuống 3% thì chỉ còn 3 triệu — và 100 triệu ấy bắt đầu muốn đi tìm chỗ lời hơn.", "chuoi": {"ten": "KHI LÃI HẠ", "buoc": ["Gửi tiết kiệm bớt lời.", "Vay mua nhà, vay kinh doanh rẻ hơn.", "Tiền rời ngân hàng, đi tìm chỗ lời hơn."], "ket": "Cổ phiếu, crypto, đất dễ lên."}}, {"id": "lam_phat", "ten": "LẠM PHÁT", "anh": "INFLATION", "icon": "xu_chay", "grid": ["................", "................", ".....JJJJJJ.....", "...JJyyyyyyoo...", "..JyyYYyyyyyyo..", "..Jyyyyyyyyyyo..", ".Jyyyyyyyyyyyyo.", ".Jyyyyyyyyyyyyo.", ".oyyyyyyyyyyyyo.", "..oyyoyyyyoyyo..", "..oyo.oyyo.oyo..", "...y..oyyo...o..", "...o...yy.......", ".......oo.......", "..y.............", "................"], "nhac": "Tiền nằm im vẫn mất sức mua.", "ngoai": "Lạm phát là mức tăng chung của giá cả: cùng một số tiền, mỗi năm mua được ít hàng hơn. Nếu giá mọi thứ tăng 4% một năm thì 100 nghìn hôm nay, sang năm chỉ mua được lượng hàng bằng khoảng 96 nghìn hôm nay. Người giữ tiền mặt lâu chịu phần mất ấy mà không thấy dòng nào bị trừ trong ví.", "viDu": "", "chuoi": {"ten": "VÌ SAO CÓ LẠM PHÁT", "buoc": ["Tiền rẻ, vay nhiều, tiêu nhiều — hàng làm ra không kịp.", "Hoặc chi phí tăng: xăng, điện, nguyên liệu đắt lên.", "Người bán tăng giá; người đi làm đòi tăng lương."], "ket": "Giá tăng khiến ai cũng tin giá còn tăng — lạm phát tự nuôi mình."}}, {"id": "da_dang", "ten": "ĐA DẠNG HOÁ", "anh": "DIVERSIFICATION", "icon": "gio_trung", "grid": ["................", "................", "................", "................", "..WW...HH...AA..", ".WSSs.HPPp.ALLl.", ".WSSs.HPPp.ALLl.", ".SSss.PPpp.LLll.", ".TTTT.TTTT.TTTT.", ".bTbT.bTbT.bTbT.", ".TbTb.TbTb.TbTb.", "..BB...BB...BB..", "................", "................", "................", "................"], "nhac": "Không bỏ trứng vào một giỏ.", "ngoai": "Chia tiền vào nhiều thứ đi khác nhau để một cú xui không cuốn hết. Nhà kinh tế Harry Markowitz — người đoạt Nobel nhờ lý thuyết này — gọi đó là \"bữa trưa miễn phí\" duy nhất của tài chính: bớt rủi ro mà không buộc bớt phần lời kỳ vọng tương ứng.", "viDu": "Giữ mười món cùng lên cùng xuống cũng giống giữ một món — thứ đếm là mức chúng đi KHÁC nhau.", "chuoi": {"ten": "VÌ SAO CHIA GIỎ BỚT RỦI RO", "buoc": ["Cổ phiếu hay rơi khi có chiến tranh, dịch bệnh.", "Đúng lúc đó vàng, trái phiếu thường lên.", "Cầm cả hai thì phần lỗ bên này được phần lời bên kia đỡ."], "ket": "Tổng tài sản lên xuống êm hơn từng món riêng."}}, {"id": "khau_vi", "ten": "KHẨU VỊ RỦI RO", "anh": "RISK APPETITE", "icon": "ot", "grid": ["................", "............g...", "...........gn...", ".........qqqn...", "........qqqqQ...", ".......qRqqqQ...", "......qRqqqQ....", ".....qqqqqQ.....", "....qqqqqQ......", "...qqqqqQ.......", "..qqqqQ.........", ".qqqQ...........", ".qQ.............", "..Q.............", "................", "................"], "nhac": "Chịu được lên xuống tới đâu — lộ ra ở cách bạn chia tiền.", "ngoai": "Khẩu vị rủi ro là mức lên xuống của tiền mà một người chịu được mà vẫn ngủ ngon và giữ kế hoạch. Nó khác nhau theo tuổi, thu nhập, mục tiêu. Người ta hay tự nhận mình \"chịu chơi\" lúc chợ đang tăng — rồi đổi ý rất nhanh khi tài khoản đỏ.", "viDu": "Câu hỏi khảo sát quen thuộc: \"Nếu danh mục của bạn giảm 20% trong một tháng, bạn làm gì?\"", "chuoi": {"ten": "VÌ SAO KHẨU VỊ ĐO LÚC BÌNH TĨNH", "buoc": ["Chợ tăng: ai cũng thấy mình gan.", "Chợ giảm: nỗi đau mất tiền nặng khoảng gấp đôi niềm vui được chừng ấy tiền.", "Người chọn mức rủi ro lúc hưng phấn thường bán tháo lúc hoảng."], "ket": "Chọn trước, lúc còn tỉnh, thì giữ được kế hoạch."}}, {"id": "thanh_khoan", "ten": "THANH KHOẢN", "anh": "LIQUIDITY", "icon": "giot_nuoc", "grid": ["................", ".......LL.......", ".......LL.......", "......LAAL......", "......LALl......", ".....LAALLl.....", ".....LALLLl.....", "....LAALLLLl....", "....LALLLLLl....", "...LWALLLLLLl...", "...LALLLLLLLl...", "...LLLLLLLLLl...", "...lLLLLLLLll...", "....lLLLLLLl....", ".....llllll.....", "................"], "nhac": "Mua bán nhanh được bao nhiêu mà giá không chạy.", "ngoai": "Một thứ \"thanh khoản cao\" khi lúc nào cũng có người sẵn sàng mua và bán ở giá gần nhau — như vàng nhẫn ở tiệm vàng. Thứ thanh khoản thấp thì ít người hỏi mua: muốn bán gấp thường là bán rẻ — như một mảnh đất ở vùng ít người qua lại.", "viDu": "Bán một chỉ vàng mất vài phút; bán một mảnh đất có thể mất vài tháng, và bán trong tuần thì thường chịu hạ giá.", "chuoi": {"ten": "VÌ SAO LÚC HOẢNG THANH KHOẢN BIẾN MẤT", "buoc": ["Ngày thường, người mua và người bán cân nhau.", "Tin xấu: ai cũng muốn bán, người mua đứng ngoài chờ giá rẻ hơn.", "Lệnh bán không ai đỡ, giá rơi từng nấc."], "ket": "Thứ tưởng \"bán lúc nào cũng được\" bỗng khó bán."}}, {"id": "goi_ky_quy", "ten": "GỌI KÝ QUỸ", "anh": "MARGIN CALL", "icon": "dien_thoai", "grid": ["................", "................", "................", "W..............W", ".W............W.", "..OOOOOOOOOOOO..", ".OOooooooooooOO.", ".OO..........OO.", "....SSSSSSSS....", "...SSxSSxSSxS...", "..SSSSSSSSSSSS..", "..SSxSSxSSxSSs..", "..SSSSSSSSSSSs..", "..ssssssssssss..", "................", "................"], "nhac": "Vốn tụt dưới mức duy trì thì bị thu ngay, không chờ bạn bán.", "ngoai": "Vay tiền công ty chứng khoán để mua cổ phiếu (mua ký quỹ) thì tài khoản buộc giữ một tỷ lệ vốn của chính mình. Giá rơi làm tỷ lệ ấy tụt dưới ngưỡng thì bị \"gọi ký quỹ\": nộp thêm tiền, hoặc công ty chứng khoán tự bán bớt cổ phiếu của bạn — thường đúng lúc giá xấu nhất.", "viDu": "Ở Việt Nam, tiền của mình tối thiểu 50% lúc mua, và tỷ lệ duy trì tối thiểu là 30%.", "chuoi": {"ten": "VÌ SAO GỌI KÝ QUỸ LÀM GIÁ RƠI THÊM", "buoc": ["Giá rơi, hàng loạt tài khoản vay chạm ngưỡng.", "Công ty chứng khoán bán giải chấp cổ phiếu của những người đó.", "Lệnh bán dồn dập đẩy giá rơi thêm, chạm ngưỡng của người khác."], "ket": "Vòng xoáy bán tháo."}}, {"id": "chu_ky", "ten": "CHU KỲ KINH TẾ", "anh": "BUSINESS CYCLE", "icon": "chu_ky", "grid": ["................", "................", "................", "................", "....WWW.........", "...GSSSq........", "..Gn...Qq.......", ".Gn.....Qq......", "Gn.......Qq.....", "n.........Qq...G", "...........Qsssn", "............xxx.", "................", "................", "................", "................"], "nhac": "Tăng, chững, giảm, phục hồi — nối nhau thành vòng.", "ngoai": "Nền kinh tế không đi thẳng. Nó mở rộng (người ta làm nhiều, tiêu nhiều), quá nóng (giá cả leo, nợ chồng nợ), co lại (công ty cắt giảm, thất nghiệp tăng), rồi hồi phục. Mỗi pha kéo dài nhiều tháng tới vài năm, và mỗi loại tài sản mạnh ở một pha khác nhau.", "viDu": "", "chuoi": {"ten": "VÌ SAO KINH TẾ ĐI THÀNH VÒNG", "buoc": ["Kinh tế tốt: người ta vay và tiêu nhiều, công ty mở rộng.", "Quá đà: giá cả leo, ngân hàng trung ương tăng lãi.", "Tiền đắt: chi tiêu giảm, công ty cắt giảm — kinh tế co lại.", "Ngân hàng trung ương hạ lãi, tiền rẻ quay lại."], "ket": "Kinh tế hồi phục — và một vòng mới bắt đầu."}}];
+/* HUY HIỆU HẠNG v4 — v4: BÓNG tăng theo bậc: Sắt/Đồng gần phẳng (viền nhạt, không dải tối) · Bạc→Bạch Kim bóng pixel rơi đậm dần ·
+   Kim Cương + Elite BÓNG ĐỘNG (bóng nhấp nhô + quầng thở theo màu bậc, CSS .hh-5/.hh-6).
+   v3 — "càng cao càng TO, càng nhiều GÓC CẠNH, càng PHỨC TẠP" trong MỘT khung giới hạn cố định (founder 11/10).
+   v3: nhóm Sắt→Vàng to thêm ~15–20 %, viền Sắt/Đồng dày · Elite thu ~15 %, đai hạt ôm sát lõi, chỉ tím + vàng hoàng gia + cánh bạc ánh tím.
+   Lưới 40×40. Mỗi bậc đổi KHỐI HÌNH (không chỉ đổi màu), cỡ khung tăng đều, ngọc lõi tăng cỡ + độ sáng:
+   SẮT đĩa nhỏ · ĐỒNG tròn + đinh tán · BẠC khiên · VÀNG khiên + cánh ngắn · BẠCH KIM bát giác + cánh dài ·
+   KIM CƯƠNG thoi + vương miện + cánh rộng · ELITE sao 8 cánh + vương miện lớn + cánh xoè hết khung + hào quang. */
+const KL=[
+  {id:'sat',      ten:'SẮT',       c:['#cfd4dc','#8d949f','#4a505a','#2a2e35'], hinh:'tron',   r:9.8,  canh:0, mien:0, ngoc:null},
+  {id:'dong',     ten:'ĐỒNG',      c:['#f3b985','#d08a4e','#8a5229','#4a2a12'], hinh:'tron',   r:11, canh:0, mien:0, ngoc:null},
+  {id:'bac',      ten:'BẠC',       c:['#ffffff','#c3cfdd','#6b7a8f','#2f3846'], hinh:'khien',  r:12.2,canh:0,mien:0, ngoc:null},
+  {id:'vang',     ten:'VÀNG',      c:['#fff6b8','#fbbf24','#a16a07','#4d3203'], hinh:'khien',  r:13, canh:2,mien:0, ngoc:{r:2,c:['#fffbe0','#fde68a','#d97706']}},
+  {id:'bach_kim', ten:'BẠCH KIM',  c:['#e2fff8','#5eead4','#0f766e','#053b37'], hinh:'bat_giac',r:13.3,canh:3,mien:0, ngoc:{r:3,c:['#ffffff','#a7f3d0','#10b981']}},
+  {id:'kim_cuong',ten:'KIM CƯƠNG', c:['#eaf6ff','#60a5fa','#1d4ed8','#0b1f5c'], hinh:'thoi',   r:13.8,canh:4, mien:3, ngoc:{r:4,c:['#ffffff','#cffafe','#22d3ee']}},
+  {id:'elite',    ten:'ELITE',     c:['#efe6ff','#a78bfa','#6d28d9','#2e1065'], hinh:'sao',    r:13, canh:5, canhMau:['#f5f3ff','#cbc5e8','#7c75a3','#3b3658'], vienDay:0, mien:5, ngoc:{r:5,c:['#ffffff','#fef08a','#f59e0b']}},
+];
+function huyHieu(t,size){
+  const N=40, C=19.5, K=KL[t], [L,M,D,V]=K.c, g=Array.from({length:N},()=>Array(N).fill(null));
+  const dat=(x,y,col)=>{if(x>=0&&y>=0&&x<N&&y<N&&col)g[y][x]=col;};
+  const trong=(x,y,r)=>{const dx=x-C, dy=y-C+(K.mien?1:0);
+    switch(K.hinh){
+      case 'tron': return Math.hypot(dx,dy)<=r;
+      case 'khien': if(dy<=0) return Math.abs(dx)<=r*0.92&&dy>=-r*0.95; return Math.abs(dx)<=r*0.92*(1-dy/(r*1.15));
+      case 'bat_giac': return Math.abs(dx)<=r&&Math.abs(dy)<=r&&Math.abs(dx)+Math.abs(dy)<=r*1.42;
+      case 'thoi': return Math.abs(dx)/(r*0.86)+Math.abs(dy)/(r*1.06)<=1;
+      case 'sao': {const a=Math.atan2(dy,dx), rr=r*(0.74+0.26*Math.abs(Math.cos(4*a))); return Math.hypot(dx,dy)<=rr;}
+    }};
+  // 1. hào quang (ELITE)
+  if(t===6) for(let y=0;y<N;y++)for(let x=0;x<N;x++){const d=Math.hypot(x-C,y-C);
+    if(d>K.r+0.9&&d<K.r+2.6&&(x+y)%2===0) dat(x,y,y<C-2?'#fde68a':(y<C+4?'#fbbf24':'#a16a07'));}
+  // 2. cánh: số lông + độ dài tăng theo bậc
+  const [wL,wM,wD,wV]=K.canhMau||[L,M,D,V];
+  if(K.canh) for(const s of [-1,1]) for(let k=0;k<K.canh;k++){const len=Math.min(2+K.canh*1.6-k*1.2,7.4-k*0.9)|0, y0=Math.round(C-K.canh+k*2.2);
+    for(let j=0;j<len;j++){const x=s<0?Math.floor(C-K.r*0.86-1-j):Math.ceil(C+K.r*0.86+1+j), ny=y0-(j>len-3?1:0)+(k===K.canh-1?1:0);
+      dat(x,ny,j===len-1?wD:(k===0?wL:wM)); dat(x,ny+1,j===len-1?wV:wD);}}
+  // 3. thân khung: viền đậm · vát sáng trên-trái · tối dưới-phải
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    if(!trong(x,y,K.r))continue;
+    const vien=!trong(x-1,y,K.r)||!trong(x+1,y,K.r)||!trong(x,y-1,K.r)||!trong(x,y+1,K.r);
+    const day=t<=1?1.3:0, r2=K.r*(t<=1?0.5:0.62);
+    if(vien||(day&&!trong(x,y,K.r-day))){dat(x,y,t<=1?D:V);continue;}
+    if(trong(x,y,r2)){const vien2=!trong(x-1,y,r2)||!trong(x,y-1,r2)||!trong(x+1,y,r2)||!trong(x,y+1,r2);
+      dat(x,y,vien2?D:'#070b14');continue;}
+    const s=(x-C)+(y-C); dat(x,y,s<-K.r*0.5?L:(s>K.r*0.6&&t>=2?D:M));
+  }
+  // 4. đinh tán (ĐỒNG, BẠC)
+  if(t===1||t===2){const n=t===1?4:6; for(let i=0;i<n;i++){const a=i/n*Math.PI*2+Math.PI/4, rr=K.r*0.81;
+    const x=Math.round(C+Math.cos(a)*rr-0.5), y=Math.round(C+Math.sin(a)*rr-0.5); dat(x,y,L);dat(x+1,y,M);dat(x,y+1,M);dat(x+1,y+1,V);}}
+  // 5. lõi: vạch bậc (SẮT/ĐỒNG/BẠC) · ngọc tăng cỡ (VÀNG→ELITE)
+  const cy=C+(K.mien?1:0);
+  if(!K.ngoc){const n=t+1; for(let i=0;i<n;i++){const x=Math.round(C-n+i*2+0.5); dat(x,Math.round(cy-1),L);dat(x,Math.round(cy),M);}}
+  else{const {r,c:[gL,gM,gD]}=K.ngoc;
+    for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){const m=Math.abs(x)+Math.abs(y); if(m>r)continue;
+      dat(Math.round(C-0.5+x),Math.round(cy-0.5+y), m===r?gD:((x+y<0)?gL:gM));}
+    dat(Math.round(C-0.5)-1,Math.round(cy-0.5)-1,'#ffffff');
+    if(t>=5) for(const [sx,sy] of [[-r-2,-r],[r+2,-r+1],[0,-r-2]]) dat(Math.round(C-0.5+sx),Math.round(cy-0.5+sy),'#ffffff'); }
+  // 6. vương miện (KIM CƯƠNG 3 chóp · ELITE 5 chóp cao)
+  if(K.mien){const [cL,cM,cD]=t===6?['#fff6b8','#fbbf24','#a16a07']:[L,M,D];
+    const top=Math.round(C-K.r*1.06)-1, rong=K.mien===5?12:8;
+    for(let x=Math.round(C-rong/2);x<=Math.round(C+rong/2);x++){dat(x,top,cM);dat(x,top+1,cD);}
+    const chop=K.mien===5?[-6,-3,0,3,6]:[-4,0,4]; const cao=K.mien===5?5:3;
+    chop.forEach((dx,i)=>{const h=cao-(K.mien===5&&(i===0||i===4)?2:0)-(K.mien===5&&(i===1||i===3)?1:0);
+      for(let k=1;k<=h;k++){dat(Math.round(C+dx-0.5),top-k,k===h?cL:cM);dat(Math.round(C+dx+0.5),top-k,k===h?cL:cD);}
+      if(K.mien===5&&i===2){dat(Math.round(C-0.5),top-h-1,'#ffffff');dat(Math.round(C+0.5),top-h-1,'#ffffff');}});}
+  let out='';
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(g[y][x])out+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${g[y][x]}"/>`;
+  return `<svg class="hh hh-${t}" width="${size}" height="${size}" viewBox="0 0 ${N} ${N}" shape-rendering="crispEdges" aria-hidden="true">${out}</svg>`;
+}
+
+const BAC_NGHE=['TẬP SỰ','CHUYÊN VIÊN','NHÀ GIAO DỊCH','QUẢN LÝ DANH MỤC','GIÁM ĐỐC ĐẦU TƯ','CHỦ QUỸ','NGƯỜI TẠO SÓNG'];
+/* STICKER VINH DANH theo bậc (founder 11/10, hình mẫu): SẮT không có · ĐỒNG Tôm · BẠC Cua · VÀNG Cá Ngựa · BẠCH KIM Cá Đuối ·
+   KIM CƯƠNG Cá Mập · ELITE Cá Voi vàng hoàng gia đội vương miện. Tôm · Cua · Cá Voi GIỮ NGUYÊN cỡ + dáng của hình mẫu
+   (lưới tách tự động từ ảnh); Cá Ngựa · Cá Đuối · Cá Mập vẽ lại cho vừa khung. */
+const STK={
+  tom:{pal:{o:'#ff6a2a'},rows:[
+    '....oooooooooooooooooooo.',
+    '..oooooooooooooooo.ooo...',
+    '.oooooooooooooooooooo.oo.',
+    '.ooooooooooooooooooo....o',
+    'oooooooooooooooo........o',
+    'ooooo.....o.o.o...oooooo.',
+    'oooo.....o.o.o...o.......',
+    'ooo.....o.o.o.....oo.....',
+    'ooo......o.o.............',
+    '.oo.......o..............',
+    '.ooo.....................',
+    '..ooo...ooo..............',
+    '....ooooooo..............']},
+  cua:{pal:{A:'#ee0a0a',C:'#ff6b5a',B:'#000000'},rows:[
+    '..AAAA....AAAA..',
+    '.AAA........AAA.',
+    '.AAAAA....AAAAA.',
+    'AAAAA......AAAAA',
+    'AA...B....B...AA',
+    'AA..AAAAAAAA..AA',
+    'AAAAAAAAAAAAAAAA',
+    '.AAAACACAAAAAAA.',
+    '...AAACAAACAA...',
+    '.AAAAAAAACAAAAA.',
+    'AA..AACAAAAA..AA',
+    '...AAAACAAAAA...',
+    '.AAA..AAAA..AAA.']},
+  ca_ngua:{pal:{o:'#f5823c',O:'#c75a1b',y:'#f6c22e',k:'#111111'},rows:[
+    '.....yy.....',
+    '....yooyy...',
+    '....oooooy..',
+    'oo.ooookoy..',
+    'oooooooooy..',
+    'o...ooooOy..',
+    '.....oooO...',
+    '....yoooO...',
+    '...yyoooOy..',
+    '...yyooooOy.',
+    '....yoooooO.',
+    '....yyooooO.',
+    '.....yooooO.',
+    '......yoooO.',
+    '.....o.yooO.',
+    '....oo..oOO.',
+    '....o..oOO..',
+    '....oo.oO...',
+    '.....oOO....']},
+  ca_duoi:{pal:{a:'#0e3d6e',b:'#1d63a8',c:'#3f8fe0',d:'#7cc2f7'},rows:[
+    '.......a.....a.......',
+    '.......a.....a.......',
+    '.......aaaaaaa.......',
+    '......abbbbbbba......',
+    '.....abbcbbbcbba.....',
+    '....abbbcccccbbba....',
+    '...abbbccdcdccbbba...',
+    '.aabbbbccdddccbbbbaa.',
+    'abbbbbbcccdcccbbbbbba',
+    'abbbaabbccdccbbaabbba',
+    'abba...abcccba...abba',
+    'aba.....abcba.....aba',
+    'aa......abcba......aa',
+    '.........aba.........',
+    '.........aba.........',
+    '..........a..........',
+    '..........a..........',
+    '...........a.........']},
+  ca_map:{pal:{s:'#4f5f68',S:'#37444b',w:'#f4f7fa',r:'#d4170f',k:'#0a0a0a'},rows:[
+    '.......s.......',
+    '......sss......',
+    '.....sssss.....',
+    '....Sssssss....',
+    '...SsssssssS...',
+    '..SssswwwsssS..',
+    '..kswwwwwwwsk..',
+    '.Sswwwrwrwwwss.',
+    '.Sswwrrrrrwwss.',
+    'Sswwrrrrrrrwwss',
+    'Swwrwrrrrrwrwws',
+    'Swwrwrwrwrwrwws',
+    'Swwwwwwwwwwwwws',
+    'SSswwwwwwwwwsss']},
+  /* vương miện: lưới tách từ hình mẫu founder (11/10) · thân vàng hoàng gia SÁNG — lưng hổ phách thay nâu bết */
+  ca_voi_vang:{pal:{b:'#fbbf24',l:'#fde68a',B:'#f59e0b',w:'#fffbea',g:'#e9c46a',k:'#4a3305',Y:'#f2cb4a',R:'#b83232',W:'#ffffff'},rows:[
+    '.....Y...........',
+    '....YWY..........',
+    '.....Y...........',
+    '.YY.YRY.YY.......',
+    'YRRYRRRYRRY......',
+    'YRRYRRRYRRY......',
+    '.YRYRRRYRY.......',
+    '..YYYYYYY........',
+    '..YYYYYYY........',
+    '...bbbbb.........',
+    '..bbllbbb........',
+    '.bblbbbbbb.......',
+    '.bbbbbbbbbb......',
+    '.bbbbbbbkbb.B...B',
+    '.wwwwwwbbbb.BB.BB',
+    '.wgwgwwBBBB.BBBBB',
+    '.wgwgwwBBBB...B..',
+    '..gwgwgBBBBB.BB..',
+    '..wwgwwgBBBBBBw..',
+    '...gwgwwbBBBBw...',
+    '...Bwwwwbbwww....',
+    '...BB...bb.......',
+    '...B....b........']},
+};
+const STICKER=[null,'tom','cua','ca_ngua','ca_duoi','ca_map','ca_voi_vang'];
+const TEN_STICKER=['—','Tôm','Cua','Cá Ngựa','Cá Đuối','Cá Mập','Cá Voi'];
+function veSticker(key,size){
+  const s=STK[key]; if(!s) return '';
+  const h=s.rows.length, w=Math.max(...s.rows.map(r=>r.length)), n=Math.max(w,h);
+  const ox=(n-w)/2, oy=(n-h)/2; let r='';
+  s.rows.forEach((row,y)=>[...row].forEach((ch,x)=>{const c=s.pal[ch]; if(c) r+=`<rect x="${x+ox}" y="${y+oy}" width="1.02" height="1.02" fill="${c}"/>`;}));
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+}
+
+/* chép NGUYÊN từ docs/ui-ux/demo/la-bai-phong-cach.html (demo lá bài đã chốt) */
+const LB_MAU={"C": "#cffafe", "D": "#67e8f9", "E": "#22d3ee", "e": "#0e7490", "V": "#ddd6fe", "v": "#a78bfa", "u": "#8b5cf6", "w": "#4c1d95", "W": "#ffffff", "S": "#e2e8f0", "s": "#94a3b8", "x": "#475569", "z": "#1e293b", "R": "#fca5a5", "q": "#ef4444", "Q": "#b91c1c", "r": "#7f1d1d", "Y": "#fef08a", "J": "#fde047", "y": "#fbbf24", "O": "#fb923c", "o": "#c2410c", "N": "#bbf7d0", "G": "#4ade80", "n": "#16a34a", "g": "#14532d", "K": "#1e1b3a", "k": "#0a0618", "A": "#bfdbfe", "L": "#60a5fa", "l": "#2563eb", "a": "#1e3a8a", "H": "#fbcfe8", "P": "#f472b6", "p": "#db2777", "h": "#831843", "T": "#c8a27a", "b": "#92400e", "B": "#78350f", "t": "#451a03"};
+const LB_LUOI={"tang": ["................................................", "................................................", "................................................", "................................................", "................................................", "..............................................n.", "..............................................n.", ".............................................nnn", "......................G......................ngn", "..........GG..........G...G.........GG.......ngn", ".........G................G..................ngn", "........GgG.......................G..GGG..n..ngn", ".......GGG...G.....GGG....GGG.........GGG.n..ngn", ".......G.G...G..GGGNGgGGGGgGNGGG......G.Gnnn.nGn", ".......G..G.....GggGggggggggGggG.....G..GngnGGn.", ".......GG..GG.GGggggggggggggggggGG.GG..GGngG..n.", ".......GgG.....GgggggggGGgggggggG.....GgGnGn....", ".......GggG...GgggggggGNNGgggggggG...GgGGGgn....", "........GGNGGGgggggggggGGgggggggggGGGNG..Ggn....", ".........GGGggggggggggggggggggggggggGGGnGnnn....", ".......G....GgGggggggggggggggggggGgG.ngG..n.....", ".......G.....GNGggGggggggggggGggGNG..ngGG.......", "..........G..GGggGNGggggggggGNGggGgG.GGn........", ".........GgGGgggggGggggggggGNGggggggGgGn........", ".........GgggggGggggggggggggGgGgggggggGn........", "........GgggggG.GgGggggggggggGNGGGgggggG........", "........GGGGGG..GGNGggggggggggGGGGGGGGGG........", "................GgGggggggggggggG.QQQ.nnn........", "...........G..G.GgGggggggggggGgG.GQ...n.........", "...........G..G.GGNGggggggggGNGG.GQ.............", "..............G.GGNGggggggggGNGG.G..............", ".................GGgggGGGGgggGG.................", ".................GgggGNNNNGgggG.G...............", ".................GggGgGNNGgGggG.G...............", ".................GgGNGgGGgGNGgG.G...............", "..............n..nGgGggggggGgG..G...............", ".............nnn.GGgggGGGGggG...................", "......n......ngGG.nGgGNNNNGG....................", "......n...Q..GGn.Gn.GgGGGGG...G.................", ".....nnn.QQGGngn.....GGGGG......................", "..n..ngnGGGQ.ngn................................", ".nGGGGGG.QrQ.ngn................................", ".ngn..n..QQQ.nnn................................", ".ngn..n...Q...n.................................", ".nnn......Q.....................................", "..n.............................................", "..n.............................................", "................................................"], "giam": ["................................................", "................................................", "................................................", "................................................", "..Q.............................................", "..Q.............................................", ".QQQ............................................", ".QrQ.......k....................krrkkkrr........", ".QrQ..Q...kqQk.................krrkQqkkr........", ".QrQ..Q..kQQqqr................r.rQqQQrk........", ".Qqq.QQQ.QqqQrQr................rQkQqqr.........", "..Q.qqqQ.rqqQkkQ.rrrrrrrrrrrrrr.QkkQqqQ.........", "..Q..Qrq.rqqqQkQQQQqqqQQQQqqqQQQQkqQqqQ.........", ".....QrQqQqqqQrrQQqqqqqQqQqqqqQQr.QqqqQ.........", ".....QQQ.nQqqkrkQqqqqqqqqqqqqqqQk.kqqQ..........", "......Q...nkQrkQqqqqqqqqqqqqqqqQQkrQkk..........", "......Q...n.rQQqqqqqqqqqqqqqqqqqQQQr............", "...........rQQqqqQqqqqqqqqqqqqqqqqQQr...........", "..........rrQQQQQQQqqqqqqqqqqQQQQQQQrr..........", "..........kQqqQQrqQqQQqqqqqQqQ.rQQqqQk..........", "..........rqqQQrkrqqQqqqqqqQqqrkrQQqqr..........", ".........kQQQQrrrrkrrQqqqqQQrkrrrrrQQQk.........", ".........rrrQQrQrQrQ.rrrrrrQ...kQrqQQrrk........", "........krrQqQrQQrQQ.rrrrrkQ..rQQrQqQrr.........", ".........rkQqqQQQQQkkQQQQQQk.rQQQQqqQkr.........", "..........rqqqqQrrrkrqqqqQqrkrrrQqqqqr..........", ".........krqqqqqQkkrQqqqqqqQrk.Qqqqqqr..........", ".........kQqqqqqqQrkQqqqqqqQkrQqqqqqqQk.........", ".........kQQQQQqqQrkQqqqqqqQkrQqqQQqQQk.........", ".........kQQQqQQqQkrQqqqqqqQrkQqQQqQQQk.........", ".........kQQQQQQQQkQqQrrrrQqQkQQQQQQQQk.........", "..........QqQQQrQQkQQkrrrrkQQkQQrQQQQQQQ........", "........k.kQqQQQQrkQQkrrrrkQQkrQQQQqQkrQ........", "........rr.rQQQQQr.QQr.rr.rQQkrQQQQQrQrQ........", "........rr..rrrrrrkQqQQkkQQqQkrrrrrrqQrQ........", "........rrrkkrrrkrkQQQQ.kQQQQkrkrrr..qrQ........", "........rrr..krrr.kkQr..kkrQkk.rrrk..QqQ........", "........rrk....rrk..kkrQQrkkk..rrk...Qrq..Q.....", "........rk.....krr..r.QQQQkr..rrk....QQQqqQQ....", "........k........rrkrrk.kkrr.rr.......Q..QqQ....", "..................rk.rrrrrr.kr........Q..Qrq....", "..................k...k..k...............QrQqqQ.", ".........................................QQQ.QqQ", "..........................................Q..QrQ", "..........................................Q..QrQ", ".............................................QQQ", "..............................................Q.", "..............................................Q."], "thien_nga": ["................................................", "................................................", "...........................O....................", "......................s.........................", ".................s....s...Y.....................", "............s....s...sss....O.q.................", ".......s....s...sss.ssss....qqqq................", "..s....s...sss.sssss..s....WqQQq................", ".sss.ssssssssss..s....s.....qQQq................", ".ssss.sss..sss...s.......O..qQQq................", ".sss...s....s...............qQQq................", "..s.........................qQQq................", "............................qQQq................", "............................qQQq................", "............................qQQq................", ".............r.r.r.r........qQQq................", "....kkkkkkk.r.r.rkr.r.r.....qQQq................", "...kkkkkkkkk.r.r.kkr.r.r....qQQq................", "...kkkrrrrkkk.r.rkk.r.r.r.r.qQQq................", "..kkkrrrrrrkkr.r.kkr.r.r.r.rqQQq................", "..kkrrrrrrrkkkr.rkkkr.r.r.r.qQRq...n............", ".kkkrrrrrrrrkk.rkkkk.r.r.r.rqQQR...n....q.......", ".kkkrrrrrrrkkkrkkkkkr.r.r.r.qQQqRRnnn.qqqq......", ".kkkkrrrrrrkkrQkkkkr.r.r.r.rqQQq.nRgn.qQQq......", "rkkkkrrrrrkkkQkkkkkQr.r.r.r.qQQq.ngRn.qQQq......", ".kkkkrrrrkkkrkkkkkkkkkkkkr.rqqqq.nnnR.qQQq......", "rkkkrrrrrkkkkkkkkkkkkkkkkkk.r.q.r..nR.qQQq......", ".rkkrrrrkkkkkkkkkkkkkkkkkkkk.rqr...n.RqQQq......", "r.rkrrrkkkrkkkkkkkkkkkkQrkkkr.r.r....RqQQq......", ".r.krrkkkrkkkkkkkkkkkkkrQr.rkr.r.r....RQQq......", "r.rkrkkkrrkkkkkkkkkkkkkkkkr.r.r.r.....RQQq......", ".r.rkkkrrkkkkkkkkkkkkkkkkkkr.r.r.r....qRQq......", "r.r.kkkrrkkkkkkkkkkkkkkkkkk.r.r.r.....qRQq......", ".r.kkkkrrkkkkkkkkkkkkkkkkkkk.r.r.r....qQRq......", "r.rkkkrkkkkkkkkkkkkkkkkkkkkkr.r.r.....qQQR......", ".rkkkkrkkkkkkkkkkkkkkkkrQrkk.r.r.r....qQQqR.....", "rkkkkkkkkkkkkkkkkkkkkkkkr.rkr.r.r.....qQQq.R....", ".kkkkkkkkkrkkkkkkkkkkkkkQr.r.r.r......qQQq..R...", "rkkkkkkkkkkkrkkkkkkkkkkkk.r.r.r.r.....qQQq...R..", ".rkkkkkkkkkkkrkkkkkkkkkkkr.r.r.r......qQQq......", "r.kkkkkkkkkkkkkkkkkkkkkkk.r.r.r.......qQQq...q..", ".r.kkkkkkkkkkkkkkkkkkr.rkk.r.r.r......qqqq.qqqq.", "..rkkkkkkkkkkkkkkkkkk.r.r.r.r.r.........q..qQQq.", ".r.rkkkkkkkkkkkkkkkkkr.r.r.r.r..........q..qQQq.", "..r.rkkkkkkkkkkkkkkkr.r.r.r.r..............qQQq.", "kkkkkrrkkkkkkkkkkkkkkrkkkkkkk..............qQQq.", "kk..kkk.rkkkkkkkkkr.kkk.rkk.k..............qqqq.", ".....r.r.r.r.r.r.r.r.r.r.r...................q.."]};
+const LB_ICON={"chien_tranh": ["..........z....Y", "..............sO", "........z....xx.", "......YO....ss..", ".....sO....Sx...", "....xx....Sx..z.", "...ss....qq.YO..", "..Sx.......sO...", ".Sx.......xx....", "qq.......ss.....", "........Sx......", ".......Sx.......", ".....Wqq........", "....Y...........", ".q.OYOq....O....", "..rqOqrr..qqr..."]};
+/* Tay bài xoè cho cảnh đầu banner — art phẳng từ lưới lá trong game (không neon, không vệt, không chữ). */
+function lbDuong(luoi){const m=new Map();luoi.forEach((h,y)=>{let x=0;while(x<h.length){const ch=h[x];
+  if(ch==='.'||!LB_MAU[ch]){x++;continue;}let r=1;while(x+r<h.length&&h[x+r]===ch)r++;
+  if(!m.has(ch))m.set(ch,[]);m.get(ch).push(`M${x},${y}h${r}v1h-${r}z`);x+=r;}});return m;}
+/* cắt khung trống quanh hình để art lấp mặt lá */
+function lbCat(luoi){let t=luoi.length,b=0,l=luoi[0].length,r=0;
+  luoi.forEach((h,y)=>[...h].forEach((c,x)=>{if(c!=='.'&&LB_MAU[c]){t=Math.min(t,y);b=Math.max(b,y);l=Math.min(l,x);r=Math.max(r,x);}}));
+  const n=Math.max(b-t,r-l)+1, cy=(t+b+1)/2, cx=(l+r+1)/2; return `${cx-n/2} ${cy-n/2} ${n} ${n}`;}
+function lbHinh(id){const luoi=LB_LUOI[id];
+  const d=[...lbDuong(luoi)].map(([ch,p])=>`<path fill="${LB_MAU[ch]}" d="${p.join('')}"/>`).join('');
+  return `<svg viewBox="${lbCat(luoi)}" shape-rendering="crispEdges" aria-hidden="true">${d}</svg>`;}
+function lbLa(id,goc){const h=lbHinh(id);
+  return `<span class="lb-o lb-${id}" style="--goc:${goc}deg"><span class="lb-la"><span class="lb-khung"></span>
+    <span class="lb-goc tr">${h}</span><span class="lb-hinh">${h}</span><span class="lb-goc bl">${h}</span></span></span>`;}
+/* trái → phải: TĂNG → THIÊN NGA ĐEN → GIẢM; vẽ GIẢM trước để TĂNG nằm trên cùng */
+function boLa(){return `<span class="lb-bo" role="img" aria-label="Tay bài: Tăng, Thiên nga đen, Giảm"><span class="lb-xoay">
+  ${lbLa('giam',21)}${lbLa('thien_nga',0)}${lbLa('tang',-21)}</span></span>`;}
+/* thu tay bài theo bề rộng banner: tay bài rộng 350px ở cỡ gốc (góc ±21°, tâm xoay dưới đáy 22 %) */
+function lbCo(){const b=document.getElementById('banner');if(!b)return;
+  const k=Math.min(.8,Math.max(.4,(b.clientWidth-8)/350));b.style.setProperty('--lb-k',k.toFixed(3));}
+
+const DATA={
+  so:{khach:false,ten:'orca_21',bac:1,soSo:true,chi:85,chi7:[120,60,0,240,95,40,85],viec:3,tongViec:4,diemDanh:false,token:'1.250',
+      viecDs:[['Chơi 3 trận Alpha Draft','3/3'],['Ghi sổ 5 ngày','5/5'],['Chốt sổ tuần','1/1'],['Thử một lá mới','0/1']]},
+  thuong:{khach:false,ten:'orca_21',bac:1,soSo:false,viec:2,tongViec:4,diemDanh:true,token:'1.250',
+      viecDs:[['Chơi 3 trận Alpha Draft','3/3'],['Thử một lá mới','1/1'],['Ghi sổ 5 ngày','0/5'],['Chốt sổ tuần','0/1']]},
+  khach:{khach:true,viec:1,tongViec:4,diemDanh:false,token:'200',
+      viecDs:[['Chơi 3 trận Alpha Draft','1/3'],['Thử một lá mới','1/1'],['Ghi sổ 5 ngày','0/5'],['Chốt sổ tuần','0/1']]}
+};
+const MO={
+  arena:{ten:'ALPHA DRAFT',tag:'DRAFT • CLIMB RANK',icon:'arena',mo:'Lật thẻ thị trường, dựng danh mục, chốt phiên — ai đọc thị trường giỏi hơn.',nut:'VÀO TRẬN ▸'},
+  finance:{ten:'PERSONAL FINANCE',tag:'TRACK • PLAN • REVIEW',icon:'vault',mo:'Ghi thu chi tiền thật · hiểu thói quen tiền của bạn.',nut:'MỞ TÀI CHÍNH ▸'},
+  mua:{ten:'MÙA 0.0',tag:'VIỆC TUẦN · MỐC · ĐIỂM DANH',icon:'medal',mo:'Việc tuần trả theo tuần: làm đủ là hết việc tuần này, cày thêm không có thêm.',nut:'XEM HÀNH TRÌNH ▸'},
+  predict:{ten:'PREDICT MARKET',tag:'FORECAST • EARN TOKEN',icon:'chart',mo:'Phân bổ token vào câu hỏi kinh tế, đoán đúng thì chia pool.',nut:'MỞ CHỢ ▸'},
+  lab:{ten:'ORACLE LAB',tag:'ANALYZE • INSIGHT',icon:'analyze',mo:'Mổ xẻ dữ liệu vĩ mô cùng Oracle.',khoa:'Admin đang chạy thận, hãy quay lại sau.'},
+  hang:{ten:'HẠNG MÙA',tag:'MÙA 0.0',icon:'medal',mo:''}
+};
+let ban='moi', tk='so', nhip=10000, slide=0, tSlide=null;
+
+function veLuoi(rows,size){
+  const n=rows.length,w=rows[0].length;let r='';
+  rows.forEach((row,y)=>{[...row].forEach((ch,x)=>{const c=PAL[ch];if(c)r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${c}"/>`;});});
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${w} ${n}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+}
+const veIcon=(name,size)=>ICONS[name]?veLuoi(ICONS[name],size):'';
+function phuIcon(root){root.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=veIcon(el.dataset.icon,+el.dataset.size||16);});}
+const nghin=v=>v.toLocaleString('vi-VN');
+const rung=ms=>{try{navigator.vibrate&&navigator.vibrate(ms);}catch(e){}};
+
+/* ── banner: cảnh trận + mục bách khoa, chuyển mờ ── */
+/* câu "bạn có biết": từ câu VÌ SAO của chính mục; mục không phải câu hỏi thì dùng câu kết */
+function goiMo(e){const h=e.chuoi?e.chuoi.ten.trim():'';
+  if(/^VÌ SAO /.test(h)) return 'Vì sao '+h.slice(7).toLocaleLowerCase('vi')+'?';
+  return e.nhac;}
+function veCanh(e,i){
+  const vat = i===0
+    ? `<span class="vat">${boLa()}</span>`
+    : `<span class="hao"></span><span class="vat">${veLuoi(e.grid,96)}</span>`;
+  return `<div class="canh${i===slide?' hien':''}" data-i="${i}">${vat}</div>`;
+}
+function veBanner(){
+  const e=BK[slide];
+  return `<div class="banner" id="banner" role="button" tabindex="0" aria-label="Đọc bách khoa: ${e.ten}">
+      <span class="tien-do" id="tienDo"></span>
+      ${BK.map(veCanh).join('')}
+      <span class="cham-bn">${BK.map((_,i)=>`<i class="${i===slide?'on':''}"></i>`).join('')}</span>
+      <span class="chu-banner" id="bnChu">
+        <span class="hang-tag"><span class="tag">BẠN CÓ BIẾT?<span id="bnTen" hidden>${e.ten}</span></span><span class="doc">ĐỌC ▸</span></span>
+        <span class="goi" id="bnGoi">${goiMo(e)}</span></span>
+    </div>`;
+}
+function chayTienDo(){
+  const p=document.getElementById('tienDo'); if(!p)return;
+  p.style.transition='none';p.style.transform='scaleX(0)';void p.offsetWidth;
+  p.style.transition=`transform ${nhip}ms linear`;p.style.transform='scaleX(1)';
+}
+function sangCanh(){
+  slide=(slide+1)%BK.length;
+  const b=document.getElementById('banner'); if(!b)return;
+  b.querySelectorAll('.canh').forEach(c=>c.classList.toggle('hien',+c.dataset.i===slide));
+  b.querySelectorAll('.cham-bn i').forEach((d,i)=>d.classList.toggle('on',i===slide));
+  const chu=document.getElementById('bnChu'); chu.classList.add('doi');
+  setTimeout(()=>{document.getElementById('bnTen').textContent=BK[slide].ten;
+    document.getElementById('bnGoi').textContent=goiMo(BK[slide]); chu.classList.remove('doi');},350);
+  b.setAttribute('aria-label','Đọc bách khoa: '+BK[slide].ten);
+  chayTienDo();
+}
+function henBanner(){clearInterval(tSlide);tSlide=setInterval(()=>{if(!tam.classList.contains('mo'))sangCanh();},nhip);chayTienDo();}
+
+function banMoi(d){
+  const max=Math.max(...(d.chi7||[1]),1);
+  const oTaiChinh=d.soSo
+    ? `<span class="nhan">TÀI CHÍNH</span>
+       <span class="so-to tien">${d.chi}<small>k</small></span>
+       <span class="duoi">chi hôm nay</span>
+       <span class="cot">${d.chi7.map((v,i)=>`<span><i style="height:${Math.max(4,v/max*100)}%"></i>${['T5','T6','T7','CN','T2','T3','NAY'][i]}</span>`).join('')}</span>`
+    : `<span class="nhan">TÀI CHÍNH</span>
+       <span class="icon-giua"><span data-icon="vault" data-size="40"></span>${d.khach?'CẦN TÀI KHOẢN':'GHI CHI TIÊU'}</span>`;
+  return `<div class="moi">
+    <div class="dau">
+      <span class="anh">${d.khach?'<span data-icon="hall" data-size="26"></span>':'<span data-icon="user" data-size="26"></span>'}</span>
+      <span class="nguoi"><span class="ten">${d.khach?'Khách':d.ten}</span>
+        <span class="phu">${d.khach?'chỉ lưu trên máy này':'MÙA 0.0'}</span></span>
+      <span class="tai-san">
+        ${d.khach?'':`<button type="button" class="hang" data-tam="hang" aria-label="Hạng mùa: ${KL[d.bac].ten}">${huyHieu(d.bac,46)}</button>`}
+        <button type="button" class="vi" data-di="token" aria-label="Ví token"><span data-icon="wallet" data-size="16"></span>${d.token} T</button>
+      </span>
+    </div>
+    <div class="luoi">
+      <div class="o o-tran" data-giu="arena">
+        <span class="nhan"><span data-icon="arena" data-size="16"></span>ALPHA DRAFT</span>
+        ${veBanner()}
+        <button type="button" class="vao" id="nutVao">VÀO TRẬN ▸</button>
+        <span class="nap"></span>
+      </div>
+      <div class="cot-phai">
+        <button type="button" class="o" data-tam="finance" aria-label="Chi tiết Tài chính">${oTaiChinh}</button>
+        <button type="button" class="o" data-tam="mua" aria-label="Chi tiết Mùa">
+          <span class="nhan">MÙA 0.0</span>
+          <span class="so-to">${d.viec}<small>/${d.tongViec}</small></span>
+          <span class="duoi">việc tuần</span>
+          <span class="nac">${Array.from({length:d.tongViec},(_,i)=>`<i class="${i<d.viec?'xong':''}"></i>`).join('')}</span>
+          <span class="chip ${d.diemDanh?'xong':''}">${d.diemDanh?'ĐÃ ĐIỂM DANH':'● ĐIỂM DANH'}</span>
+        </button>
+      </div>
+      <div class="hang-nho">
+        <button type="button" class="o o-nho mo-nhat" data-di="predict" data-giu="predict" aria-label="Mở Predict Market (giữ để xem là gì)">
+          <span data-icon="chart" data-size="24"></span><span class="ten-nho">PREDICT</span><span class="nap"></span></button>
+        <button type="button" class="o o-nho mo-nhat" data-tam="lab" data-khoa="1" aria-label="Oracle Lab đang khoá">
+          <span data-icon="analyze" data-size="24"></span><span class="ten-nho">LAB</span>
+          <span class="khoa" data-icon="lock" data-size="16"></span></button>
+      </div>
+    </div>
+    ${d.khach?`<button type="button" class="dang-ky" data-di="dangky">▶ ĐĂNG KÝ ĐỂ GIỮ TÀI KHOẢN</button>`:''}
+    <p class="mien-tru">Token T không có giá trị thật · không mua bán · không quy đổi.</p>
+  </div>`;
+}
+function banCu(d){
+  const the=k=>{const m=MO[k];return `<div class="the"><span class="khung"><span data-icon="${m.icon}" data-size="32"></span></span>
+    <span class="chu"><span class="t1">${m.ten}</span><span class="t2">${m.tag}</span><span class="t3">${m.mo}</span></span>
+    <span class="mui">${m.khoa?veIcon('lock',16):'›'}</span></div>`;};
+  return `<div class="cu"><div class="thanh-cu"><span class="logo">DELPH<i>I</i></span>
+      <span class="vi-cu"><span data-icon="wallet" data-size="16"></span>${d.token} T</span></div>
+    <div class="cuon" id="cuonCu">
+    <div class="bieu">${d.khach?'<span data-icon="hall" data-size="64"></span>':'<span data-icon="user" data-size="64"></span>'}
+      ${d.khach?'':`<span class="ten">${d.ten}</span>`}</div>
+    ${['arena','finance','predict','lab'].map(the).join('')}
+    ${d.khach?'<button type="button" class="nut-dn">▶ ĐĂNG KÝ ĐỂ GIỮ TÀI KHOẢN</button><p class="nhac">Đang chơi bằng tài khoản khách. Thành tích chỉ ở lại trên máy này.</p>':''}
+    <p class="mien-tru">Token T không có giá trị thật · không mua bán · không quy đổi.</p>
+  </div></div>`;
+}
+
+/* ── lớp trượt ── */
+const tam=document.getElementById('tam'), manToi=document.getElementById('manToi');
+let truocDo=null;
+function noiDung(k,d){
+  if(k==='hang'){const b=d.bac;return {
+    dau:`<span class="anh" style="border:0;background:none;box-shadow:none">${huyHieu(b,56)}</span><span style="display:flex;flex-direction:column;gap:3px"><span class="tam-ten" id="tamTen">${KL[b].ten}</span><span class="tam-tag">${BAC_NGHE[b]} · MÙA 0.0</span></span>`,
+    than:`<div class="tam-chi-tiet"><div class="bac-luoi">${KL.map((k2,i)=>`<div class="bac-o ${i===b?'dang':''} ${i>b?'chua':''}">${huyHieu(i,44)}<b>${k2.ten}</b><span>${BAC_NGHE[i]}</span></div>`).join('')}</div>
+      <p class="tam-hoi" style="margin-top:6px">QUÀ VINH DANH — lên bậc nào, nhận sticker bậc đó</p>
+      <div class="sticker-hang">${STICKER.map((n,i)=>`<div class="sticker ${i>b?'chua':''} ${n?'':'trong'}">${n?veSticker(n,40):'<span class="rong">—</span>'}<span>${(i>b||!n)?KL[i].ten:TEN_STICKER[i]}</span></div>`).join('')}</div>
+      <p class="mien-tru" style="text-align:left">Demo: hạng là chỗ giữ sẵn — /auth/me chưa trả hạng (Ý chờ).</p></div>`,
+    nut:null};}
+  if(k==='bk'){const e=BK[slide];return {
+    dau:`<span class="anh">${veLuoi(e.grid,40)}</span><span style="display:flex;flex-direction:column;gap:3px"><span class="tam-ten" id="tamTen">${e.ten}</span><span class="tam-tag">${e.anh}</span></span>`,
+    than:`<p class="tam-hoi">${e.nhac}</p><div class="tam-chi-tiet"><p class="tam-mo">${e.ngoai}</p>
+      ${e.chuoi?`<p class="tam-hoi" style="margin-top:4px">${e.chuoi.ten}</p>${e.chuoi.buoc.map((b,i)=>`<div class="buoc"><b>${i+1}</b><span>${b}</span></div>`).join('')}${e.chuoi.ket?`<div class="ket">${e.chuoi.ket}</div>`:''}`:''}
+      ${e.viDu?`<div class="dong" style="display:block;font-weight:500;line-height:1.3"><b style="color:var(--violet-soft);letter-spacing:.12em">VÍ DỤ · </b>${e.viDu}</div>`:''}</div>`,
+    nut:'MỞ BÁCH KHOA ▸'};}
+  const m=MO[k];
+  let ct='';
+  if(k==='finance'&&d.soSo){const ngay=['T5','T6','T7','CN','T2','T3','HÔM NAY'];
+    ct=d.chi7.map((v,i)=>`<div class="dong"><span>${ngay[i]}</span><b class="vang">${v?nghin(v*1000)+' đ':'—'}</b></div>`).slice(-4).join('');}
+  if(k==='mua') ct=d.viecDs.map(([t,s])=>`<div class="dong"><span>${t}</span><b>${s}</b></div>`).join('');
+  let nut=m.nut, phu='';
+  if(k==='mua'&&!d.diemDanh) phu='<button type="button" class="vao" data-dong="1" data-hat="1">ĐIỂM DANH ●</button>';
+  if(k==='finance'&&d.khach) nut=null;
+  return {
+    dau:`<span class="anh"><span data-icon="${m.icon}" data-size="32"></span></span><span style="display:flex;flex-direction:column;gap:3px"><span class="tam-ten" id="tamTen">${m.ten}</span><span class="tam-tag">${m.tag}</span></span>`,
+    than:`<p class="tam-mo">${m.khoa||m.mo}</p>${ct?`<div class="tam-chi-tiet">${ct}</div>`:''}`,
+    nut, phu};
+}
+function moTam(k){
+  const n=noiDung(k,DATA[tk]);
+  tam.innerHTML=`<span class="quai" aria-hidden="true"></span><div class="tam-dau">${n.dau}</div>${n.than}
+    <div class="tam-nut">${n.phu||''}${n.nut?`<button type="button" class="vao" data-dong="1" data-hat="1">${n.nut}</button>`:''}
+    <button type="button" class="dong-tam" data-dong="1">ĐÓNG</button></div>`;
+  phuIcon(tam);
+  truocDo=document.activeElement;
+  tam.classList.add('mo');manToi.classList.add('mo');tam.setAttribute('aria-hidden','false');
+  tam.querySelector('.dong-tam').focus({preventScroll:true});
+}
+function dongTam(){tam.classList.remove('mo');manToi.classList.remove('mo');tam.setAttribute('aria-hidden','true');tam.style.transform='';
+  if(truocDo&&document.contains(truocDo))truocDo.focus({preventScroll:true});}
+manToi.addEventListener('click',dongTam);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&tam.classList.contains('mo'))dongTam();});
+let y0=null;
+tam.addEventListener('pointerdown',e=>{if(e.target.closest('button,.tam-chi-tiet'))return;y0=e.clientY;tam.style.transition='none';tam.setPointerCapture(e.pointerId);});
+tam.addEventListener('pointermove',e=>{if(y0===null)return;tam.style.transform=`translateY(${Math.max(0,e.clientY-y0)}px)`;});
+tam.addEventListener('pointerup',e=>{if(y0===null)return;const dy=e.clientY-y0;y0=null;tam.style.transition='';if(dy>70)dongTam();else tam.style.transform='';});
+
+/* ── phản hồi chạm ── */
+function phutHat(el){
+  const r=el.getBoundingClientRect(), m=document.getElementById('may').getBoundingClientRect();
+  for(let i=0;i<8;i++){const h=document.createElement('span');h.className='hat';
+    const a=i/8*Math.PI*2, d=28+Math.random()*18;
+    h.style.left=(r.left-m.left+r.width/2)+'px';h.style.top=(r.top-m.top+r.height/2)+'px';
+    h.style.setProperty('--dx',Math.cos(a)*d+'px');h.style.setProperty('--dy',Math.sin(a)*d+'px');
+    document.getElementById('may').appendChild(h);setTimeout(()=>h.remove(),450);}
+}
+let tFlash;
+function flash(t){let f=document.getElementById('flash');if(!f){f=document.createElement('div');f.id='flash';
+  f.style.cssText='position:absolute;left:50%;bottom:74px;transform:translateX(-50%);z-index:8;padding:6px 12px;background:#0e1b30;border:1px solid var(--border-accent);color:var(--accent-bright);font-size:13px;letter-spacing:.08em;box-shadow:var(--px-bong);white-space:nowrap';
+  document.getElementById('may').appendChild(f);}f.textContent=t;f.hidden=false;clearTimeout(tFlash);tFlash=setTimeout(()=>f.hidden=true,1100);}
+const TEN_DI={predict:'PREDICT MARKET',token:'tab TOKEN',dangky:'màn ĐĂNG KÝ'};
+
+const may=document.getElementById('may');
+let giu=null, daGiu=false, dich=null;
+function dichCua(t){return t.closest('#nutVao, #banner, .o, .vi, .hang, .dang-ky, .tam .vao');}
+may.addEventListener('pointerdown',e=>{
+  const el=dichCua(e.target); if(!el)return;
+  dich=el; daGiu=false;
+  const nhanEl=el.id==='banner'?el:(el.closest('.o')&&!el.matches('#nutVao,.vao')?el.closest('.o'):el);
+  nhanEl.classList.add('nhan-xuong'); dich._nhan=nhanEl; rung(8);
+  const o=el.closest('[data-giu]');
+  if(o && !el.matches('#nutVao,#banner')){ o.classList.add('dang-giu');
+    giu=setTimeout(()=>{daGiu=true;rung(15);o.classList.remove('dang-giu');nhanEl.classList.remove('nhan-xuong');moTam(o.dataset.giu);},450);}
+});
+function nhaTay(){clearTimeout(giu);document.querySelectorAll('.dang-giu').forEach(x=>x.classList.remove('dang-giu'));
+  if(dich&&dich._nhan)dich._nhan.classList.remove('nhan-xuong');}
+['pointerup','pointercancel','pointerleave'].forEach(t=>may.addEventListener(t,nhaTay));
+may.addEventListener('contextmenu',e=>e.preventDefault());
+may.addEventListener('click',e=>{
+  if(daGiu){daGiu=false;return;}
+  const t=e.target;
+  if(t.closest('.tam [data-dong]')){const b=t.closest('[data-dong]');
+    if(b.dataset.hat){phutHat(b);setTimeout(()=>{dongTam();flash('→ '+b.textContent.replace('▸','').trim());},140);} else dongTam();return;}
+  if(t.closest('#nutVao')){const b=t.closest('#nutVao');phutHat(b);setTimeout(()=>flash('→ vào SẢNH ĐẤU (1 chạm)'),120);return;}
+  if(t.closest('#banner')){moTam('bk');return;}
+  const k=t.closest('[data-tam]'); if(k){
+    if(k.dataset.khoa){k.classList.add('lac');setTimeout(()=>{k.classList.remove('lac');moTam(k.dataset.tam);},170);} else moTam(k.dataset.tam);return;}
+  const di=t.closest('[data-di]'); if(di){flash('→ đi tới '+(TEN_DI[di.dataset.di]||di.dataset.di)+' (1 chạm)');}
+});
+may.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.id==='banner'){e.preventDefault();moTam('bk');}});
+
+function soDo(){
+  const el=document.getElementById('cuonCu')||than.firstElementChild;
+  const cuon=Math.max(0,el.scrollHeight-el.clientHeight);
+  const dongChu=ban==='cu'?12:0;
+  document.getElementById('soDo').innerHTML=
+    `<div class="${cuon===0?'tot':''}"><b>${cuon} px</b><span>PHẢI CUỘN</span></div>
+     <div class="${dongChu===0?'tot':''}"><b>${dongChu}</b><span>DÒNG MÔ TẢ TRÊN MẶT</span></div>
+     <div class="tot"><b>1</b><span>CHẠM TỚI TRẬN</span></div>`;
+}
+const than=document.getElementById('than');
+function ve(){
+  const d=DATA[tk];
+  than.innerHTML=ban==='moi'?banMoi(d):banCu(d);
+  phuIcon(may);
+  document.getElementById('navMua').classList.toggle('cham',!d.diemDanh);
+  dongTam(); if(ban==='moi')henBanner(); else clearInterval(tSlide);
+  requestAnimationFrame(lbCo);
+  requestAnimationFrame(soDo);
+}
+const nhom=(sel,cb)=>document.querySelectorAll(sel).forEach(b=>b.onclick=()=>{document.querySelectorAll(sel).forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));cb(b);});
+nhom('#bCu,#bMoi',b=>{ban=b.id==='bCu'?'cu':'moi';ve();});
+nhom('[data-tk]',b=>{tk=b.dataset.tk;ve();});
+document.getElementById('chonHang').onchange=e=>{const v=+e.target.value;DATA.so.bac=v;DATA.thuong.bac=v;if(tk==='khach'){tk='so';document.querySelectorAll('[data-tk]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.tk==='so'?'true':'false'));}ve();};
+window.addEventListener('resize',()=>{soDo();lbCo();});
+ve();
+</script>

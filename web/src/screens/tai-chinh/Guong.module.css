@@ -1,0 +1,435 @@
+/*
+ * Màn GƯƠNG — CHÉP TỪ DEMO ĐÃ CHỐT (A11.25), `docs/ui-ux/demo/pfm-ban-tien.html` `#manGuong`
+ * (bản đã sửa 06/09, D290: nút Oracle 38px · `.thieuMau` thành lớp · `--linh-nen` thành token).
+ *
+ * ⚠ Không `composes` từ `pixel.module.css` (giống `Hu.module.css`/`So.module.css`): tệp tự
+ * reset nút của mình. Repo KHÔNG có reset toàn cục cho `<button>`, nên mọi nút dưới đây phải
+ * tự khai `background`/`border`/`font`, không thì nó ra nền trắng.
+ *
+ * ⚠ TÊN LỚP: đã grep trước khi đặt (luật D241). Vùng neo đáy tên `neoDay` chứ KHÔNG phải
+ * `day` — `Hu.module.css` đã có `.day` nghĩa "vùng đáy" và `.huDay` nghĩa "hũ đầy"; bỏ dấu
+ * thì ba chữ viết y hệt nhau và một cú `composes` nhầm sẽ không lỗi, không cảnh báo.
+ */
+
+/*
+ * ⚠ `--chu-thieu` và `--linh-nen` TỪNG khai tạm ở đây (D292), kèm ghi nợ "đưa về
+ * `pfm_token.css` là một lượt riêng". Lượt ấy là D308 — hai token nay nằm ở `:root`
+ * của tệp token dùng chung, đúng chỗ demo đặt chúng. Đừng khai lại ở đây.
+ */
+
+/*
+ * ── GÓC KHẤC PIXEL — chữ ký thị giác của cả hệ (§XI luật 1) ───────────────────────
+ *
+ * ⚠⚠ MỘT NGUỒN (A11.5): `composes` lớp `khung` của `pixel.module.css` chứ KHÔNG chép lại
+ * polygon. Chép lại là dựng bản cài đặt thứ hai của cùng một hình, và bản thứ hai sẽ trôi
+ * khi `--px-notch` đổi — trôi IM LẶNG, vì một góc vát sai 1px không làm gì đỏ.
+ * ⚠ Đây là lớp DUY NHẤT của tệp `composes` sang `pixel.module.css`: `.khung` chỉ khai
+ * `border-radius: 0` + `clip-path`, không đụng `background`/`border`/`font` — nên nó
+ * KHÔNG phá phần reset nút mà tệp này tự làm (xem khối đầu tệp).
+ * ⚠ Demo gọi lớp này là `.khac` và gắn nó lên 13 chỗ của `#manGuong`; giữ nguyên tên để
+ * đối chiếu demo ↔ code không phải dịch qua một từ điển thứ ba.
+ */
+.khac {
+  composes: khung from '@/styles/pixel.module.css';
+}
+
+/* ── KHỐI THẺ DÙNG CHUNG (chép demo: khoi2/hang2/ten2/so2/phu2s/chuThich/tieu) ─────── */
+.tieu {
+  margin: 13px 0 8px;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  padding-left: 1.5px;
+  color: var(--text-muted);
+}
+.tieuForm { margin: 9px 0 6px; }
+
+.khoi2 {
+  position: relative;
+  border: 1px solid var(--line);
+  background: var(--surface-card);
+  padding: 12px;
+  margin-bottom: 9px;
+}
+.hang2 { display: flex; align-items: baseline; gap: 8px; }
+.ten2 { flex: 1; font-size: 15px; color: var(--text-bright); }
+.phu2s { font-size: 12px; color: var(--text-muted); }
+.soPhai { margin-left: auto; }
+.so2 { font-size: 21px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-bright); }
+.chuThich { margin: 7px 0 0; font-size: 12px; line-height: 1.55; color: var(--chu-mo); }
+.cau { margin-top: 7px; font-size: 13px; line-height: 1.5; color: var(--text-bright); }
+/* D325 — câu hỏi của thẻ NHÌN LẠI THÁNG TRƯỚC (demo `pfm-lo-trinh-trang-thai.html` §③). */
+.cauCk { margin: 9px 0 0; font-size: 13px; line-height: 1.45; letter-spacing: .3px; color: var(--text-bright); }
+
+/* ── THẺ ORACLE ──────────────────────────────────────────────────────────────────── */
+.oracle {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  border: 1px solid var(--accent);
+  background: rgba(34, 211, 238, .06);
+  padding: 10px;
+  margin-bottom: 10px;
+}
+/*
+ * LINH VẬT THẬT, KHÔNG NỀN (D366 — founder 21/09: *"bỏ cái phông nền tím của oracle đi"*).
+ * ⚠ Trước đây đây là KHỐI PIXEL tím — chỗ giữ cho Mascot thật, ghi nợ từ D68. `Mascot` đã có
+ *   thật và GĐ A/B dùng nó ở bong bóng Oracle mới; để ô tím ở lại đây là hai Oracle mặc hai bộ
+ *   đồ trên CÙNG MỘT MÀN (ảnh founder gửi có cả hai). Nợ art D68 ở chỗ này coi như trả xong.
+ */
+.linh {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+}
+.noi { flex: 1; min-width: 0; }
+.cauOracle { display: block; font-size: 13px; line-height: 1.5; color: var(--text-bright); }
+.viSao {
+  display: block;
+  margin-top: 7px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  border-left: 2px solid var(--line-2);
+  padding-left: 8px;
+}
+.hangOracle { margin-top: 8px; gap: 4px; }
+/* ⚠ 38px (D290): 30px là vùng chạm NHỎ NHẤT cả bản thử, mà VÌ SAO?/BỎ QUA là hai nút bấm
+   nhiều nhất ở GƯƠNG. Chữ 11.5px cho hai nút vẫn lọt một hàng. */
+.hangOracle .nut2 { min-width: 0; height: 38px; font-size: 11.5px; padding: 0 9px; }
+
+/* ── NẮP GẤP — mỗi lá nắp TỰ MANG con số tóm tắt ──────────────────────────────────── */
+/* ⚠ Nắp không mang số là GIẤU thông tin, không phải progressive disclosure — đó là ranh
+   giữa hai thứ, và nó dễ vượt qua mà không nhận ra (§4-bis). */
+.gap {
+  border: 1px solid var(--line);
+  background: var(--surface-card);
+  margin-bottom: 7px;
+}
+.gapDau {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+}
+.gT { flex: 1; font-size: 12px; letter-spacing: 1.5px; color: var(--text-muted); }
+.gS {
+  font-size: 13.5px;
+  color: var(--text-bright);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.gM { flex: none; width: 13px; font-size: 12px; color: var(--text-muted); text-align: center; }
+.mo { border-color: var(--line-2); }
+.mo .gT { color: var(--accent); }
+.gapThan { padding: 2px 10px 11px; }
+
+/* ── LỊCH THÁNG — một cái liếc thay cho một câu số ────────────────────────────────── */
+.lich { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; margin: 9px 0 4px; }
+.lich i { height: 13px; background: var(--long-thanh); border: 1px solid rgba(93, 114, 144, .22); }
+.lich i.on { background: var(--accent); border-color: var(--accent); }
+.lich i.nay { outline: 1px solid var(--gold); outline-offset: 1px; }
+
+/* ── MỘT CHỈ SỐ = MỘT THANH CÓ MỐC THÁNG TRƯỚC ───────────────────────────────────── */
+/* ⚠ MẪU SỐ ở lại ngoài (`n=26` — luật P7), ĐỊNH NGHĨA vào nút (?): trước đây cả hai cùng
+   nằm ngoài nên mỗi chỉ số ngốn ba dòng và năm chỉ số vượt khung 97px. */
+.csD { padding: 8px 0 9px; border-bottom: 1px dashed rgba(93, 114, 144, .16); }
+.csD:last-of-type { border-bottom: 0; }
+.csTop { display: flex; align-items: baseline; gap: 8px; }
+.csTop .t { flex: 1; font-size: 12.5px; color: var(--text-dim); }
+.csTop .v { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-bright); }
+.csTop .n { font-size: 11px; color: var(--chu-mo); }
+/* ⚠ "chưa đủ để nói" là một CÂU, không phải một con số — nên nó bỏ cỡ chữ số và lấy màu
+   chữ mờ. Bản demo trước để `style="color:#5d7290"` inline; D290 đổi thành lớp này. */
+.csTop .v.thieuMau { font-size: 12px; color: var(--chu-thieu); }
+
+.csBar {
+  position: relative;
+  height: 14px;
+  margin-top: 7px;
+  background: var(--long-thanh);
+  border: 1px solid rgba(93, 114, 144, .25);
+}
+.csBar > i { display: block; height: 100%; background: var(--muc-cu); }
+.csBar > s { position: absolute; top: 0; bottom: 0; background: var(--muc-nay); }
+.csBar > u { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--moc-cu); z-index: 2; }
+/* Thiếu mẫu thì thanh KẺ SỌC và không có con số — "chưa đủ để nói" phải NHÌN THẤY được,
+   không chỉ đọc được. */
+.csBar.thieu {
+  background: repeating-linear-gradient(90deg, var(--long-thanh) 0 5px, var(--soc-thieu) 5px 10px);
+}
+.csChu { margin-top: 4px; font-size: 11.5px; line-height: 1.45; color: var(--chu-mo); }
+.mucNay { color: var(--muc-nay); }
+.mocCu { color: var(--moc-cu); }
+
+/* ── HAI BẢNG CHI TIẾT (D242) ─────────────────────────────────────────────────────── */
+/*
+ * ⚠⚠ Cột "so tháng trước" KHÔNG tô đỏ/xanh. Đỏ-xanh ở đây là MÀU PHÁN XÉT: nó nói tăng là
+ * xấu, giảm là tốt — mà app không được phép có ý kiến về tiền của người chơi (A10 🔒). Chỉ
+ * hiện dấu và số, cùng MỘT màu trung tính; `--win`/`--lose` không xuất hiện trong tệp này.
+ */
+.cuonBang { overflow-x: auto; }
+.bang { width: 100%; border-collapse: collapse; font-size: 12px; }
+.bang th {
+  padding: 5px 4px;
+  text-align: right;
+  font-size: 10px;
+  letter-spacing: .8px;
+  font-weight: 600;
+  color: var(--chu-mo);
+  border-bottom: 1px solid var(--line);
+}
+.bang th:first-child { text-align: left; }
+.bang td {
+  padding: 5px 4px;
+  text-align: right;
+  color: var(--chu-than);
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid rgba(93, 114, 144, .14);
+}
+.bang td:first-child { text-align: left; color: var(--chu-sang); }
+.oNho {
+  display: inline-grid;
+  place-items: center;
+  min-width: 30px;
+  height: 17px;
+  font-size: 9.5px;
+  letter-spacing: .4px;
+  background: var(--mat-phim-phu);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.delta { color: var(--chu-phu); }
+.it { color: var(--chu-mo); font-style: italic; }
+/* Thanh tỉ trọng nằm TRONG ô, không cần thêm một cột nữa. */
+.cot { position: relative; display: block; height: 3px; margin-top: 3px; background: var(--long-thanh); }
+.cot i { position: absolute; inset: 0 auto 0 0; background: var(--muc-cu); }
+
+/* ── CHỈ SỐ DÒNG ĐƠN (khối tuần) ──────────────────────────────────────────────────── */
+.cs {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px dashed rgba(93, 114, 144, .16);
+  font-size: 13px;
+}
+.csTen { flex: 1; color: var(--text-dim); }
+.csGt { font-variant-numeric: tabular-nums; color: var(--text-bright); }
+
+/* ── CON DẤU NIÊM PHONG — nhịp MÁY nên steps(), chạy MỘT lần rồi đứng yên ─────────── */
+@keyframes dongDau {
+  0% { transform: scale(2.4) rotate(-14deg); opacity: 0; }
+  60% { transform: scale(.94) rotate(2deg); opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+.dau {
+  display: grid;
+  place-items: center;
+  height: 72px;
+  margin-top: 8px;
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  font-size: 15px;
+  letter-spacing: 2px;
+  padding-left: 2px;
+  animation: dongDau 420ms steps(5, end) both;
+}
+
+/*
+ * ── Ô ĂN MỪNG — cái vỗ tay sau khi chốt sổ tuần ──────────────────────────────────
+ * ⚠ EMOJI ĐƯỢC PHÉP Ở KHU PFM (founder chốt 06/09) với ranh: emoji cho KHOẢNH KHẮC (ăn
+ * mừng, linh vật) · PIXEL do ta vẽ cho thứ mang THÔNG TIN (ngôi sao ưu tiên, thanh đo,
+ * mốc). Ô này không mang một con số nào ⇒ nó là khoảnh khắc. Cỡ đo chép nguyên từ demo.
+ */
+.vothay {
+  display: grid;
+  place-items: center;
+  height: 46px;
+  margin-top: 7px;
+  font-size: 26px;
+  border: 1px solid rgba(253, 224, 71, .45);
+}
+
+/* ── PILL · NÚT · Ô HỎI (chép demo) ──────────────────────────────────────────────── */
+.pill {
+  display: inline-block;
+  padding: 3px 7px 3px 8px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  border: 1px solid var(--line-2);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.pill.chay { border-color: var(--accent); color: var(--accent); }
+.pill.dung { border-color: var(--gold); color: var(--gold); }
+
+.nutHang { display: flex; gap: 5px; margin-top: 9px; flex-wrap: wrap; }
+.nut2 {
+  flex: 1;
+  min-width: 74px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding-left: 1px;
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  box-shadow: var(--px-bong);
+  cursor: pointer;
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.nut2:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+.nut2.chinh { border-color: var(--accent); color: var(--accent-bright); background: rgba(34, 211, 238, .10); }
+.nut2.vang { border-color: rgba(253, 224, 71, .5); color: var(--gold); }
+.rong100 { width: 100%; flex: none; }
+
+/*
+ * ⚠ NÚT (?) — HAI PHẦN TỬ, HAI VIỆC (founder chốt phương án (c) cho D292, sửa demo cùng lượt).
+ *
+ * Bản trước để CẢ HAI trên một phần tử: `<button class="hoi khac">` (góc khấc) + `.hoi::before`
+ * 44px (vùng chạm). Mà `clip-path` xén cả pseudo-element lẫn VÙNG NHẬN CHẠM, nên lớp phủ bị
+ * cắt lại đúng về bát giác 21×21 — cú nới vùng chạm KHÔNG có hiệu lực, và không gì đỏ.
+ * ⇒ NÚT là `.cham44`: 44×44 trong suốt, KHÔNG khấc, KHÔNG clip — nó nhận chạm và mang trạng
+ *   thái (`aria-expanded`). HÌNH là `<span class="hoi khac">` 21×21 bên trong — chỉ để nhìn.
+ *   Cùng nếp `.cham44` khối ① của `CaiDatPfm.module.css`.
+ * ⚠ LỀ ÂM 11.5px = (44 − 21) / 2: hộp lề của nút vẫn đúng 21×21 nên HÀNG CHỮ KHÔNG CAO LÊN
+ *   (nút nằm cuối một hàng `.csTop`, và §4-bis đo từng px của cột chỉ số); hộp viền 44×44 mới
+ *   là thứ nhận chạm, đè lên khoảng trống quanh nó — đúng điều lớp phủ cũ định làm.
+ * ⚠ Nút (?) là chỗ DUY NHẤT người chơi đọc được một chỉ số nghĩa là gì; chạm trượt thì định
+ *   nghĩa coi như không tồn tại trên điện thoại (D290 đã nâng `.hangOracle .nut2` vì đúng
+ *   lý do này).
+ * ⚠ Tệp tự reset nút (không reset toàn cục cho `<button>` — xem đầu tệp): thiếu `background:
+ *   none; border: 0` là một ô trắng 44px hiện ra giữa hàng chữ.
+ */
+.cham44 {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -11.5px;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+}
+/* Con của nút không nhận chạm — mục tiêu sự kiện luôn là NÚT, trạng thái chỉ có một chỗ đọc. */
+.cham44 > * { pointer-events: none; }
+.hoi {
+  flex: none;
+  width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text-muted);
+  border: 1px solid var(--line-2);
+}
+.cham44[aria-expanded='true'] .hoi { border-color: var(--accent); color: var(--accent); }
+.giai {
+  margin: 7px 0 0;
+  padding: 9px 10px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-dim);
+  background: var(--surface-inset);
+  border-left: 2px solid var(--accent);
+}
+
+/* ── Ô NGƯỠNG CỦA FORM ĐẶT LUẬT — VÀNG, VÀ CỐ Ý TRỐNG ───────────────────────────── */
+/* ⚠ Viền vàng là lời hứa "chỗ này của bạn": `mau_luat.ts` khai `NGUONG_GOI_Y = null` vì
+   một con số điền sẵn là thả neo (anchoring) và là app định nghĩa hộ "bao nhiêu thì lớn". */
+.oTrong { box-shadow: inset 0 0 0 1px var(--gold); padding: 2px 9px; }
+.oTrong.loi { box-shadow: inset 0 0 0 2px var(--lose); }
+
+/* ── NEO ĐÁY: CHỐT SỔ TUẦN NÀY (một hành động chính mỗi màn — §4-bis) ────────────── */
+.neoDay {
+  position: sticky;
+  bottom: calc(65px + env(safe-area-inset-bottom, 0px));
+  z-index: 4;
+  padding: 9px 0;
+  margin: 0 -10px;
+  border-top: 2px solid var(--mep-ban);
+  background: var(--mat-ban);
+}
+.nutChinh {
+  width: calc(100% - 20px);
+  margin: 0 10px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: var(--gold);
+  background: none;
+  border: 1px solid rgba(253, 224, 71, .5);
+  border-radius: 0;
+  box-shadow: var(--px-bong);
+  cursor: pointer;
+  transition: transform 90ms steps(2, end), box-shadow 90ms steps(2, end);
+}
+.nutChinh:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+.nutChinh:disabled { opacity: .5; cursor: default; box-shadow: none; }
+.loiDay {
+  margin: 7px 10px 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--gold);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* ⚠ Phải là ĐÚNG selector đã dùng ở trên — rút gọn về lớp đơn là thua độ ưu tiên và
+     hoạt ảnh lọt lưới, im lặng (A11.18). Ở đây `.dau` vốn đã là lớp đơn. */
+  .dau { animation: none; }
+}
+
+/* ── VỊ THẾ · ĐỘ KHỚP (tệp 15 lát 1, bản 2) ────────────────────────────────────────────
+ * ⚠ Lá KẾT TOÁN trên thẻ NHÌN LẠI dùng khuôn chung `components/pfm/LaKetToan` (bố cục + CSS ở đó, không ở đây).
+ * ⚠ Hoạt ảnh DÙNG LẠI `ndVaoLen` (motion.module.css) — reduced-motion đã tắt ở đó (D116). Không
+ *   keyframe mới ở tệp này. Không mã hex rời — chỉ biến đã có (luật 5 `00-doc-truoc.md`).
+ */
+.vaoLoiDoan { composes: ndVaoLen from '../../styles/motion.module.css'; }
+
+/* Chip "chắc tới đâu" ở form đặt luật — nhấn bằng CỠ (số to), cùng hàng ba nút đều nhau. */
+.hangChac { flex-wrap: nowrap; }
+.chacLuat { height: 44px; font-size: 17px; letter-spacing: 0; }
+
+/* Nắp LỜI ĐOÁN — mỗi mức chắc một hàng: số % to · ô đếm (đặc = tới) · chữ đếm. */
+.hangChacDem { display: flex; align-items: center; gap: 9px; margin-top: 7px; }
+.soChac {
+  flex: none;
+  min-width: 44px;
+  font-size: 19px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-bright);
+}
+.oDem { display: flex; flex-wrap: wrap; gap: 3px; flex: 1; }
+.oDem i {
+  display: block;
+  width: 13px;
+  height: 13px;
+  border: 1px solid var(--gold);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, .45);
+}
+.oDem i.oToi { background: var(--gold); }

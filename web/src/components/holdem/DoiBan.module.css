@@ -1,0 +1,37 @@
+/* ĐỘI CỦA BẠN — màn kết bàn chung. §XI: góc khấc, không bo, bóng cứng. */
+.khoi {
+  composes: khungNoi from '@/styles/pixel.module.css';
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 1.5px solid rgba(34, 211, 238, 0.4);
+  box-shadow: var(--px-vien-trong), var(--px-bong);
+  background: rgba(0, 0, 0, 0.35);
+}
+.dau { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.nhan { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; color: var(--accent); }
+.phu { margin-left: auto; font-size: 10px; color: var(--text-muted); }
+.ds { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.dong {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 8px;
+  border: 1px solid rgba(93, 114, 144, 0.3);
+  font-size: 12px;
+}
+.toi { border-color: var(--gold-amber, #fbbf24); background: rgba(251, 191, 36, 0.06); }
+.ten { font-weight: 700; letter-spacing: 0.04em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.so { font-variant-numeric: tabular-nums; color: var(--text-bright); white-space: nowrap; }
+.so small { color: var(--text-muted); font-size: 10px; }
+.chan { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.nut {
+  composes: nut from '@/styles/pixel.module.css';
+  padding: 9px;
+  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.14);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+.chu { font-size: 10px; color: var(--text-muted); line-height: 1.5; }

@@ -1,0 +1,61 @@
+/*
+ * GƯƠNG TẦNG KHÔNG GIAN — hình riêng của mặt GƯƠNG (phần chung ở `components/pfm/PfmBento.module.css`). Demo CHỐT bản 6.
+ *
+ * VÒNG "TIỀN VÀO ĐI ĐÂU": vật tròn dựng bằng `conic-gradient` + MẶT NẠ (không `border-radius` — pixel art). Hiệu ứng QUÉT mở dần theo biến
+ * `--quet` (góc) — NGOẠI LỆ ĐÃ DUYỆT của luật "chỉ animate transform/opacity" (founder 11/10, `docs/so-chot.md`): mặt nạ quạt là thứ duy nhất
+ * tả được "vòng được quét ra", và animate nó chỉ chạy MỘT LẦN mỗi lần dựng tab (không vô hạn, không trên số liệu). Có `@property` để trình duyệt nội suy góc.
+ */
+@property --quet { syntax: '<angle>'; inherits: false; initial-value: 360deg; }
+
+.oHuong { flex: 0 0 auto; gap: 2px; padding: 8px 10px; }
+.tieuTang { flex: 0 0 auto; margin: 2px 0 -2px; font-size: var(--tk-micro); letter-spacing: 0.14em; color: var(--v-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.luoi { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 8px; }
+.oHang { gap: 4px; overflow: hidden; }
+
+.lech { display: flex; gap: 10px; min-width: 0; }
+.lech > span { display: flex; flex-direction: column; flex: 1 1 0; min-width: 0; }
+.lech em { font-style: normal; font-size: var(--tk-micro); color: var(--text-muted); }
+.lech b { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; font-size: 17px; line-height: 1.1; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-title); }
+.oDem { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.oDem > i { width: 12px; height: 12px; background: var(--n-4); box-shadow: var(--px-vien); }
+.oDem > i.toi { background: var(--v-3); }
+
+/* VÒNG: ô vuông co theo ô cha (`container-type: size` đo cạnh ngắn) — vòng không bao giờ tràn ô. */
+.vong { flex: 1 1 0; min-height: 0; display: grid; place-items: center; container-type: size; margin-block: 4px; }
+.quet {
+  width: min(86px, 100cqmin);
+  height: min(86px, 100cqmin);
+  /* Vật tròn: cắt hình tròn (mặt nạ chỉ khoét LỖ GIỮA, không cắt góc). */
+  clip-path: circle(50%);
+  -webkit-mask: radial-gradient(closest-side, transparent 57%, #000 59%), conic-gradient(#000 var(--quet), transparent 0);
+  -webkit-mask-composite: source-in;
+  mask: radial-gradient(closest-side, transparent 57%, #000 59%), conic-gradient(#000 var(--quet), transparent 0);
+  mask-composite: intersect;
+  animation: pfmQuet var(--nhip-pfm-quet, 760ms) cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--tre, 0ms) + 220ms);
+}
+@keyframes pfmQuet { from { --quet: 0deg; transform: scale(0.88) rotate(-10deg); } }
+
+/* CỘT CHI TỪNG NGÀY: cột mọc từ đáy (`pfmMocDoc` ở PfmBento), ngày chưa tới = sọc chéo. */
+.cotG { flex: 1 1 auto; min-height: 20px; display: flex; align-items: flex-end; gap: 2px; }
+.cotG > i { flex: 1; background: var(--v-2b); }
+.cotG > i.nay { background: var(--v-3); }
+.cotG > i.trong { height: 100%; background: repeating-linear-gradient(45deg, var(--n-3) 0 3px, transparent 3px 6px); }
+
+/* SÁU Ô NHỎ */
+.hangNho { grid-column: 1 / 3; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.oNho { align-items: center; justify-content: center; text-align: center; gap: 2px; padding: 5px 4px; height: 58px; }
+.oNho b { width: 100%; font-size: var(--tk-label); letter-spacing: 0.06em; color: var(--text-title); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; }
+.phu { width: 100%; font-size: var(--tk-micro); color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; }
+
+.nutChot { flex: 0 0 auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .quet { animation: none; }
+}
+/* Màn thấp (360×640): ô nhỏ gọn lại; mọi thứ vẫn là khối nguyên. */
+@media (max-height: 720px) {
+  .oNho { height: 50px; }
+  .lech b { font-size: 15px; }
+}

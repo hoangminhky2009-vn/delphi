@@ -1,0 +1,125 @@
+/* PHÒNG HƯỚNG DẪN — trang đọc, ưu tiên nhịp chữ. Cùng họ Terminal×Neon:
+ * khung vuông, không bo góc, không gradient chữ. */
+
+.trang {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-bottom: 24px;
+}
+
+.mo {
+  color: var(--text-bright, #e2e8f0);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.muc {
+  border: 1px solid rgba(139, 92, 246, 0.28);
+  padding: 10px 12px;
+}
+
+.mucDau {
+  margin: 0 0 8px;
+  color: var(--accent-bright, #a78bfa);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.mucSo {
+  margin-right: 4px;
+  color: var(--text-dim, #64748b);
+  font-weight: 700;
+}
+
+.muc p {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.buoc {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.gach {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.chuY {
+  margin-top: 8px;
+  padding: 6px 8px;
+  border-left: 2px solid var(--gold-amber, #fbbf24);
+  background: rgba(251, 191, 36, 0.07);
+  font-size: 12px;
+}
+
+/* Nút vào màn tập — cửa chính của trang (founder 02/08: dạy bằng chơi). */
+.nutTap {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: 1.5px solid var(--gold-amber, #fbbf24);
+  background: rgba(251, 191, 36, 0.14);
+  color: var(--gold-amber, #fbbf24);
+  font: inherit;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.nutTap:hover:not(:disabled) { box-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+.nutTap:disabled { opacity: 0.6; cursor: wait; }
+.loiTap { color: var(--lose-tag); font-size: 11px; }
+/* D334 — lối sang bách khoa đầy đủ, ngay dưới ba cơ chế gọn. Lam vì chạm được (luật màu 13/09). */
+.moBachKhoa {
+  display: block;
+  margin-top: 8px;
+  padding: 8px 10px;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  text-decoration: none;
+  background: rgba(34, 211, 238, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.28);
+}
+
+.docThem { border: 1px dashed rgba(139, 92, 246, 0.35); padding: 8px 10px; }
+.docThem > * + * { margin-top: 10px; }
+.docThemMo {
+  color: var(--accent-soft, #a78bfa);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  user-select: none;
+}
+.docThemMo:hover { color: var(--accent, #22d3ee); }
+
+.nutVe {
+  display: block;
+  padding: 12px;
+  border: 1px solid var(--accent-bright, #a78bfa);
+  background: rgba(139, 92, 246, 0.16);
+  color: inherit;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-decoration: none;
+}
+.nutVe:hover { box-shadow: 0 0 8px rgba(139, 92, 246, 0.6); }

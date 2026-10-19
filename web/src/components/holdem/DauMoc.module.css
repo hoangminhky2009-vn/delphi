@@ -1,0 +1,14 @@
+/* DẤU MỐC KỸ NĂNG — màn kết. §XI: khấc, không bo, bóng cứng. */
+.khoi {
+  composes: khungNoi from '@/styles/pixel.module.css';
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 1.5px solid rgba(52, 211, 153, 0.4);
+  box-shadow: var(--px-vien-trong), var(--px-bong);
+  background: rgba(0, 0, 0, 0.35);
+}
+.nhan { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; color: #34d399; margin-bottom: 6px; }
+.ds { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.muc { display: flex; flex-direction: column; gap: 2px; }
+.ten { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; color: var(--text-bright); }
+.cau { margin: 0; font-size: 10.5px; line-height: 1.5; color: var(--text-dim); }

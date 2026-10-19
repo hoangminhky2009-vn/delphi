@@ -1,0 +1,491 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.topRow {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+}
+
+.resultLink {
+  text-decoration: none;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.breadcrumb a {
+  color: var(--accent);
+}
+
+.prompt {
+  color: var(--accent);
+}
+
+.question {
+  margin: 0;
+  font-family: var(--font-human);
+  font-size: 17.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-title);
+}
+
+/* Khối "pool đang ẩn" (A3.1) */
+.maskNote {
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  background: rgba(34, 211, 238, 0.05);
+  border-radius: 0;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-body);
+}
+
+.tapHint {
+  margin: 0;
+  display: flex;
+  gap: 8px;
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
+
+.doors {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.doorBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Khoảnh khắc reveal sau khi server ghi phân bổ */
+.revealIn {
+  composes: badgeup from '../styles/motion.module.css';
+  --dl-badgeup-dur: 0.5s;
+}
+
+.placedFlash {
+  composes: badgeup from '../styles/motion.module.css';
+  --dl-badgeup-dur: 0.45s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: var(--text-dim);
+  background: rgba(74, 222, 128, 0.07);
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  border-radius: 0;
+  padding: 8px 11px;
+}
+
+/* ===== Panel thanh kéo (bung dưới cửa được chạm) ===== */
+.sliderPanel {
+  composes: badgeup from '../styles/motion.module.css';
+  --dl-badgeup-dur: 0.3s;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 4px 8px 6px;
+  padding: 12px;
+  background: var(--surface-inset);
+  border: 1px solid var(--border-accent-soft);
+  border-top: 0;
+  border-radius: 0;
+}
+
+/* ALL-IN — họ hiệu ứng lửa Mẫu E (firepulse/emberglow/emberfloat) */
+.fire {
+  composes: fireBlock from '../styles/motion.module.css';
+  --dl-badgeup-dur: 0.3s;
+  background: rgba(251, 146, 60, 0.1);
+  border: 1px solid var(--border-gold);
+  border-top: 0;
+}
+
+/* (firepulse/emberglow dùng chung, đã dồn về motion.module.css qua `fireBlock`.) */
+
+.allinTag {
+  composes: badgeup from '../styles/motion.module.css';
+  --dl-badgeup-dur: 0.35s;
+  position: absolute;
+  top: -9px;
+  right: 10px;
+  z-index: 2;
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 800;
+  color: #241a04;
+  background: var(--gold);
+  border-radius: 0;
+  padding: 2px 8px;
+  box-shadow: 0 0 14px rgba(253, 224, 71, 0.7);
+}
+
+/* Tàn lửa là VẬT 3×3 đang ĐỔI CHỖ → nhảy theo nấc như sprite (cùng thang 12
+   nấc với hạt giấy rơi). Quầng 6px quanh nó vẫn là ánh sáng → giữ blur. */
+.ember {
+  position: absolute;
+  bottom: 4px;
+  width: 3px;
+  height: 3px;
+  border-radius: 0;
+  background: var(--gold-ember);
+  box-shadow: 0 0 6px var(--gold-flame);
+  opacity: 0;
+  pointer-events: none;
+  animation: emberfloat 2s steps(12, end) infinite;
+}
+
+@keyframes emberfloat {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  18% { opacity: 1; }
+  100% { transform: translateY(-16px) translateX(4px) scale(0.25); opacity: 0; }
+}
+
+/* Thanh kéo neon — fill gradient set inline theo giá trị */
+.range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 9px;
+  border-radius: 0;
+  outline: none;
+  cursor: pointer;
+}
+/*
+ * NÚM KÉO — vật nhỏ đặc 20×20. Bản cũ tô nó bằng `--grad-logo` (dải cyan→lục
+ * 135deg): trên 20px thì dải đó trải chưa tới ngưỡng 12px của luật 5, mắt không
+ * đọc ra "có nguồn sáng" mà đọc ra "mặt bị nhoè". Nay màu ĐẶC + vát 2px, đúng
+ * công thức `.khoi` — chép tay vì `composes` không vào được pseudo-element.
+ * Quầng 12px giữ nguyên: nó là ánh sáng, và núm đang bật thì phải sáng.
+ */
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 0;
+  border: 0;
+  background: var(--accent);
+  box-shadow: var(--px-vien-trong-day), 0 0 12px rgba(34, 211, 238, 0.75);
+  cursor: pointer;
+}
+.range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 0;
+  border: 0;
+  background: var(--accent);
+  box-shadow: var(--px-vien-trong-day), 0 0 12px rgba(34, 211, 238, 0.75);
+  cursor: pointer;
+}
+/* Trạng thái cháy: đổi MÀU núm, không đổi cấu tạo — vát phải khai lại ở đây,
+   nếu chỉ đổi `background` thì đúng, nhưng khai `box-shadow` mà quên vát là
+   bóc mất khối (bẫy ghi đè im lặng). */
+.fire .range::-webkit-slider-thumb {
+  background: var(--gold-amber);
+  box-shadow: var(--px-vien-trong-day), 0 0 14px rgba(251, 146, 60, 0.9);
+}
+.fire .range::-moz-range-thumb {
+  background: var(--gold-amber);
+  box-shadow: var(--px-vien-trong-day), 0 0 14px rgba(251, 146, 60, 0.9);
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.numInput {
+  composes: doiMau from '../styles/pixel.module.css';
+  width: 84px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-bright);
+  background: var(--surface-idle);
+  border: 1px solid var(--border-idle);
+  border-radius: 0;
+  padding: 7px 10px;
+  outline: none;
+}
+.numInput:focus {
+  border-color: var(--border-accent-strong);
+}
+
+.unit {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Nút pixel thật: góc khấc, bóng cứng, lún xuống khi bấm. Trước đây nó chỉ là
+   một ô viền cyan đổi màu chữ — bấm vào không có phản hồi cơ học nào. */
+.maxBtn {
+  composes: nut from '../styles/pixel.module.css';
+  font-size: 10.5px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: var(--accent-bright);
+  background: rgba(34, 211, 238, 0.08);
+  border-color: var(--border-accent);
+  padding: 5px 12px;
+}
+.maxBtn:hover {
+  color: var(--accent-peak);
+  border-color: rgba(103, 232, 249, 0.9);
+}
+
+.maxInfo {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.statsLine {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ===== Phiếu tổng ===== */
+.slip {
+  composes: doiMau from '../styles/pixel.module.css';
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface-inset);
+  border: 1px solid var(--border-idle-soft);
+  border-radius: 0;
+  padding: 14px;
+}
+
+.slipFire {
+  composes: emberglow from '../styles/motion.module.css';
+  border-color: var(--border-gold);
+}
+
+.slipHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.slipLabel {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--accent-bright);
+}
+
+.slipCap {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Thanh chia khúc theo cửa (rải nhiều cửa) */
+.splitBar {
+  display: flex;
+  height: 9px;
+  border-radius: 0;
+  overflow: hidden;
+  background: var(--surface-track);
+}
+
+/* Khúc thanh đổi BỀ RỘNG = đổi hình của vật → nhảy nấc. 10 nấc theo thang
+   "quét": đủ để mắt thấy nó chạy, không đủ để thành trượt mượt. */
+.splitSeg {
+  height: 100%;
+  min-width: 3px;
+  transition: width 350ms steps(10, end);
+  box-shadow: inset -2px 0 0 rgba(5, 10, 20, 0.55);
+}
+
+.splitLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  color: var(--text-dim);
+}
+
+.legendDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
+/* ===== Đồng hồ khẩu vị rủi ro ===== */
+.riskBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.riskRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.riskLabel {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.riskCells {
+  display: flex;
+  gap: 3px;
+  flex: 1;
+  min-width: 90px;
+}
+
+.riskCell {
+  composes: doiMau from '../styles/pixel.module.css';
+  flex: 1;
+  height: 8px;
+  border-radius: 0;
+  background: var(--surface-track);
+}
+
+.cell_probe {
+  background: rgba(34, 211, 238, 0.45);
+}
+.cell_steady {
+  background: var(--accent);
+  box-shadow: 0 0 6px rgba(34, 211, 238, 0.5);
+}
+.cell_hot {
+  background: var(--violet);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+}
+/* Ô LED cao 8px: dải vàng→cam dọc chỉ có 8 điểm ảnh để trải, dưới ngưỡng 12px
+   của luật 5 → không đọc ra ánh sáng, chỉ đọc ra cạnh nhoè. Màu đặc. */
+.cell_allin {
+  background: var(--gold-amber);
+  box-shadow: 0 0 8px rgba(251, 146, 60, 0.8);
+}
+
+.riskTier {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.tier_probe {
+  color: var(--text-dim);
+}
+.tier_steady {
+  color: var(--accent-bright);
+}
+.tier_hot {
+  color: var(--violet);
+  text-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
+}
+.tier_allin {
+  color: var(--gold);
+  text-shadow: 0 0 10px rgba(251, 146, 60, 0.8);
+}
+
+.riskNote {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 1px dashed var(--border-idle);
+  padding-top: 9px;
+}
+
+.totalLabel {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.totalVal {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-max);
+}
+
+.totalValFire {
+  color: var(--gold);
+  text-shadow: 0 0 12px rgba(251, 146, 60, 0.7);
+}
+
+.slipHint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.errLine {
+  margin: 0;
+  font-size: 12px;
+  color: var(--lose-soft);
+}
+
+.lockedNote {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-dim);
+  background: var(--surface-inset);
+  border: 1px solid var(--border-idle-soft);
+  border-radius: 0;
+  padding: 12px;
+}
+
+.rules {
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  border-top: 1px dashed var(--border-idle);
+  padding-top: 10px;
+}
+
+.errBox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--text-dim);
+  border: 1px dashed var(--border-idle);
+  border-radius: 0;
+  padding: 14px;
+}

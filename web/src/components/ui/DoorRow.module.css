@@ -1,0 +1,250 @@
+/*
+ * `doiMau` thay cho `transition: opacity .5s, background .45s, border-color .45s`.
+ * Nền + viền là màu của vật → nhảy 2 nấc. `opacity` rơi ra ngoài là CÓ Ý: cửa
+ * chỉ mờ đi ở trạng thái `.lose`, mà ngay lúc đó `losebreath` đã cầm lái opacity
+ * — transition cũ chưa bao giờ được nhìn thấy.
+ */
+.row {
+  composes: khung from '@/styles/pixel.module.css';
+  composes: doiMau from '@/styles/pixel.module.css';
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--border-idle-strong);
+  background: var(--surface-idle);
+  border-radius: 0;
+  padding: 10px 12px 11px;
+  text-align: left;
+  width: 100%;
+  font-family: var(--font-mono);
+}
+
+/*
+ * ══════════════════════════════════════════════════════════════════════════
+ * CỬA CHƯA MỞ KHOÁ — "ĐANG CHỜ DỮ LIỆU", KHÔNG PHẢI "Ô RỖNG" (founder 04/08)
+ *
+ * Founder: *"hiệu ứng predict market ngày xưa đẹp mà giờ trông hơi xấu và khô
+ * cứng"*. Đo ra thì không phải hiệu ứng nào chết (audit CSS build: 94 animation
+ * sống, 0 chết) — mà là trạng thái `masked` CHƯA TỪNG CÓ hiệu ứng nào.
+ *
+ * Và `masked` chính là thứ người chơi thấy NHIỀU NHẤT: A3.1 giấu phân bố tới
+ * lần đặt đầu, nên lúc mở màn lần đầu TOÀN BỘ danh sách cửa đứng im. Phần lớn
+ * diện tích màn là những ô vuông chết.
+ *
+ * ⚠⚠ RÀNG BUỘC THEN CHỐT — MỌI CỬA PHẢI DIỄN GIỐNG HỆT NHAU.
+ *
+ * Đây không phải chuyện gọn gàng: nếu cửa nào nhấp nháy khác cửa nào — nhanh
+ * hơn, sáng hơn, lệch pha — thì chuyển động TRỞ THÀNH MỘT KÊNH RÒ. Người chơi
+ * đọc được phân bố từ nhịp thở, và A3.1 bị đi vòng qua đúng cái cửa nó khoá
+ * (D19 còn siết thêm: bỏ cả tỷ lệ ăn lẫn số người, để "% ví đặt vào" giữ được
+ * nghĩa là ĐỘ TỰ TIN chứ không phải phản ứng đám đông).
+ *
+ * Nên: KHÔNG `animation-delay` theo chỉ số, KHÔNG biến CSS theo cửa, KHÔNG gì
+ * suy từ dữ liệu. Một nhịp duy nhất, mọi cửa cùng pha. `web/tests/market.test.tsx`
+ * canh điều đó.
+ */
+.masked {
+  position: relative;
+  overflow: hidden;
+}
+
+/*
+ * Dải quét chạy ngang — ngôn ngữ "bảng điện tử đang chờ số về", đúng chất
+ * Terminal × Neon. Chỉ `transform`, nên nó không bắt tính lại bố cục.
+ * `steps()` chứ không mượt: §XI — chuyển động pixel nhảy theo nấc.
+ */
+.masked::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 34%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(34, 211, 238, 0) 0%,
+    rgba(34, 211, 238, 0.07) 50%,
+    rgba(34, 211, 238, 0) 100%
+  );
+  animation: choDuLieu 2.6s steps(14, end) infinite;
+}
+
+@keyframes choDuLieu {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(420%); }
+}
+
+/*
+ * Ba chấm `· · ·` thôi đứng im: chúng sáng lần lượt như con trỏ terminal đang
+ * đợi. Đây là chỗ DUY NHẤT có lệch pha, và nó an toàn vì lệch pha nằm GIỮA BA
+ * CHẤM CỦA CÙNG MỘT CỬA, không phải giữa các cửa.
+ */
+.maskedDot {
+  animation: chamCho 1.4s steps(2, end) infinite;
+}
+.maskedDot:nth-child(2) { animation-delay: 0.18s; }
+.maskedDot:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes chamCho {
+  0%, 60% { opacity: 0.28; }
+  30% { opacity: 1; }
+}
+
+/*
+ * Tiết kiệm chuyển động: bỏ hẳn cả hai nhịp. Thứ bị tắt là CHUYỂN ĐỘNG, không
+ * phải thông tin — ô vẫn nói "chưa mở khoá" bằng chính ba dấu chấm.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .masked::after,
+  .maskedDot {
+    animation: none;
+  }
+}
+
+.selectable {
+  cursor: pointer;
+}
+.selectable:hover {
+  border-color: rgba(103, 232, 249, 0.6);
+}
+
+.selected {
+  border-color: var(--border-accent-strong);
+  background: rgba(34, 211, 238, 0.07);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.15);
+}
+
+/*
+ * Hiệu ứng lấy từ motion.module.css bằng `composes` — KHÔNG gõ `animation: ...`
+ * ở đây. Keyframe nằm ở file khác thì CSS Modules đổi tên và animation chết câm
+ * (bug 20/07: cửa thắng không nảy, cửa sai không rung).
+ */
+.win {
+  composes: doorWin from '../../styles/motion.module.css';
+  border-color: var(--win);
+  background: rgba(74, 222, 128, 0.17);
+}
+
+.lose {
+  composes: doorLose from '../../styles/motion.module.css';
+  border-color: rgba(248, 113, 113, 0.7);
+  background: rgba(248, 113, 113, 0.1);
+  opacity: 0.42;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.nameWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.name {
+  composes: doiMau from '@/styles/pixel.module.css';
+  font-family: var(--font-human);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-body);
+  /* Tên cửa thật (khoảng giá tiếng Việt) có thể dài — wrap thay vì bị cắt */
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+.nameWin {
+  color: #ffffff;
+}
+.nameLose {
+  color: var(--lose-soft);
+  text-decoration: line-through;
+}
+
+.loseTag {
+  font-size: 10px;
+  letter-spacing: 1px;
+  font-weight: 800;
+  color: var(--lose-tag);
+  border: 1px solid var(--border-lose);
+  background: rgba(248, 113, 113, 0.1);
+  border-radius: 0;
+  padding: 1px 7px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.winTag {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+  color: var(--win-on);
+  background: var(--win);
+  border-radius: 0;
+  padding: 1px 7px;
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.5);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.mineTag {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-bright);
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid var(--border-accent);
+  border-radius: 0;
+  padding: 2px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.mineTagWin {
+  color: var(--win-on);
+  background: rgba(74, 222, 128, 0.9);
+}
+
+.barArea {
+  position: relative;
+  height: 36px;
+}
+
+.pct {
+  composes: doiMau from '@/styles/pixel.module.css';
+  position: absolute;
+  top: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-body);
+}
+.pctLive {
+  color: var(--accent-bright);
+  text-shadow: 0 0 10px rgba(34, 211, 238, 0.8);
+}
+.pctWin {
+  color: var(--win-soft);
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+}
+.pctLose {
+  color: var(--lose-dim);
+}
+
+.barPos {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+}
+
+.footer {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* (winbreath/losebreath đã chuyển sang motion.module.css cùng doorWin/doorLose —
+   ba lớp animation của một cửa phải nằm CÙNG một khai báo, không tách ra được.) */

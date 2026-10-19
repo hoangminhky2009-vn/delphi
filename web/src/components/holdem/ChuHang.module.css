@@ -1,0 +1,170 @@
+/*
+ * CHỮ HẠNG PIXEL — S · SS · SSS. Lý lẽ dựng hình + bốn quy luật rút từ đợt tra
+ * cứu game nằm ở docstring `ChuHang.tsx`; đây là phần thi hành.
+ *
+ * LUẬT CHUNG: chỉ animate `transform` · `opacity` · `color`. Hai cái đầu là tập
+ * giao của web/Discord-Activity/native (ràng buộc ba mặt, xem `ThanhPhongCach`);
+ * `color` là paint trên vài chục ô box-shadow — rẻ, và có bản tương đương
+ * native. TUYỆT ĐỐI không `background-position`, không `width/height`, không
+ * `filter` trên phần tử đang transform.
+ *
+ * §XI: `steps()` chứ không `cubic-bezier`, box-shadow blur = 0, radius 0.
+ */
+
+/*
+ * VỎ — nơi treo hiệu ứng của CẢ CỤM (rung, tia). Cấu trúc lưới chữ nằm ở
+ * `ChuPixel.module.css`; file này chỉ còn phần chuyển động.
+ */
+.voc { position: relative; display: inline-block; }
+
+.cum { position: relative; }
+
+.chu {
+  /*
+   * CÚ RƠI — mỗi glyph hạ xuống lệch pha theo `--i`, quá đà rồi về.
+   * RƠI chứ không BẬT RA: quy luật 3 (gacha cố ý làm chậm cú lộ để mong đợi
+   * kịp lên đỉnh). Và lệch pha là thứ biến ba ký tự thành một CÚ ba nhịp thay
+   * vì một dòng chữ hiện ra cùng lúc.
+   */
+  animation: chRoi 420ms steps(7, end) both;
+  animation-delay: calc(var(--i) * 130ms);
+}
+
+/*
+ * Màu MẶC ĐỊNH = bậc SS (hai màu chạy). Bậc S rút xuống một màu tĩnh, bậc SSS
+ * mở lên bốn màu — xem hai khối bậc bên dưới.
+ * `--y` cho mỗi hàng lệch 45ms ⇒ màu chạy DỌC thân chữ, không đổi cả khối.
+ */
+.hang {
+  color: #ff5d8f;
+  /* Bật SAU khi glyph đã đáp (420ms) — đổi màu lúc đang rơi thì hai chuyển
+     động tranh nhau và mắt không đọc được cái nào. */
+  animation: chMau2 900ms steps(2, end) infinite;
+  animation-delay: calc(420ms + var(--i) * 130ms + var(--y) * 45ms);
+}
+
+@keyframes chRoi {
+  0% { opacity: 0; transform: translateY(-90%) scale(1.9); }
+  55% { opacity: 1; transform: translateY(9%) scale(0.88); }
+  78% { transform: translateY(-5%) scale(1.06); }
+  100% { opacity: 1; transform: none; }
+}
+
+/*
+ * DẢI MÀU — mượn NGUYÊN bảng của thanh phong cách
+ * (`ThanhPhongCach.module.css`: hồng #ff5d8f · hổ phách #f0b429 · lục #4ade80 ·
+ * lam #7dd3fc), để cú công bố và cái thanh vừa lên hạng là MỘT vật ở hai cỡ.
+ * Hai bảng khác nhau cho cùng một hạng thì người chơi phải học hai lần.
+ */
+@keyframes chMau2 {
+  0% { color: #ff5d8f; }
+  50% { color: #f0b429; }
+  100% { color: #ff5d8f; }
+}
+@keyframes chMau4 {
+  0% { color: #ff5d8f; }
+  25% { color: #f0b429; }
+  50% { color: var(--win); }
+  75% { color: #7dd3fc; }
+  100% { color: #ff5d8f; }
+}
+
+/* ══ BẬC S — ít nhất: 1 glyph, MỘT màu tĩnh, không rung, không tia ══════════
+ * Vì sao S không có dải màu chạy: nếu bậc thấp nhất đã sặc sỡ thì SSS không
+ * còn gì để hơn ngoài việc dài hơn — mà "dài hơn" là thứ người chơi chịu đựng,
+ * không phải thứ họ khoe. Bậc thấp giữ chỗ trống cho bậc cao lấp vào.
+ * Màu hổ phách #f0b429 = đúng màu bậc `.sieu` (S-, S, S+) của thanh phong cách. */
+.S .hang {
+  color: #f0b429;
+  animation: none;
+}
+
+/* ══ BẬC SS — mở kênh MÀU (2 màu chạy) + kênh RUNG (nhẹ) ═══════════════════ */
+.SS {
+  animation: chRung 620ms steps(4, end) infinite;
+  animation-delay: 500ms;
+}
+
+/* ══ BẬC SSS — mở tiếp kênh TIA; màu lên 4, rung mạnh hơn, vào trễ nhất ════ */
+.SSS {
+  animation: chRungManh 500ms steps(5, end) infinite;
+  animation-delay: 560ms;
+}
+.SSS .chu {
+  /* Quy luật 3 — vào TRỄ hơn hai bậc kia một nhịp: nền đã sáng màu bậc trước
+     khi chữ tới, đúng kiểu "báo màu trước cú lộ" của gacha. */
+  animation-delay: calc(180ms + var(--i) * 130ms);
+}
+.SSS .hang {
+  animation-name: chMau4;
+  animation-duration: 720ms;
+  animation-timing-function: steps(4, end);
+  animation-delay: calc(600ms + var(--i) * 130ms + var(--y) * 45ms);
+}
+
+/*
+ * TIA — bốn thanh pixel phóng ra từ sau cụm chữ, CHỈ ở SSS.
+ * Vẽ bằng `::before`/`::after` của chính cụm (2 phần tử, không thêm DOM), mỗi
+ * cái một chùm bốn tia nhờ box-shadow. Scale từ tâm rồi tan.
+ * ⚠ box-shadow blur = 0 (§XI: bóng cứng) — đây là TIA, một vật, không phải quầng.
+ */
+.SSS::before,
+.SSS::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--px);
+  height: var(--px);
+  margin: calc(var(--px) / -2) 0 0 calc(var(--px) / -2);
+  background: var(--gold);
+  box-shadow:
+    calc(var(--px) * -9) 0 #ff5d8f,
+    calc(var(--px) * 9) 0 #7dd3fc,
+    0 calc(var(--px) * -7) var(--win),
+    0 calc(var(--px) * 7) #f0b429;
+  pointer-events: none;
+  animation: chTia 620ms steps(6, end) 700ms both;
+}
+.SSS::after {
+  animation-delay: 960ms;
+  animation-duration: 760ms;
+}
+
+@keyframes chRung {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-1px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(1px, 1px); }
+}
+@keyframes chRungManh {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-2px, 1px); }
+  40% { transform: translate(2px, -2px); }
+  60% { transform: translate(-1px, -1px); }
+  80% { transform: translate(2px, 1px); }
+}
+@keyframes chTia {
+  0% { opacity: 1; transform: scale(0.25); }
+  100% { opacity: 0; transform: scale(2.6); }
+}
+
+/*
+ * ⚠ TẮT CHUYỂN ĐỘNG, KHÔNG TẮT THÔNG TIN. Ba trong năm hoạt ảnh ở trên là VÔ
+ * HẠN; nhóm này KHÔNG đi qua `composes` nên khối tắt chung ở
+ * `styles/motion.module.css` không với tới (đúng lỗ `.sel`/`adLoLung` mà file
+ * đó đã ghi).
+ *
+ * ⚠⚠ VÀ BẬC VẪN PHẢI PHÂN BIỆT ĐƯỢC KHI TẮT — Balatro cho tắt rung/CRT vì lý do
+ * tiếp cận nhưng người chơi vẫn đọc được mình ăn bao nhiêu. Ở đây: số glyph
+ * (1/2/3) và màu tĩnh của bậc vẫn còn nguyên, nên ba bậc vẫn khác nhau bằng MẮT
+ * mà không cần một khung hình chuyển động nào.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .cum, .chu, .hang, .SS, .SSS, .SSS .chu, .SSS .hang { animation: none; }
+  .chu { opacity: 1; transform: none; }
+  /* Giữ màu phân bậc ở trạng thái đứng yên: S hổ phách · SS hồng · SSS lam. */
+  .SS .hang { color: #ff5d8f; }
+  .SSS .hang { color: #7dd3fc; }
+  .SSS::before, .SSS::after { display: none; }
+}

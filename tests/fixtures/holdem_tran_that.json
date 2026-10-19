@@ -1,0 +1,277 @@
+{
+  "_doc": "TRẬN THẬT trên prod của tài khoản admin (founder) — ĐẦU VÀO cho corpus golden replay (B5, founder chốt 03/09/2026: corpus = synthetic + trận của chính founder). Mỗi mục là (phien_ban, seed, so_o, ghe, log) đủ để gọi replay() y hệt đường prod. KHÔNG chứa user_id, handle, email hay bất kỳ thứ gì định danh — đã soi ghe_json trước khi kéo (C7).",
+  "_vi_sao": "Corpus synthetic (D215) tự khai KHÔNG dựng được: lenh/khop_truoc (lệnh NAV theo mốc bp, khớp giữa vòng) · gan/gan_phu (gắn thẻ chiến thuật vào một mã) · chuỗi cuoc to/theo/bo · dau_hang · ky_ngo · tu_dong/mo_bang/du_bao/khao_sat_lai · bac_rank khác mặc định. Mười một trận dưới đây có ĐỦ những thứ đó, vì người thật đã bấm chúng.",
+  "_nguon": "SELECT theo owner_user_id có role='admin' AND status='xong' AND jsonb_array_length(action_log)>=5, lấy trận có log DÀI NHẤT mỗi balance_version. Chạy 03/09/2026 qua công cụ Supabase chỉ-đọc, project <project-ref>.",
+  "_canh_bao": "ĐÃ ĐỐI CHIẾU 03/09/2026 — không còn cảnh báo. Cách đối chiếu: dò định dạng `jsonb::text` của chính prod (khoá sắp theo ĐỘ DÀI rồi bytewise, phân cách \": \" và \", \"), tái lập đúng vậy phía JS, rồi so md5(action_log) và md5(ghe_json) của từng trận với `md5(...::text)` tính NGAY TRÊN Postgres. Khớp 11/11, kèm seed và so_o. Không dùng .env.prod — đi qua công cụ SQL chỉ-đọc. `npm run tran-that:kiem` vẫn là đường đối chiếu lại về sau (nó so nội dung đầy đủ, không chỉ md5).",
+  "da_doi_chieu_prod": true,
+  "ngay_lay": "2026-09-03",
+  "ngay_doi_chieu": "2026-09-03",
+  "tran": [
+    {
+      "phien_ban": "balance-v10a-tatcuoc",
+      "seed": 2832040198,
+      "so_o": null,
+      "ghe": [
+        { "id": "ban", "loai": "nguoi", "khau_vi": "quyet_liet", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_1", "loai": "bot", "bot_id": "phong_thu", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_2", "loai": "bot", "bot_id": "da_dang", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_3", "loai": "bot", "bot_id": "duoi_da", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_4", "loai": "bot", "bot_id": "bat_day", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_5", "loai": "bot", "bot_id": "khac_che", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_6", "loai": "bot", "bot_id": "nguoc_dong", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } }
+      ],
+      "log": [
+        { "mua": ["btc"], "cuoc": [], "them": 0, "vong": 1, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 2, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["btc", "di_nguoc"], "cuoc": [], "them": 0, "vong": 3, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "gan": { "luot_song": "btc" }, "mua": ["btc", "luot_song"], "cuoc": [], "them": 0, "vong": 4, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 5, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 6, "du_bao": true, "mo_bang": 1, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["btc"], "cuoc": [], "them": 0, "vong": 7, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["btc"], "cuoc": [], "them": 0, "vong": 8, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 }
+      ]
+    },
+    {
+      "phien_ban": "balance-v13-succang",
+      "seed": 1640647270,
+      "so_o": null,
+      "ghe": [
+        { "id": "ban", "loai": "nguoi", "khau_vi": "can_bang", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_1", "loai": "bot", "bot_id": "duoi_da", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_2", "loai": "bot", "bot_id": "bat_day", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_3", "loai": "bot", "bot_id": "khac_che", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } }
+      ],
+      "log": [
+        { "mua": [], "cuoc": [], "them": 0, "vong": 1, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 2, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 3, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 4, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 5, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 6, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 7, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 8, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 }
+      ]
+    },
+    {
+      "phien_ban": "balance-v17-khong",
+      "seed": 1407368126,
+      "so_o": null,
+      "ghe": [
+        { "id": "ban", "loai": "nguoi", "khau_vi": "can_bang", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_1", "loai": "bot", "bot_id": "duoi_da", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_2", "loai": "bot", "bot_id": "bat_day", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_3", "loai": "bot", "bot_id": "khac_che", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_4", "loai": "bot", "bot_id": "nguoc_dong", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } }
+      ],
+      "log": [
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "cp_cn", "chieu": "mua", "moc_bp": 7500 }], "them": 0, "vong": 1, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["khop_nhanh"], "cuoc": [], "lenh": [{ "ma": "cp_cn", "chieu": "ban", "moc_bp": 10000 }, { "ma": "vang", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 2, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "vang", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 3, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "gan": { "ban_khong": "vang" }, "mua": ["ban_khong"], "cuoc": [], "them": 0, "vong": 4, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "vang", "chieu": "ban", "moc_bp": 10000 }], "them": 0, "vong": 5, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 6, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 7, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 8, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 }
+      ]
+    },
+    {
+      "phien_ban": "balance-v18-hequa",
+      "seed": 20260841,
+      "so_o": 8,
+      "ghe": [
+        { "id": "ban", "loai": "nguoi", "khau_vi": "can_bang", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_1", "loai": "bot", "bot_id": "nguoc_dong", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_2", "loai": "bot", "bot_id": "tat_tay", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_3", "loai": "bot", "bot_id": "phong_thu", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_4", "loai": "bot", "bot_id": "da_dang", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } }
+      ],
+      "log": [
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "vang", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 1, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["luot_song"], "cuoc": [], "them": 0, "vong": 2, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 3, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 4, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 5, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 6, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 7, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [{ "loai": "bo" }], "them": 0, "vong": 8, "hanh_dong": "dau_hang", "khao_sat_lai": 0 }
+      ]
+    },
+    {
+      "phien_ban": "balance-v19-xungdot",
+      "seed": 20260841,
+      "so_o": 8,
+      "ghe": [
+        { "id": "ban", "loai": "nguoi", "khau_vi": "can_bang", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_1", "loai": "bot", "bot_id": "nguoc_dong", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_2", "loai": "bot", "bot_id": "tat_tay", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_3", "loai": "bot", "bot_id": "phong_thu", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_4", "loai": "bot", "bot_id": "da_dang", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } }
+      ],
+      "log": [
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "vang", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 1, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["luot_song"], "cuoc": [], "them": 0, "vong": 2, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 3, "mo_bang": 1, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["luot_song"], "cuoc": [], "them": 0, "vong": 4, "du_bao": true, "mo_bang": 1, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "vang", "chieu": "ban", "moc_bp": 10000 }, { "ma": "cp_cn", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 5, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "cp_cn", "chieu": "ban", "moc_bp": 10000 }, { "ma": "tpcp", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 6, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 7, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 8, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 }
+      ]
+    },
+    {
+      "phien_ban": "balance-v20-conghuong",
+      "seed": 20260841,
+      "so_o": 8,
+      "ghe": [
+        { "id": "ban", "loai": "nguoi", "khau_vi": "can_bang", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_1", "loai": "bot", "bot_id": "nguoc_dong", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_2", "loai": "bot", "bot_id": "tat_tay", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_3", "loai": "bot", "bot_id": "phong_thu", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_4", "loai": "bot", "bot_id": "da_dang", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } }
+      ],
+      "log": [
+        { "mua": [], "cuoc": [], "them": 0, "vong": 1, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 2, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 3, "mo_bang": 1, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["ban_khong"], "cuoc": [], "lenh": [{ "ma": "vang", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 4, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "vang", "chieu": "khong", "moc_bp": 7500 }], "them": 0, "vong": 5, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "vang", "chieu": "dong_khong", "moc_bp": 10000 }], "them": 0, "vong": 6, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 7, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 8, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 }
+      ]
+    },
+    {
+      "phien_ban": "balance-v23-cantroi2",
+      "seed": 1889944688,
+      "so_o": 16,
+      "ghe": [
+        { "id": "ban", "loai": "nguoi", "khau_vi": "quyet_liet", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_1", "loai": "bot", "bot_id": "da_dang", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_2", "loai": "bot", "bot_id": "duoi_da", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_3", "loai": "bot", "bot_id": "bat_day", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_4", "loai": "bot", "bot_id": "khac_che", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_5", "loai": "bot", "bot_id": "nguoc_dong", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_6", "loai": "bot", "bot_id": "tat_tay", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } }
+      ],
+      "log": [
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "cp_cn", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 1, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "gan": { "don_bay": "cp_cn" }, "mua": ["don_bay"], "cuoc": [], "them": 0, "vong": 2, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "cp_cn", "chieu": "ban", "moc_bp": 10000 }], "them": 0, "vong": 3, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "cp_cn", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 4, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "gan": { "don_bay": "cp_cn" }, "mua": ["don_bay"], "cuoc": [], "lenh": [{ "ma": "vang", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 5, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "gan": { "don_bay": "vang" }, "mua": [], "cuoc": [], "lenh": [{ "ma": "cp_cn", "chieu": "ban", "moc_bp": 10000 }], "them": 0, "vong": 6, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "btc", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 7, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "gan": { "don_bay": "btc" }, "mua": ["don_bay"], "cuoc": [], "them": 0, "vong": 8, "hanh_dong": "giu_vi_the", "khao_sat_lai": 1 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 9, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "btc", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 10, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "vang", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 11, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "gan": { "don_bay": "vang" }, "mua": [], "cuoc": [], "lenh": [{ "ma": "btc", "chieu": "ban", "moc_bp": 5000 }], "them": 0, "vong": 12, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 13, "mo_bang": 1, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "vang", "chieu": "ban", "moc_bp": 10000 }, { "ma": "btc", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 14, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "btc", "chieu": "ban", "moc_bp": 10000 }], "them": 0, "vong": 15, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 16, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 }
+      ]
+    },
+    {
+      "phien_ban": "balance-v27-bongbong",
+      "seed": 2018205450,
+      "so_o": 12,
+      "ghe": [
+        { "id": "ban", "loai": "nguoi", "khau_vi": "quyet_liet", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_1", "loai": "bot", "bot_id": "da_dang", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_2", "loai": "bot", "bot_id": "duoi_da", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_3", "loai": "bot", "bot_id": "bat_day", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } }
+      ],
+      "log": [
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "btc", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 1, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["don_bay"], "cuoc": [], "lenh": [{ "ma": "btc", "chieu": "ban", "moc_bp": 10000 }], "them": 0, "vong": 2, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "btc", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 3, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 4, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 5, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 6, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 7, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 8, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 9, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 10, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 11, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 12, "tu_dong": true, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 }
+      ]
+    },
+    {
+      "phien_ban": "balance-v34-vai",
+      "seed": 974839649,
+      "so_o": 16,
+      "ghe": [
+        { "id": "ban", "vai": "doi_lai", "loai": "nguoi", "khau_vi": "quyet_liet", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_1", "vai": "to_chuc", "loai": "bot", "bot_id": "tat_tay", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_2", "vai": "ca_map", "loai": "bot", "bot_id": "phong_thu", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_3", "vai": "ca_nhan", "loai": "bot", "bot_id": "da_dang", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_4", "vai": "ca_nhan", "loai": "bot", "bot_id": "duoi_da", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_5", "vai": "ca_nhan", "loai": "bot", "bot_id": "bat_day", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_6", "vai": "ca_nhan", "loai": "bot", "bot_id": "khac_che", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_7", "vai": "ca_nhan", "loai": "bot", "bot_id": "nguoc_dong", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } }
+      ],
+      "log": [
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "cp_cn", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 1, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["chan_lo"], "cuoc": [], "lenh": [{ "ma": "vang", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 2, "hanh_dong": "giu_vi_the", "khop_truoc": [[{ "ma": "cp_cn", "chieu": "ban", "moc_bp": 10000 }]], "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 3, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "vang", "chieu": "ban", "moc_bp": 10000 }, { "ma": "vn30", "chieu": "mua", "moc_bp": 7500 }], "them": 0, "vong": 4, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "cp_cn", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 5, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 6, "du_bao": true, "ky_ngo": "la_ban", "mo_bang": 1, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "vn30", "chieu": "ban", "moc_bp": 10000 }, { "ma": "cp_cn", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 7, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 8, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 9, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 10, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 11, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 12, "ky_ngo": "bat_nhip", "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 13, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 14, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 15, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 16, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 }
+      ]
+    },
+    {
+      "phien_ban": "balance-v36-regime",
+      "seed": 20260790,
+      "so_o": 8,
+      "ghe": [
+        { "id": "ban", "loai": "nguoi", "khau_vi": "can_bang", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_1", "loai": "bot", "bot_id": "bat_day", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_2", "loai": "bot", "bot_id": "khac_che", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_3", "loai": "bot", "bot_id": "nguoc_dong", "bac_rank": "chua_xep", "danh_muc": { "tai_san": [], "chien_thuat": [] } }
+      ],
+      "log": [
+        { "mua": [], "cuoc": [], "lenh": [{ "ma": "btc", "chieu": "mua", "moc_bp": 10000 }], "them": 0, "vong": 1, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["luot_song"], "cuoc": [], "them": 0, "vong": 2, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 3, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 4, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 5, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 6, "du_bao": true, "mo_bang": 1, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [{ "loai": "bo" }], "them": 0, "vong": 7, "hanh_dong": "dau_hang", "khao_sat_lai": 0 }
+      ]
+    },
+    {
+      "phien_ban": "balance-v5-D30-camket",
+      "seed": 1411303007,
+      "so_o": null,
+      "ghe": [
+        { "id": "ban", "loai": "nguoi", "khau_vi": "can_bang", "bac_rank": "Đồng", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_1", "loai": "bot", "bot_id": "da_dang", "bac_rank": "Vàng", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_2", "loai": "bot", "bot_id": "duoi_da", "bac_rank": "Vàng", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_3", "loai": "bot", "bot_id": "bat_day", "bac_rank": "Vàng", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_4", "loai": "bot", "bot_id": "khac_che", "bac_rank": "Vàng", "danh_muc": { "tai_san": [], "chien_thuat": [] } },
+        { "id": "bot_5", "loai": "bot", "bot_id": "nguoc_dong", "bac_rank": "Vàng", "danh_muc": { "tai_san": [], "chien_thuat": [] } }
+      ],
+      "log": [
+        { "mua": ["tpcp"], "cuoc": [{ "loai": "to", "them": 10000 }], "them": 0, "vong": 1, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [{ "loai": "theo" }], "them": 0, "vong": 2, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["luot_song"], "cuoc": [], "them": 0, "vong": 3, "hanh_dong": "giu_vi_the", "khao_sat_lai": 1 },
+        { "mua": ["tpcp"], "cuoc": [], "them": 0, "vong": 4, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["usd"], "cuoc": [], "them": 0, "vong": 5, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": ["don_bay"], "cuoc": [{ "loai": "to", "them": 17042 }], "them": 0, "vong": 6, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 7, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 },
+        { "mua": [], "cuoc": [], "them": 0, "vong": 8, "hanh_dong": "giu_vi_the", "khao_sat_lai": 0 }
+      ]
+    }
+  ]
+}

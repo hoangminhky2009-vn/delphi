@@ -1,0 +1,279 @@
+/*
+ * TAB SHOP — hai quầy. Terminal × Neon, không hình ảnh casino (A1).
+ *
+ * §XI: 0 border-radius (ảnh món là lưới pixel vuông, không phải huy hiệu tròn),
+ * 0 blur trong bóng (bóng có OFFSET để nói ô dày bao nhiêu — vai VẬT), và không
+ * @keyframes nào ở file này nên không có bẫy "keyframes đổi tên theo file".
+ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ───────────────────────────── VÍ HAI XU ───────────────────────────── */
+
+/*
+ * Hai loại xu đứng CẠNH NHAU, cùng cỡ chữ, không xu nào to hơn xu nào. Cỡ chữ lệch
+ * là một phát biểu về giá trị quy đổi giữa chúng — mà tường lửa A3.5 nói rõ là
+ * không tồn tại tỷ giá nào.
+ */
+.viRow {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.viO {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.viNhan {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.viSo {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+
+/* ───────────────────────────── NHÓM & Ô ───────────────────────────── */
+
+.nhomNhan {
+  margin-top: 4px;
+  font-size: 10.5px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.luoi {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.o,
+.oNho,
+.hopDau,
+.ketQua {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border-radius: 0;
+}
+
+.o {
+  padding: 12px;
+  border: 1px solid var(--border-idle);
+  background: var(--surface-card-alt);
+  box-shadow: var(--px-bong);
+}
+
+.oNho {
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border-idle-soft);
+}
+
+.hopDau,
+.ketQua {
+  padding: 12px 14px;
+}
+
+/* Không mua được: mờ hơn hẳn + viền gạch — khác trạng thái "mua được" ngay từ xa. */
+.oMo {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+/*
+ * Ảnh món = lưới 32×32. `pixelated` là bắt buộc: co giãn mượt làm mép nhoè và ở cỡ
+ * này thì một nhãn dán nhoè trông y như một nhãn khác.
+ */
+.anh {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 0;
+  image-rendering: pixelated;
+}
+
+.anh svg {
+  width: 100%;
+  height: 100%;
+}
+
+.oChu {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.oTen {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--text-title);
+}
+
+.oTenNho {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-title);
+}
+
+.oMoTa {
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.oPhai {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.gia {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--text-bright);
+}
+
+/*
+ * Khung bề rộng CỐ ĐỊNH cho nút — đúng lớp lỗi D27 đã phải chữa ở BetBar: ô dựng
+ * cho nhãn ngắn thì nhãn dài làm phình cả hàng và chữ dạt trái. Nhãn "ĐANG GỬI"
+ * dài hơn "ĐỔI" nên bố cục không được phụ thuộc độ dài chữ.
+ */
+.nut {
+  min-width: 92px;
+  text-align: center;
+  font-size: 10.5px;
+  letter-spacing: 1.4px;
+}
+
+.khoa {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  color: var(--gold-amber);
+}
+
+.oCho {
+  max-width: 100px;
+  font-size: 9px;
+  line-height: 1.35;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+}
+
+.banPhat {
+  font-size: 8.5px;
+  font-style: normal;
+  letter-spacing: 1px;
+  padding: 2px 5px;
+  border: 1px solid var(--gold-amber);
+  color: var(--gold-amber);
+}
+
+/* ───────────────────────────── BẬC HIẾM ───────────────────────────── */
+
+.bac {
+  font-size: 8.5px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  padding: 2px 5px;
+  border: 1px solid currentColor;
+  color: var(--text-muted);
+}
+
+.bac_thuong { color: var(--text-muted); }
+.bac_hiem   { color: var(--accent); }
+.bac_epic   { color: var(--gold-amber); }
+
+.conLai {
+  font-size: 9px;
+  letter-spacing: 0.4px;
+  color: var(--gold-amber);
+}
+
+/* ───────────────────────────── TỶ LỆ CÔNG KHAI ───────────────────────────── */
+
+/*
+ * Dải này KHÔNG được thu gọn, không được nằm dưới màn cuộn (D25/R1): tỷ lệ đã công
+ * bố và mốc bảo hiểm là hai thứ người chơi dựa vào để quyết định mở lượt tiếp.
+ */
+.rate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 14px 10px;
+}
+
+.rateO {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.rateNhan {
+  font-size: 8.5px;
+  letter-spacing: 1.2px;
+  color: var(--text-muted);
+}
+
+.ratePct {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+
+/* ───────────────────────────── LỖI & CHÂN ───────────────────────────── */
+
+.loi {
+  padding: 10px 12px;
+  border: 1px solid var(--danger-red, #b91c1c);
+  border-radius: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--danger-red, #b91c1c);
+  background: var(--surface-card-alt);
+}
+
+.chan,
+.chanNho {
+  margin: 0;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.chan {
+  margin-top: 6px;
+  font-size: 10.5px;
+}
+
+.chanNho {
+  padding: 0 14px 12px;
+  font-size: 10px;
+}

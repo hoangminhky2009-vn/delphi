@@ -1,0 +1,202 @@
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /*
+   * Đáy chừa chỗ cho BottomNav (position:fixed nên không chiếm luồng).
+   * 74px = 4 tab phẳng. Trước 25/07 là 96px vì tab giữa nổi lên -22px; bỏ tab
+   * hero mà để nguyên 96 thì thành dải trắng chết dưới mọi màn.
+   */
+  padding: 20px 16px 74px;
+}
+/*
+ * D541 — màn TOÀN MÀN (bàn đấu) không có BottomNav ⇒ không chừa 74 px đáy cho nó. Đo 06/10 ở 375 × 690: bàn 663 px + 20 đầu = 683, vừa khung —
+ * nhưng 74 px trống chừa cho một thanh không tồn tại đẩy trang lên 757 ⇒ phải cuộn, che nửa dải người chơi (ảnh founder).
+ */
+.shellToanMan { padding-bottom: env(safe-area-inset-bottom, 0px); }
+/*
+ * HUB (SPEC `ui-tang-khong-gian`) — khung KHÔNG CUỘN: vỏ chỉ chừa đầu 12 px + đáy 74 px (thanh điều hướng) + vùng an toàn, và cao đúng
+ * 100dvh. `100vh` của `.shell` lớn hơn `dvh` khi thanh địa chỉ trình duyệt đang hiện ⇒ trang cuộn thừa một khoảng trống; `dvh` thì không.
+ * Hub (`Hub.module.css` `.khung`) trừ ĐÚNG ba số này — đổi ở đây là phải đổi ở đó.
+ */
+.shell[data-dau-sanh] {
+  min-height: 100dvh;
+  /* Tai thỏ / Dynamic Island khi cài PWA ra màn hình chính (viewport-fit=cover): đệm đúng phần máy báo, máy thường vẫn 12 px. */
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+}
+
+/*
+ * KHUNG PFM (SPEC `pfm-tang-khong-gian`) — bốn tab không cuộn, KHÔNG có BottomNav: vỏ chỉ chừa đầu 12 px + đáy 8 px + vùng an toàn và
+ * cao đúng 100dvh. `KhungPfm.module.css` `.khung` trừ ĐÚNG ba số này — đổi ở đây là phải đổi ở đó.
+ */
+.shell[data-khung-pfm] {
+  min-height: 100dvh;
+  padding-top: 12px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+}
+
+.frame {
+  width: 100%;
+  max-width: var(--shell-width);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.frameRong {
+  /*
+   * Bỏ trần điện thoại cho bảng quản trị. `--shell-width: 390px` là đúng cho
+   * app người chơi (mobile-first, C6) nhưng bảng số thì nhồi vào 390px trên
+   * máy tính là bắt cuộn ngang từng cột một.
+   */
+  max-width: min(1600px, 100vw - 24px);
+}
+
+/*
+ * BÀN ĐẤU TRÊN MÀN HÌNH LỚN (founder 04/08).
+ *
+ * ⚠ KHÔNG kéo hết cỡ như `.frameRong`. Bảng số càng rộng càng dễ đọc vì mắt
+ * quét theo CỘT; bàn đấu thì mắt phải ôm cả cục, kéo ngang một mét là bắt người
+ * ta ngoái đầu. 1100px là chỗ vừa đủ để bàn + thị trường + shop đứng cạnh nhau.
+ *
+ * Dưới 900px thì KHÔNG có gì đổi — điện thoại giữ nguyên từng px, và đó là
+ * đường chạy của phần lớn người chơi (C6 mobile-first).
+ */
+.frameNgang {
+  max-width: min(1100px, 100vw - 24px);
+}
+
+@media (min-width: 900px) {
+  /*
+   * Tầm đọc KHÔNG nới theo khung. Khung rộng ra để xếp được nhiều khối cạnh
+   * nhau; còn một dòng chữ dài quá thì mắt lạc dòng — giới hạn của mắt người,
+   * không phải của màn hình. Đây đúng là hai vai mà `--shell-width` từng gánh
+   * chung, nay tách ra mới nới được một bên.
+   */
+  .frameNgang { --tam-width: 460px; }
+
+  /*
+   * ⚠⚠ LƯỚI PHẢI ĐẶT Ở TẦNG NỘI DUNG. BẢN ĐẦU ĐẶT Ở TẦNG KHUNG, VÀ ĐÓ LÀ LỖI
+   * FOUNDER NHÌN THẤY TRONG DISCORD 04/08.
+   *
+   * Ý đúng và vẫn giữ: "màn ngang" không phải cho KHUNG rộng ra — nó là cho NỘI
+   * DUNG XẾP CẠNH NHAU. Nới trần mà vẫn một cột thì thành một dải hẹp giữa khung
+   * rộng, hai bên đen thui, trông tệ hơn cả lúc chưa nới.
+   *
+   * Nhưng `.frame` có ĐÚNG HAI con: `<header>` và `<main>`. Nên `auto-fit` chia
+   * cột cho hai thứ đó — **header ăn trọn một cột**. Đo trên Chrome, cửa sổ
+   * 1280×720:
+   *     grid-template-columns: 542px 542px
+   *     HEADER  x=90  542×549      ← thanh cao 40px được cấp nửa màn hình
+   *     MAIN    x=648 542×549      ← cả app nhồi vào nửa còn lại
+   * Đúng cái founder chụp: logo + ví lơ lửng giữa nửa trái trống trơn.
+   *
+   * ⚠ VÀ NÓ CÒN HỤT MỘT TẦNG NỮA — `main` có ĐÚNG MỘT con (`.wrap` của màn), nên
+   * kể cả đặt lưới lên `main` thì `auto-fit` vẫn chỉ thấy MỘT ô và không bao giờ
+   * chảy thành hai cột. Nói cách khác cái "lưới tự chảy" CHƯA TỪNG CHẢY cho bất
+   * kỳ màn nào; nó chỉ tách được header ra khỏi phần còn lại.
+   *
+   * Nên lưới đặt lên chính `.wrap` của màn — chỗ các khối nội dung THẬT SỰ nằm.
+   * Mọi `.wrap` trong `screens/` đều là flex-column trần (không nền, không viền,
+   * không padding), nên đổi sang lưới không mất một nét vẽ nào, và `gap` riêng
+   * của từng màn vẫn được tôn trọng.
+   *
+   * ⚠ `:only-child` là CHỐT AN TOÀN, không phải thẩm mỹ: màn nào trả về nhiều
+   * khối gốc thì bỏ qua, giữ nguyên một cột như cũ — thà không chảy còn hơn biến
+   * mỗi khối thành một lưới con.
+   */
+  .frameNgang > .main > :global(*:only-child) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--tam-width), 1fr));
+    align-content: start;
+  }
+  /* Ô lưới co được: không có dòng này thì nội dung dài đẩy cột phình ra. */
+  .frameNgang > .main > :global(*:only-child) > :global(*) { min-width: 0; }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logoChip {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 0;
+  background: var(--surface-idle);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  /*
+   * Hai vai trong MỘT khai báo, đúng thứ tự luật 6: vát (bề mặt của tấm) rồi
+   * mới tới quầng (ánh sáng linh vật hắt ra). Quầng offset 0 nên là ÁNH SÁNG —
+   * giữ nguyên blur, xoá đi là tắt đúng thứ Terminal × Neon sống bằng.
+   */
+  box-shadow: var(--px-vien-trong), 0 0 10px rgba(124, 58, 237, 0.25);
+}
+
+.logoText {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 2px;
+  color: var(--text-bright);
+}
+
+.logoSlash {
+  color: var(--accent);
+}
+
+.logoScreen {
+  color: var(--text-muted);
+}
+
+.wallet {
+  /* Viền sáng lên khi trỏ vào = đổi trạng thái NHỊ PHÂN → nhảy hai nấc theo
+     nhịp chung, không hoà sắc 0,2s. Đã composes thì KHÔNG khai lại transition. */
+  composes: doiMau from '@/styles/pixel.module.css';
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(34, 211, 238, 0.05);
+  border: 1px solid var(--border-accent-soft);
+  border-radius: 0;
+  padding: 5px 10px;
+  text-decoration: none;
+}
+.wallet:hover {
+  border-color: rgba(103, 232, 249, 0.7);
+}
+
+.walletLabel {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.walletValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* (dev-nav tạm đã gỡ 18/07 — menu chính thật ở components/BottomNav) */
+
+/*
+ * MÀN KẾT BENTO (`screens/holdem/ManKet.tsx`): cùng một route với bàn đấu (toàn tâm) nên AppShell không biết trận đã kết — màn tự đánh dấu
+ * `html[data-man-ket]` khi sống. Khung không-cuộn cao đúng `100dvh − 20 px đầu − vùng an toàn`; `.shell` mặc định `min-height: 100vh` lớn hơn `dvh`
+ * khi thanh địa chỉ trình duyệt đang hiện ⇒ trang cuộn thừa một khoảng trống. Hạ về `100dvh` thì tổng chiều cao trang = đúng một màn.
+ */
+:global(html[data-man-ket]) .shell { min-height: 100dvh; }

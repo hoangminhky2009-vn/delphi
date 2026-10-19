@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    // Bật 20/07 sau khi gỡ khối "Bộ bài" khỏi màn trận và phát hiện 3 biến
+    // chết nằm im: tsc không hề kêu. Code chết tích tụ âm thầm đúng thứ A8.9
+    // cấm — nay đổi thành lỗi build.
+    "noUnusedLocals": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "types": ["vite/client", "node"],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@config/*": ["../config/*"],
+      "@server/*": ["../server/*"]
+    }
+  },
+  "include": ["src", "tests", "vite.config.ts", "../config", "../server/holdem/nav.ts"],
+  // Bản demo "khách nâng cao" import CẢ server (máy chủ chạy trong trang) — kiểm kiểu riêng ở tsconfig.demo.json,
+  // không kéo toàn bộ server vào luật `noUnusedLocals` của web (server có tsc gốc của nó).
+  "exclude": ["src/demo", "tests/demo_may_chu.test.ts"]
+}

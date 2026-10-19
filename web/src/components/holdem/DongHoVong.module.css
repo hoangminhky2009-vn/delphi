@@ -1,0 +1,201 @@
+/*
+ * ĐỒNG HỒ VÒNG (D38) — hạn của pha chọn bài.
+ *
+ * §XI: khung vuông (`border-radius: 0`), không gradient, không blur. Ba trạng
+ * thái đọc được KHÔNG CHỈ bằng màu — người mù màu vẫn phải phân biệt được:
+ *   bình thường → chữ "CÒN" + số, viền tím nhạt;
+ *   sắp hết     → số đập nhịp, thanh đầy gần hết;
+ *   hết giờ     → CHỮ ĐỔI HẲN thành "HẾT GIỜ", số biến mất.
+ */
+
+.hop {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 3px 8px;
+  /* 13/09 tối — đồng hồ là THÔNG TIN, không bấm được ⇒ xám tối. Lam đã thành màu riêng của
+     thứ tương tác (brief founder), nên một cái đồng hồ lam là nói dối về affordance. Nhánh
+     hết giờ/gấp vẫn đỏ: đó là cảnh báo, không phải lời mời chạm. */
+  border: 1px solid var(--border-idle);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.45);
+  font-size: var(--fs-meta);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.nhan {
+  color: rgba(226, 232, 240, 0.72);
+  letter-spacing: var(--ls-nut);
+}
+
+/*
+ * `tabular-nums` + bề rộng cố định: số 9 và số 10 phải chiếm CÙNG chỗ, nếu không
+ * cả dải trạng thái nhích ngang mỗi giây. Đúng lớp lỗi D27 đã sửa ở BetBar —
+ * ô dựng cho 2 ký tự rồi nhét chuỗi dài hơn vào thì đẩy cả hàng.
+ */
+.so {
+  min-width: 26px;
+  color: var(--text-dim);
+  font-weight: 800;
+  font-size: var(--fs-human);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.thanh {
+  /* `relative` để vạch chia ĐỌC|QUYẾT (M2) neo theo % bề rộng thanh. */
+  position: relative;
+  display: inline-block;
+  /* D401 — 26px (số demo `giai-vong.html`: nhường chỗ cho hộp GIẢI cùng hàng HUD); màn hẹp hơn 375px còn 12px (khối
+     @media cuối tệp). Thanh là phần DƯ của mặt đồng hồ — giây và nhãn ĐỌC/QUYẾT mới chở tin, nên nó nhường trước. */
+  width: 26px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+/*
+ * Bề rộng do TSX đặt (đã làm tròn về nấc 10%). Không `transition` — chuyển mượt
+ * ở 4px chiều cao chỉ tạo ra khung hình trung gian bị khử răng cưa, và nấc nhảy
+ * là ĐÚNG ngôn ngữ pixel chứ không phải nhược điểm.
+ */
+.day {
+  display: block;
+  height: 100%;
+  background: var(--text-muted);
+}
+
+/*
+ * SẮP HẾT GIỜ: đổi màu VÀ đập nhịp. `steps(1, end)` biến nhịp thành sóng vuông —
+ * viền đỏ CÓ hoặc KHÔNG, không có trạng thái nửa hiện, không có luồng sáng mờ.
+ */
+.gap {
+  border-color: rgba(244, 63, 94, 0.6);
+  animation: dhvDap 0.9s steps(1, end) infinite;
+}
+
+.gap .so { color: #fb7185; }
+.gap .day { background: #fb7185; }
+
+/* HẾT GIỜ: đứng yên. Nhấp nháy một thứ đã hết là nhắc mãi một chuyện đã xong. */
+.het {
+  border-color: rgba(244, 63, 94, 0.45);
+  box-shadow: none;
+}
+
+.het .nhan {
+  color: #fb7185;
+  font-weight: 800;
+}
+
+.het .day { background: rgba(244, 63, 94, 0.55); }
+
+/*
+ * ── VIỀN CẢNH BÁO SẮP HẾT GIỜ (founder 09/08) ─────────────────────────────
+ *
+ * Phủ TOÀN MÀN nhưng `pointer-events: none` — nó nằm trên mọi nút, chạm phải
+ * xuyên qua được. Đây là ràng buộc cứng, không phải tinh chỉnh: một cảnh báo
+ * "nhanh lên" mà chặn đúng cái nút cần bấm là tự mâu thuẫn.
+ *
+ * Vẽ bằng `box-shadow: inset` chứ không phải `border`: border ăn vào hộp và
+ * đẩy bố cục, còn inset shadow là ÁNH SÁNG hắt từ mép — đúng bản chất thứ này
+ * (một quầng cảnh báo), và không tốn một lần tính lại layout nào.
+ *
+ * `--cao-nav` không liên quan ở đây vì màn trận là toàn màn (D47); dùng
+ * `inset: 0` cho đúng mép thiết bị.
+ */
+.vienGap {
+  position: fixed;
+  /*
+   * ⚠ 75, KHÔNG PHẢI 60 — sửa lỗi founder báo 22/08: *"nhấp nháy đỏ mà lúc mở
+   * shop đ** thấy nháy gì"*. Shop (`ShopManHinh .phu`) là lớp phủ `fixed` ở
+   * z-index 70 nên viền 60 nằm DƯỚI nó; mà shop mở chính là lúc người chơi
+   * đang cân chip và cần viền nhất. 75 = trên shop, dưới chip bay (80).
+   * `pointer-events: none` nên đè lên shop không chặn một cú chạm nào.
+   */
+  z-index: 75;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 2px rgba(244, 63, 94, 0.55),
+    inset 0 0 34px 6px rgba(244, 63, 94, 0.26);
+  animation: dhvVien 1s ease-in-out infinite;
+}
+
+/*
+ * NẤC KHẨN (≤ NGUONG_KHAN_S) — dày gấp đôi, quầng rộng hơn, nhịp gấp đôi.
+ *
+ * Vì sao hai nấc chứ không phải một mức đậm hơn: nấc thứ hai làm viền CHỞ
+ * THÔNG TIN thay vì chỉ báo động — liếc một cái là biết "còn kịp cân nhắc"
+ * hay "bấm ngay đi". Một mức duy nhất thì suốt 8 giây đều gào như nhau, và
+ * người chơi học cách phớt lờ nó.
+ *
+ * ⚠ NHỊP 0,5s = 2 Hz, CÓ TRẦN CHỨ KHÔNG PHẢI CHỌN CHO ĐẸP. Ngưỡng an toàn
+ * quốc tế cho nội dung nhấp nháy là DƯỚI 3 lần/giây; nhanh hơn thế là rủi ro
+ * co giật ánh sáng. 2 Hz nằm dưới trần đó, và vùng nháy chỉ là dải mép (không
+ * phải mảng lớn giữa màn) nên còn an toàn thêm một lớp nữa. Có test khoá —
+ * ai muốn "nháy gấp hơn cho gấp" sẽ đỏ trước khi kịp ship.
+ */
+.vienKhan {
+  box-shadow:
+    inset 0 0 0 4px rgba(244, 63, 94, 0.85),
+    inset 0 0 56px 10px rgba(244, 63, 94, 0.42);
+  animation: dhvVienKhan 0.5s ease-in-out infinite;
+}
+
+/* CSS Modules đổi tên MỌI animation-name theo file ⇒ @keyframes phải CÙNG FILE. */
+@keyframes dhvDap {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+  50% { box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.16); }
+}
+
+/*
+ * CHỈ `opacity` (luật D68) — nhấp nháy ở đây là đổi ĐỘ SÁNG, không đụng bố
+ * cục. Đáy 0.34 chứ không phải 0: viền tắt hẳn rồi bật lại đọc thành lỗi
+ * render, còn thở nhẹ thì đọc thành cảnh báo. Founder dặn "nhẹ".
+ */
+@keyframes dhvVien {
+  0%, 100% { opacity: 0.34; }
+  50% { opacity: 1; }
+}
+
+/* Nấc khẩn dìm đáy sâu hơn (0.18) — cùng một nhịp mà tương phản mạnh hơn thì
+   mắt đọc ra "gấp" mà không cần nháy nhanh thêm (xem trần 3 Hz ở trên). */
+@keyframes dhvVienKhan {
+  0%, 100% { opacity: 0.18; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gap { animation: none; }
+  /*
+   * Viền ĐỨNG YÊN chứ KHÔNG biến mất — người tắt hoạt ảnh vẫn có quyền biết
+   * mình sắp hết giờ. Thứ bị tắt là cái nháy, không phải cái tin.
+   * Nấc khẩn vẫn PHÂN BIỆT ĐƯỢC nhờ viền dày + đậm hơn (box-shadow ở trên),
+   * nên thông tin "còn rất ít" không mất theo cái nháy.
+   */
+  .vienGap, .vienKhan { animation: none; opacity: 0.72; }
+}
+
+/*
+ * D401 — màn < 375px: thanh 12px để [đồng hồ · GIẢI] còn chung hàng với số vòng. Đo 24/09 ở 360px (cỡ Android phổ
+ * biến): ca xấu nhất có thật — vòng 2 chữ số · "KỲ NGỘ" · giải 6 chữ số sau một cú tất tay — vừa khít với thanh 12px,
+ * tràn xuống dòng với thanh 26px. Truy vấn theo VIEWPORT là đủ: khung app trần 390px (`--shell-width`) ≥ 375, nên bề
+ * ngang hàng HUD chỉ hẹp hơn 375 khi chính màn hẹp hơn. (Không dùng @container: nó kéo theo layout containment, biến
+ * hàng HUD thành khối chứa của mọi con `position: fixed`.)
+ */
+@media (max-width: 374.98px) {
+  .thanh { width: 12px; }
+}
+
+/* M2 (17/08) — vạch chia ĐỌC | QUYẾT trên thanh đã trôi. Một cột 2px, không
+   hoạt ảnh: nó là cái MỐC, không phải thứ để nhìn. */
+.vach {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gold-amber, #fbbf24);
+  opacity: 0.85;
+}

@@ -1,0 +1,29 @@
+/*
+ * CHẤM VÀNG Ở GÓC. Phần tử cha phải `position: relative`.
+ *
+ * ⚠ CÓ THỞ, KHÔNG NHẤP NHÁY. Nhịp thở chậm nói "có gì mới" mà không cướp sự chú ý khỏi thứ
+ *   người dùng đang làm; nhấp nháy (`steps()`) ở kích cỡ này đọc ra là lỗi render — đúng ranh
+ *   `docs/ui-ux/01-vfx-game-feel.md`: `steps()` cho nhịp máy, `ease-in-out` cho ÁNH SÁNG thở.
+ * ⚠ Chỉ động `transform`/`opacity` — 60 FPS.
+ */
+.dom {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  pointer-events: none;
+  background: var(--gold);
+  /* Viền theo nền sâu để chấm tách khỏi mọi thứ nó đậu lên, kể cả nút đang sáng. */
+  box-shadow: 0 0 0 2px var(--bg-deep);
+  animation: domTho 2.4s ease-in-out infinite;
+}
+
+@keyframes domTho {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.82); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dom { animation: none; }
+}

@@ -1,0 +1,74 @@
+/*
+ * ORACLE GIÚP 5 — "tiền đi tới ngày nào" (D365). Số đo dải lịch chép từ demo đã chốt
+ * `pfm-ngay-dau.html` §`.lich` (A11.25).
+ * ⚠ `flex-wrap` + `overflow:hidden`: dải tối đa 21 ô, màn 375px vẫn không đẩy trang tràn ngang
+ *   (bài học D356: một phần tử có transform vẫn nong vùng cuộn).
+ */
+
+.khoi { margin: 0 0 11px; }
+
+.lich { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 9px; overflow: hidden; }
+
+.lich i {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--chu-mo);
+  border: 1px solid var(--line);
+  background: var(--n-1);
+}
+
+/* Bốn loại ô — màu MÔ TẢ, không phải màu khen chê (A10). */
+.ve { color: var(--gold) !important; border-color: var(--gold) !important; }
+.qua { color: var(--accent-bright) !important; }
+.nay { color: var(--text-bright) !important; border-color: var(--line-2) !important; }
+.het { color: var(--lose) !important; border-color: var(--lose) !important; }
+.thuong { }
+
+.chuThich { margin: 6px 0 0; font-size: 11px; line-height: 1.45; color: var(--chu-mo); }
+.vi { margin: 6px 0 0; font-size: 12px; line-height: 1.45; color: var(--chu-mo); }
+
+.nut { display: flex; gap: 6px; margin-top: 9px; }
+
+.nut button {
+  flex: 1;
+  min-height: 44px;
+  border: 1px solid var(--line-2);
+  background: var(--n-1);
+  color: var(--text-bright);
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+/* ⚠ Nút chính chỉ khác viền + màu chữ, KHÔNG to hơn: hai câu trả lời đều hợp lệ (P5/P6). */
+.chinh { border-color: var(--accent) !important; color: var(--accent-bright) !important; }
+
+.nut button:active { transform: translate(1px, 1px); }
+
+.gon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 9px 0 0;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--chu-phu);
+}
+
+.doi {
+  min-height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--accent-bright);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}

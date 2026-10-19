@@ -1,0 +1,36 @@
+.card {
+  composes: khungNoi from '@/styles/pixel.module.css';
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+  background: var(--surface-card);
+  border: 1px solid var(--border-idle);
+  /*
+   * Hai nhịp KHÁC NHAU vì hai vai khác nhau (luật 4). `box-shadow` ở đây chỉ đổi
+   * ĐỘ MẠNH quầng — hai lớp đầu (vát + bóng cứng) là hằng số, xem `cardShadow` —
+   * nên nó là ánh sáng và được mượt. `border-color` là CẠNH của card, đổi cạnh
+   * là đổi vật → nhảy 2 nấc.
+   */
+  transition: box-shadow 250ms ease, border-color 120ms steps(2, end);
+  padding: 16px 14px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Scanline CRT (Mẫu E) — pointer-events none, nằm trên cùng */
+.scanline {
+  composes: crt from '../../styles/motion.module.css';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9;
+  border-radius: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.16) 0px,
+    rgba(0, 0, 0, 0.16) 1px,
+    rgba(0, 0, 0, 0) 1px,
+    rgba(0, 0, 0, 0) 4px
+  );
+}

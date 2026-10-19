@@ -1,0 +1,127 @@
+/*
+ * HŨ TẦNG KHÔNG GIAN — mặt bento + ruột lớp trượt của tab HŨ (SPEC `pfm-tang-khong-gian`, demo CHỐT bản 6). Phần chung (nhãn, số to,
+ * hàng lớp trượt, vào so le…) ở `components/pfm/PfmBento.module.css`; ở đây chỉ HÌNH HŨ.
+ *
+ * HAI LOẠI HŨ PHẢI KHÁC NHAU Ở HÌNH (founder 11/10: *"chưa thấy sự phân biệt giữa hũ chi và hũ tiết kiệm"*):
+ *   · TIẾT KIỆM = BÌNH đứng, mực ĐẦY DẦN từ đáy, có VẠCH lời đoán (đứt nét vàng) — màu mực đi theo nấc tiến độ của `ThanhTienDo`.
+ *   · CHI       = PHONG BÌ nằm, mực CẠN DẦN từ phải sang trái (còn bao nhiêu), nắp tam giác — màu lam (tiền đã/đang tiêu).
+ * Bài canh `pfm_bento_hu.test.tsx` đo hai họ lớp này khác nhau (`data-hinh="binh"` ≠ `"phong-bi"`).
+ *
+ * ⚠ Không `border-radius` (pixel art); không hex (token); không `composes` pixel (có `cubic-bezier` của chuyển động vật lý).
+ */
+
+/* ── hàng CHIA TIỀN TỐI NAY ── */
+.oChia { flex: 0 0 auto; flex-direction: row; align-items: center; gap: 10px; padding: 8px 10px; border-color: rgba(253, 224, 71, 0.5); }
+.oChia .giua { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.chipHoi { flex: 0 0 auto; padding: 0 5px; border: 1px solid var(--gold); color: var(--gold); font-size: var(--tk-micro); letter-spacing: 0.08em; }
+
+/* ── ô hũ ƯU TIÊN (★) ── */
+.oSao { flex: 1 1 auto; min-height: 0; flex-direction: row; align-items: stretch; gap: 10px; overflow: hidden; border-color: rgba(253, 224, 71, 0.5); }
+.oSao .ben { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.tenLon { font-size: var(--tk-title); color: var(--text-title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.doanDong { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; overflow: hidden; }
+.doanDong b { color: var(--gold); font-size: var(--tk-body); }
+.nhanDoan { font-size: var(--tk-micro); letter-spacing: 0.14em; color: var(--gold); }
+.soHu { margin-top: auto; font-size: 24px; color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.soHu small { font-size: var(--tk-label); color: var(--text-muted); }
+
+/* ── BÌNH (tiết kiệm) ── */
+.binh { position: relative; flex: 0 0 44px; margin-top: 9px; background: var(--n-1); box-shadow: inset 0 0 0 2px var(--n-4b), inset 0 4px 10px rgba(0, 0, 0, 0.6); }
+.binh::before { content: ''; position: absolute; left: -4px; right: -4px; top: -8px; height: 7px; background: var(--n-4b); box-shadow: var(--px-vien); }
+.binh > i { position: absolute; left: 3px; right: 3px; bottom: 3px; background: var(--fill, var(--c-2)); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25); transform-origin: 50% 100%; }
+.binh > b { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; font-size: var(--tk-micro); color: var(--text-title); text-shadow: 1px 1px 0 var(--ink); font-weight: 600; z-index: 1; }
+.binhNho { position: relative; width: 22px; height: 26px; background: var(--n-2); box-shadow: inset 0 0 0 2px var(--n-4b); }
+.binhNho::before { content: ''; position: absolute; left: -2px; right: -2px; top: -4px; height: 4px; background: var(--n-4b); }
+.binhNho > i { position: absolute; left: 2px; right: 2px; bottom: 2px; background: var(--fill, var(--c-2)); transform-origin: 50% 100%; }
+/* Vạch lời đoán: đứt nét vàng, nằm ở MỨC ĐÃ ĐẶT (SPEC câu 2 = A: lời đoán là "tới hạn ĐỦ mức", nên vạch ở miệng bình). */
+.vach { position: absolute; left: -3px; right: -3px; height: 0; border-top: 2px dashed var(--v-3); z-index: 2; }
+.binhNho .vach { left: -2px; right: -2px; }
+.vachMau { display: inline-block; width: 14px; border-top: 2px dashed var(--v-3); vertical-align: middle; margin-right: 4px; }
+/* Hũ ĐẦY: quầng thở phía sau bình (`huTho`). */
+.quang { position: absolute; inset: -3px; background: var(--win); opacity: 0.12; pointer-events: none; z-index: 0; animation: huTho 1500ms ease-in-out infinite; }
+@keyframes huTho { 0%, 100% { opacity: 0.12; } 50% { opacity: 0.32; } }
+
+/* ── PHONG BÌ (chi) ── */
+.phongBi { position: relative; width: 30px; height: 20px; margin-top: 4px; background: var(--n-2); box-shadow: inset 0 0 0 2px var(--n-4b); overflow: hidden; }
+.phongBi > i { position: absolute; left: 2px; top: 2px; bottom: 2px; background: var(--c-3); opacity: 0.85; transform-origin: 0 50%; }
+.phongBi::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 9px; background: linear-gradient(to bottom right, transparent 49%, var(--n-4b) 50%, transparent 56%), linear-gradient(to bottom left, transparent 49%, var(--n-4b) 50%, transparent 56%); background-size: 50% 100%; background-repeat: no-repeat; background-position: left, right; }
+.phongBiLon { width: 44px; height: 30px; margin-top: 9px; }
+
+/* HŨ NẢY khi vừa tích (huNay, cùng đường cong với màn cũ) — lớp gắn bằng `tich_hu.ts`, gỡ bằng hẹn giờ. */
+.nay { animation: huNay var(--nhip-nd-day, 620ms) cubic-bezier(0.2, 1.4, 0.4, 1) 1; }
+@keyframes huNay {
+  0% { transform: scale(1) translateY(0); }
+  28% { transform: scale(1.11) translateY(-3px); }
+  52% { transform: scale(0.985) translateY(0); }
+  74% { transform: scale(1.05); }
+  100% { transform: scale(1.02); }
+}
+/* XU RƠI — gắn vào `body` bằng `tich_hu.ts`; trên cả lớp trượt (z-tam-truot 61). */
+.xuRoi { position: fixed; z-index: 70; width: 6px; height: 6px; background: var(--v-3); box-shadow: inset -1px -1px 0 rgba(0, 0, 0, 0.35); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+  .nay { animation: none; }
+  .quang { animation: none; opacity: 0.12; }
+  .xuRoi { display: none; }
+}
+
+/* ── ô NHÓM (TIẾT KIỆM · CHI) ── */
+.oNhom { flex: 0 0 auto; gap: 4px; }
+.nhomDau { display: flex; align-items: center; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.oNhom .nhomDau { font-size: var(--tk-label); letter-spacing: 0.14em; color: var(--violet-soft); }
+.nhomDau:focus-visible, .conHu:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; }
+/* `min-height` = chiều cao của hũ mini ĐẦY ĐỦ (bình 82 · phong bì 70 → lấy 82): hàng không đổi chiều cao giữa lúc đang tải · chưa có hũ · có hũ, nên khi dữ liệu về
+   KHÔNG khối nào nhảy (bắt bằng bài `mang` của pfm_bento.mjs: trước đây ô nhóm cao 78 → 126 và đẩy ô ★ co lại ngay dưới mắt người chơi). */
+.con { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 4px; min-height: 82px; }
+.conHu { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px 5px; min-width: 0; border: 0; background: var(--n-1); box-shadow: var(--o-vien); text-align: center; color: inherit; font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.conHu:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: none; }
+.conHu > span { width: 100%; font-size: var(--tk-micro); color: var(--n-9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.conHu .soCon { color: var(--v-3); }
+.conHu .dauCon { font-size: 9px; color: var(--n-7); }
+.them { justify-content: center; color: var(--accent-bright); font-size: var(--tk-title); border: 1px dashed var(--line-2); background: none; box-shadow: none; }
+
+/* ── hàng DANH MỤC (đáy) ── */
+.oDanhMuc { flex: 0 0 auto; gap: 2px; padding: 6px 10px; }
+.oDanhMuc .nhan { font-size: var(--tk-label); }
+
+/* Màn thấp (360×640): thu bình lớn, bỏ dòng phụ — vẫn một khối nguyên, không cắt giữa chữ. */
+@media (max-height: 720px) {
+  .oSao .duoiBot { display: none; }
+  .binh { margin-top: 6px; }
+  .oSao { padding-top: 7px; padding-bottom: 7px; }
+}
+
+/* ════════ LỚP TRƯỢT ════════ */
+.lopChia { display: flex; flex-direction: column; gap: 10px; }
+/* Khay trong lớp: tĩnh, không dính đáy (khay cũ dựng cho thanh neo đáy trang). */
+.khayTrongTam > div { margin: 0; }
+.keTrongTam > section { margin: 0; }
+
+/* TẠO HŨ ba bước */
+.chonLoai { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.chonLoai > button { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 6px 10px; border: 0; border-bottom: 3px solid var(--n-6); background: var(--n-4b); color: var(--text-title); font: inherit; text-align: center; box-shadow: var(--go-phim, inset 0 1px 0 rgba(255, 255, 255, 0.16)), var(--px-bong); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.chonLoai > button:active { transform: translate(var(--px-day), var(--px-day)); box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.35); }
+.chonLoai > button[aria-pressed='true'] { background: color-mix(in srgb, var(--c-3) 22%, var(--n-4b)); border-bottom-color: var(--c-3); }
+.chonLoai b { font-size: var(--tk-title); letter-spacing: 0.1em; }
+.chonLoai span:last-child { font-size: var(--tk-label); color: var(--text-muted); }
+.chonLoai .binhNho { width: 28px; height: 34px; margin-top: 4px; background: var(--n-2); box-shadow: inset 0 0 0 2px var(--n-6); }
+.chonLoai .binhNho::before { left: -3px; right: -3px; top: -5px; height: 5px; background: var(--n-6); }
+.o2 { display: flex; flex-direction: column; gap: 6px; }
+.oGo { width: 100%; padding: 9px 10px; border: 0; background: var(--n-0); box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7), inset 0 0 0 1px var(--line-2); color: var(--text-title); font: inherit; font-size: var(--tk-body); }
+.oGo::placeholder { color: var(--n-7); }
+.oGo.loi { box-shadow: inset 0 0 0 1px var(--lose); }
+.hangMau { display: flex; flex-wrap: wrap; gap: 6px; }
+.luoiIcon { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.luoiIcon > button { display: grid; place-items: center; height: 38px; padding: 0; border: 1px solid var(--line); background: none; cursor: pointer; }
+.luoiIcon > button[aria-pressed='true'] { border-color: var(--accent); background: rgba(34, 211, 238, 0.12); }
+.tomCo { display: flex; justify-content: space-between; gap: 8px; padding: 6px 9px; background: var(--n-1); box-shadow: var(--o-vien); font-size: var(--tk-label); font-variant-numeric: tabular-nums; }
+.tomCo b { color: var(--gold); font-weight: 600; }
+.lopTrongChi { display: flex; flex-direction: column; gap: 6px; }
+.tieuLop { margin: 4px 0 0; font-size: var(--tk-label); letter-spacing: 0.12em; color: var(--violet-soft); }
+.ghiPhu { margin: 0; font-size: var(--tk-label); color: var(--text-muted); line-height: 1.35; }
+.nhapSo { display: flex; align-items: center; gap: 8px; }
+.nhapSo input { flex: 1 1 auto; min-width: 0; }
+.hangChac > button { flex: 1 1 0; justify-content: center; text-align: center; padding: 8px 4px; }
+.hangChac { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.hangChac > button { display: flex; flex-direction: column; gap: 2px; align-items: center; }
+.hangChac small { font-size: var(--tk-micro); color: var(--text-muted); }
+.oMay { display: inline-flex; align-items: center; gap: 4px; }

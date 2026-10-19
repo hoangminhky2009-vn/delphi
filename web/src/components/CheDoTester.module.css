@@ -1,0 +1,79 @@
+/*
+ * DẢI CHẾ ĐỘ TESTER (D370). Dùng token màu sẵn có — không đặt mã màu mới.
+ *
+ * ⚠ Nó NẰM TRÊN mọi màn của người đang trong đợt đo, nên phải MỎNG: cao hơn một chút là đẩy nội dung
+ *   màn xuống trên điện thoại 375px, mà màn Đấu trường đã đo sát trần từ D321.
+ * ⚠ Dính ĐẦU màn (`sticky top`), không dính đáy: đáy là chỗ của BottomNav và của nút CHỐT VÒNG.
+ */
+
+.dai {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--surface-inset);
+  border-bottom: 1px solid var(--violet-soft);
+}
+
+.dong { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.nhan {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--violet-soft);
+}
+
+.ma { display: flex; align-items: baseline; gap: 6px; }
+.ma i { font-style: normal; font-size: 9.5px; letter-spacing: 1px; color: var(--text-muted); }
+.ma b {
+  font-size: 17px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.buoc {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Câu "giờ làm gì" — thứ duy nhất dẫn đường khi không còn người điều phối, nên nó là dòng to nhất. */
+.viec { margin: 0; font-size: 13px; line-height: 1.45; }
+
+.cho { margin: 0; font-size: 12px; color: var(--text-muted); }
+
+.nut {
+  align-self: flex-start;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  letter-spacing: 1px;
+  text-decoration: none;
+  color: var(--bg, #0b0e14);
+  background: var(--gold);
+}
+
+/* Lối dự phòng khi mất tab Form — cố ý nhạt hơn nút chính, để nó không thành đường đi thường. */
+.nutPhu {
+  align-self: flex-start;
+  padding: 2px 0;
+  font-size: 11px;
+  text-decoration: none; /* D396 — cũng dùng cho link (xem thẻ): chỉ giữ gạch chấm bên dưới, không gạch chân kép */
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  border-bottom: 1px dotted var(--text-muted);
+  cursor: pointer;
+}
+.nutPhu:disabled { opacity: 0.6; cursor: default; }
+
+.loi { margin: 0; font-size: 11.5px; color: var(--danger, #e5484d); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .nut { transition: transform 90ms cubic-bezier(0.2, 0.9, 0.3, 1.4); }
+  .nut:active { transform: translateY(1px); }
+}

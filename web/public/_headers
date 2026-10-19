@@ -1,0 +1,107 @@
+# LUẬT CACHE CỦA ASSET — đặt ở đây, KHÔNG ở worker/index.js.
+#
+# Lớp static-assets của Cloudflare trả file thẳng ở biên mà không gọi worker
+# (`run_worker_first` mặc định false), nên set header trong worker cho HTML là
+# code chết — đã đo và xác nhận 25/07/2026.
+#
+# ─────────────────────────────────────────────────────────────────────────
+# VÌ SAO VỎ HTML PHẢI `no-store`.
+#
+# Đo được 25/07/2026: sau khi `wrangler deploy`, mở `https://dubao…workers.dev/`
+# vẫn nhận `index-C7XgCziv.js` (bundle CŨ), trong khi `/?v=<timestamp>` nhận
+# `index-BIn8Mxm-.js` (bundle MỚI) và asset mới gọi trực tiếp thì 200.
+# `CF-Cache-Status: HIT` trên `/` → biên đang giữ vỏ HTML cũ cho đúng cache-key
+# đó, dù nội dung đã đổi.
+#
+# Hậu quả: DEPLOY VÔ HÌNH với người mở đúng địa chỉ gốc, trong một khoảng thời
+# gian mình không kiểm soát. Tệ hơn deploy hỏng — deploy hỏng thì biết ngay, còn
+# cái này báo "đã lên" mà người dùng vẫn thấy bản cũ.
+#
+# Chia đúng cho SPA có tên file BĂM:
+#   · vỏ HTML  → no-store. Nó là BẢN ĐỒ trỏ tới bundle nào, phải luôn mới. Vài KB.
+#   · asset băm → cache vĩnh viễn + immutable. Tên đổi mỗi build nên không bao
+#     giờ có nguy cơ trả bản cũ sai.
+
+/
+  Cache-Control: no-store
+
+/index.html
+  Cache-Control: no-store
+
+# D335 — vỏ HTML của app quản trị riêng: cùng luật với vỏ app người chơi.
+/quan-tri
+  Cache-Control: no-store
+
+/quan-tri.html
+  Cache-Control: no-store
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ═══════════════════════════════════════════════════════════════════════════
+# HEADER BẢO MẬT (thêm 11/08). Trước hôm nay repo không có cái nào.
+#
+# ⚠⚠ ĐẶT Ở ĐÂY LÀ BẮT BUỘC VỚI VỎ SPA, và chỉ với vỏ SPA. Asset tĩnh do
+# Cloudflare trả THẲNG Ở BIÊN, không gọi worker (`run_worker_first` = false, đã
+# đo 25/07) ⇒ đặt trong worker/index.js là code chết. Ngược lại `/admin` KHÔNG
+# phải asset tĩnh (worker bắt riêng rồi proxy sang API) ⇒ header của nó nằm ở
+# server/app.ts. Hai nơi, hai vai; đặt nhầm chỗ nào cũng trông như đã làm.
+#
+# ⚠ DÙNG `/*` CHỨ KHÔNG PHẢI `/` — đây là SPA, mọi lối vào sâu (/vi, /shop,
+# /keo/:id, /arena) đều được fallback trả về index.html. Chỉ khai `/` thì curl `/`
+# báo "đã áp" trong khi phần lớn lối vào thật KHÔNG có header — vừa hở, vừa làm
+# lỗi CSP xuất hiện chập chờn theo đường vào, loại lỗi khó lần nhất.
+#
+# ⚠⚠ TUYỆT ĐỐI KHÔNG THÊM `X-Frame-Options`. Discord Activity chạy app trong
+# IFRAME của `{clientId}.discordsays.com`; XFO không diễn đạt được allowlist nên
+# bất kỳ giá trị nào của nó cũng giết cửa Discord. Việc "cho ai nhúng" nói bằng
+# `frame-ancestors`, và nói đúng một lần, ở đúng một chỗ.
+#
+# ⚠ `font-src` PHẢI CÓ `data:` — bộ chữ nhúng thẳng bằng data URI, trong đó có
+# subset TIẾNG VIỆT. Thiếu nó thì chữ có dấu tụt về font hệ thống trong một app
+# tiếng Việt, và curl KHÔNG bắt được lỗi này (header vẫn 200, trang vẫn chạy).
+#
+# `style-src` giữ 'unsafe-inline': React đặt style qua CSSOM nên CSP không chạm,
+# nhưng có vài chỗ tiêm chuỗi HTML mang `style="..."`. Nới ở style là đánh đổi
+# rẻ; nới ở script thì không, nên script-src KHÔNG có 'unsafe-inline' (vite
+# không sinh một byte inline nào — đã kiểm trên dist thật).
+#
+# ⚠ B8 (SPEC va-bao-mat-chuan-hoa-api-dot-1, founder A 19/10) — `*.discordsays.com` GHIM về ĐÚNG Activity của app:
+# `1533904921517097070` = `VITE_DISCORD_CLIENT_ID` (ID công khai, không phải bí mật). Dấu sao cho MỌI Activity Discord nhúng được app
+# và đọc được bằng `connect-src`. Đổi ứng dụng Discord ⇒ sửa ID ở cả ba chỗ trên dòng CSP; `tests/header_bao_mat.test.ts`
+# đối chiếu với `web/.env` khi có (tệp này tĩnh, không đọc env lúc build được).
+#
+# ─────────────────────────────────────────────────────────────────────────
+# PERMISSIONS-POLICY (thêm 28/09, D444 — review bảo mật prod).
+#
+# Tắt các API nhạy cảm app KHÔNG dùng tới, để một lỗ XSS hoặc một trang lạ
+# nhúng app vào iframe không xin được quyền thay app:
+#   camera / microphone / geolocation / payment / usb / display-capture
+#   ⇒ `()` = KHÔNG origin nào được xin, kể cả chính app ('self') — app không
+#   có một tính năng nào chạm tới các API này, nên không có lý do gì để trình
+#   duyệt còn cho HỎI quyền.
+#
+# ⚠⚠ TUYỆT ĐỐI KHÔNG liệt kê `web-share` hay `clipboard-write` ở đây (kể cả
+# viết `(self)` cũng đừng — không nhắc tới là an toàn nhất). App ĐANG DÙNG
+# `navigator.share` và `navigator.clipboard` thật trên prod (`RuBan.tsx`,
+# `TheKetTran.tsx`, `DoiBan.tsx`, `PhongCho.tsx`, `BuoiDo.tsx`,
+# `CaiDatPfm.tsx`, `AlphaDraftMatch.tsx`) — thêm một trong hai với `()` là tắt
+# thẳng tay một tính năng đang sống. Không liệt kê ⇒ giữ nguyên allowlist mặc
+# định của trình duyệt (self), đủ cho app, không cần khai gì thêm.
+#
+# ⚠ TRONG IFRAME DISCORD ACTIVITY: header này của TA chỉ THU HẸP THÊM được so
+# với những gì thuộc tính `allow` của thẻ <iframe> ở trang CHA (Discord) đã
+# cho phép — không MỞ RỘNG được. Tắt một feature ở đây là tắt hẳn dù Discord
+# có cho phép hay không; ngược lại feature nào Discord không cho trong `allow`
+# thì có mở ở đây cũng vô ích. Ta không sở hữu `allow` của Discord nên chỉ tắt
+# cái chắc chắn không cần, không đụng cái app đang dùng.
+#
+# ⚠ ĐỪNG thêm feature lạ kiểu `interest-cohort` (FLoC) — Chrome hiện không còn
+# nhận diện tên này, và console sẽ cảnh báo "Unrecognized feature" trên MỌI
+# trang tải app. Chỉ liệt kê feature còn được trình duyệt nhận.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Strict-Transport-Security: max-age=15552000
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), display-capture=()
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://1533904921517097070.discordsays.com wss://1533904921517097070.discordsays.com; frame-ancestors https://1533904921517097070.discordsays.com https://discord.com; base-uri 'none'; form-action 'self'; object-src 'none'; manifest-src 'self'; worker-src 'self'

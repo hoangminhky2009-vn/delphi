@@ -1,0 +1,123 @@
+/*
+ * "HÔM NAY BẠN VỪA CHẠM" — khối khoảnh khắc ở màn kết (16/08, tầng 1).
+ * §XI: không bo góc, không blur, viền cứng, chữ đơn sắc; số nhuộm win/lose
+ * theo dấu delta server gửi. Không animation: khối này là thứ ĐỌC, không phải
+ * thứ diễn — mọi diễn đã xảy ra ở lúc chốt từng vòng.
+ */
+/*
+ * 13/09 — khối này thôi là một hộp riêng: nó nằm TRONG dải GHI VÀO THẺ ở đáy khối PHONG CÁCH
+ * (`GhiVaoThe`), nên bỏ khung + nền riêng; nhãn theo vai tím nhạt như nhãn dải. Câu NGOÀI ĐỜI vẫn
+ * nhìn thấy — đó là phần DẠY (xem chú thích `DaCham.tsx`).
+ */
+.khoi {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.nhan {
+  margin: 0 0 7px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--violet-soft);
+}
+
+.danhSach {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * ⚠ 24/08 — TỪ LƯỚI HAI CỘT SANG XẾP DỌC. Bốn tin của hàng đầu (icon · tên ·
+ * vòng · %) nay do chính `.dau` xếp bằng flex, nên `.muc` chỉ còn là một cột.
+ * Lưới hai cột cũ buộc mỗi câu văn phải khai `grid-column: 1 / -1` để khỏi bị
+ * ép vào một nửa bề ngang — thứ rất dễ quên khi thêm dòng mới.
+ */
+.muc {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Hàng đầu chở ĐỦ bốn tin — liếc một cái là xong, không phải parse câu nào. */
+.dau {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.icon { flex: none; }
+/* Vòng là BỐI CẢNH: nhạt hơn tên và số, không tranh chú ý với hai thứ kia. */
+.vong {
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/*
+ * Dấu (!) mở câu KỂ LẠI.
+ * ⚠ Glyph `!` chứ không `?` — cùng lý do đã ghi ở Bảng điện tử: `?` trong app
+ * này đang mang nghĩa "CHƯA BIẾT giá trị", và hai nghĩa một ký hiệu là đúng thứ
+ * vừa phải đi sửa. `!` là ký hiệu "giải thích" mà lá bài đã dạy người chơi.
+ */
+.giai { margin-top: 1px; }
+.giaiNut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--border-accent-soft);
+  border-radius: 0;
+  background: rgba(34, 211, 238, 0.08);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  list-style: none;
+}
+.giaiNut::-webkit-details-marker { display: none; }
+.giaiNut::marker { content: ''; }
+.giai[open] .giaiNut { background: rgba(34, 211, 238, 0.22); }
+
+/* 13/09 — tên khái niệm không bấm được ⇒ không mang lam (lam = bấm được); nhãn khung ⇒ tím nhạt. */
+.ten {
+  padding: 2px 6px;
+  border: 1px solid color-mix(in srgb, var(--violet-soft) 55%, transparent);
+  color: var(--violet-soft);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+}
+
+.so {
+  /* Dạt phải: mắt quét được một CỘT SỐ thẳng hàng qua cả ba mục. */
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.soDuong { color: var(--win); }
+.soAm { color: var(--lose); }
+
+.ngoaiDoi {
+  margin: 0;
+  color: var(--text-body);
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+
+.hoiCo {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 9.5px;
+  line-height: 1.4;
+}

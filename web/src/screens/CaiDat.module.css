@@ -1,0 +1,78 @@
+/* CÀI ĐẶT — §XI pixel: viền 1px, không bo góc, không blur. */
+.khoi { margin-top: 18px; }
+
+/*
+ * Khối SỔ CHI TIÊU (D295): ruột chép demo `pfm-cai-dat.html` — demo có `.tren{padding:0 10px}`
+ * và tự mang đầu trang riêng, nên ở đây chỉ kéo sát mép thẻ của `ScreenFrame` (14px) về
+ * đúng 10px như demo; không đổi số đo nào bên trong.
+ */
+.khoiPfm { margin-left: -4px; margin-right: -4px; }
+
+.khoiNhan {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.chuThich {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.loi {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: var(--danger, #ff5a5a);
+}
+
+.lienKet { color: var(--accent); }
+
+.danhSach {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.lua {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  text-align: left;
+  font: inherit;
+  color: var(--text-body);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-dim) 45%, transparent);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.lua:disabled { cursor: default; opacity: 0.6; }
+
+.luaChon {
+  border-color: var(--accent);
+  box-shadow: 2px 2px 0 0 color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.luaTen {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--text-body);
+}
+
+.luaGiai {
+  font-size: 11px;
+  letter-spacing: 0;
+  color: var(--text-dim);
+}
+
+.luaXemTruoc {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  font-style: italic;
+}

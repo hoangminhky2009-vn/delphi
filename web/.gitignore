@@ -1,0 +1,7 @@
+node_modules/
+dist/
+# Bản demo "khách nâng cao" (npm run demo:build) — sinh ra, không commit.
+dist-demo/
+dev-dist/
+.env
+*.local

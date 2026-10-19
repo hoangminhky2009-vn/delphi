@@ -1,0 +1,110 @@
+/*
+ * RỦ BẠN CÙNG BÀN — cùng khối với card chế độ ở sảnh (khungNoi + bóng cứng),
+ * §XI: góc khấc, steps(), không bo. Nút = nút pixel dùng chung.
+ */
+.khoi { margin-bottom: 9px; }
+
+.mode {
+  composes: khungNoi from '@/styles/pixel.module.css';
+  display: block;
+  width: 100%;
+  padding: 15px;
+  border: 1.5px solid rgba(34, 211, 238, 0.4);
+  box-shadow: var(--px-vien-trong), var(--px-bong);
+  background: linear-gradient(168deg, rgba(20, 60, 80, 0.45), rgba(8, 6, 20, 0.9));
+  color: var(--text-bright);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.18s steps(3, end), border-color 0.2s steps(2, end);
+}
+.modeMo { border-color: var(--accent); }
+
+.tieuDe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+.moTa { color: var(--text-dim); font-size: 11px; line-height: 1.5; }
+
+.than {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: -3px;
+  padding: 12px;
+  border: 1.5px dashed rgba(34, 211, 238, 0.4);
+  border-top: 0;
+}
+.nhan { font-size: 10px; letter-spacing: 0.14em; color: var(--text-muted); }
+.hangCo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.o {
+  composes: nut from '@/styles/pixel.module.css';
+  padding: 8px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+.oChon { border-color: var(--accent); background: rgba(34, 211, 238, 0.14); color: var(--accent); }
+.nutChinh {
+  composes: nut from '@/styles/pixel.module.css';
+  padding: 12px;
+  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.16);
+  color: var(--accent);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+.nutPhu {
+  composes: nut from '@/styles/pixel.module.css';
+  padding: 8px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.hangNut { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+/* Mã to, đọc được qua vai người khác — đó là mục đích của nó. */
+.maTo {
+  padding: 10px;
+  border: 2px solid var(--gold-amber, #fbbf24);
+  background: rgba(251, 191, 36, 0.08);
+  color: var(--gold, #fde047);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.chu { font-size: 10px; line-height: 1.5; color: var(--text-muted); }
+.vach { height: 1px; background: rgba(93, 114, 144, 0.3); margin: 2px 0; }
+.hangNhap { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+.nhap {
+  padding: 8px 10px;
+  border: 1px solid rgba(93, 114, 144, 0.5);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text-bright);
+  font: inherit;
+  font-size: 16px;            /* ≥16px để iOS không zoom khi chạm ô nhập */
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.nhap:focus { outline: none; border-color: var(--accent); }
+.loi { font-size: 11px; color: var(--lose-tag); }
+
+/*
+ * TRONG LỚP TRƯỢT (`luonMo`, sảnh bento 11/10): ruột đứng một mình dưới đầu lớp — không còn nút `.mode` phía trên để dính vào ⇒ bỏ viền đứt
+ * và chỗ lùi `-3px`; chữ lên thang khung không-cuộn (`--tk-*`) cho cùng cỡ với mọi lớp trượt khác.
+ */
+.thanTam { margin-top: 0; padding: 0; border: 0; gap: 10px; }
+.thanTam .nhan { font-size: var(--tk-label); }
+.thanTam .nutChinh { font-size: var(--tk-body); }
+.thanTam .o, .thanTam .nutPhu { font-size: var(--tk-label); }
+.thanTam .chu, .thanTam .loi { font-size: var(--tk-label); }

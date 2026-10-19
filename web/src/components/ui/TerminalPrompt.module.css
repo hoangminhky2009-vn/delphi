@@ -1,0 +1,25 @@
+.banner {
+  composes: khung from '@/styles/pixel.module.css';
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  background: rgba(34, 211, 238, 0.05);
+  padding: 10px 12px;
+  min-height: 21px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+  overflow-wrap: anywhere;
+}
+
+.prompt {
+  color: var(--win);
+}
+
+.cursor {
+  composes: blink from '../../styles/motion.module.css';
+  display: inline-block;
+  width: 9px;
+  height: 15px;
+  background: var(--accent);
+  vertical-align: -2px;
+  box-shadow: var(--glow-cursor);
+}

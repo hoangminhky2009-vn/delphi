@@ -1,0 +1,99 @@
+/* M3 lăng kính + M4 lịch vòng — §XI: khấc, không bo, không gradient. */
+.khoi { display: flex; flex-direction: column; gap: 3px; width: 100%; }
+.thanh {
+  display: flex;
+  height: 8px;
+  border: 1px solid rgba(93, 114, 144, 0.45);
+  background: rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+.doan { display: block; height: 100%; }
+
+/*
+ * ── NHỊP VÒNG: thanh SỐNG theo lãi/lỗ (founder 23/08) ─────────────────────
+ * *"làm thanh ở trên sống hơn 1 tý khi tăng/giảm như kiểu là đỏ và rung nhẹ
+ * khi bị lỗ hoặc xanh và phát sáng khi lãi"*.
+ *
+ * ⚠ CHỈ chạm KHUNG thanh (viền + quầng + rung), KHÔNG chạm ba đoạn bên trong.
+ * Ba đoạn đang nói "danh mục đang là gì"; nhuộm đỏ chúng khi lỗ là nói dối về
+ * phân bổ — và tệ hơn, nó buộc hai thông tin khác nhau dùng chung một màu.
+ *
+ * ⚠ Cả hai đều một nhịp RỒI TẮT (`both` + không `infinite`): thanh này nằm
+ * ngay đầu màn và ở lại suốt vòng, nên một quầng sáng vĩnh viễn sẽ thành đèn
+ * nền chứ không còn là tin. §XI: `steps()`, bóng cứng khi là VẬT — riêng quầng
+ * `0 0` offset là ÁNH SÁNG nên được mềm (luật 4–5 của `pixel.module.css`).
+ */
+@keyframes lkLai {
+  0% { box-shadow: 0 0 0 rgba(74, 222, 128, 0); border-color: rgba(93, 114, 144, 0.45); }
+  25% { box-shadow: 0 0 14px rgba(74, 222, 128, 0.75); border-color: var(--win); }
+  100% { box-shadow: 0 0 0 rgba(74, 222, 128, 0); border-color: rgba(93, 114, 144, 0.45); }
+}
+@keyframes lkLo {
+  0%, 100% { transform: translateX(0); border-color: rgba(93, 114, 144, 0.45); }
+  15% { transform: translateX(-2px); border-color: var(--lose); }
+  35% { transform: translateX(2px); border-color: var(--lose); }
+  55% { transform: translateX(-1px); border-color: var(--lose); }
+  75% { transform: translateX(1px); border-color: var(--lose); }
+}
+.thanhLai { animation: lkLai 900ms steps(6, end) both; }
+.thanhLo { animation: lkLo 420ms steps(5, end) both; }
+
+/* ⚠ Tắt CHUYỂN ĐỘNG, không tắt TIN: viền vẫn đổi màu một nhịp tĩnh, nên người
+   bật tiết kiệm chuyển động vẫn thấy vòng vừa rồi lãi hay lỗ. */
+@media (prefers-reduced-motion: reduce) {
+  .thanhLai, .thanhLo { animation: none; }
+  .thanhLai { border-color: var(--win); }
+  .thanhLo { border-color: var(--lose); }
+}
+.ruiRo { background: var(--lose); }
+.phongThu { background: #34d399; }
+.tienMat { background: #5d7290; }
+/*
+ * ⚠ `gap` 10 → 6px, và `flex-wrap` GIỮ. Đo trên máy thật ở 375px: ba nhãn ăn
+ * 248px trong 328px khả dụng, con số nhịp vòng cần 81px ⇒ THIẾU 11px và nó rơi
+ * xuống dòng riêng — mà founder khoanh đỏ đúng chỗ CÙNG HÀNG với nhãn. Với gap
+ * 6px thì tổng còn 240 + 6 + số, vừa khít.
+ * Giữ `wrap` làm lưới an toàn: số dài bất thường (NAV sáu chữ số) thì thà rơi
+ * dòng còn hơn đè lên nhãn.
+ */
+.nhanHang { display: flex; gap: 6px; flex-wrap: wrap; font-size: 9px; letter-spacing: 0.06em; color: var(--text-muted); }
+.mot { display: inline-flex; align-items: center; gap: 4px; }
+/* Ô mép phải hàng nhãn — `margin-left:auto` đẩy sát mép, `flex-wrap` của hàng
+   nhãn vẫn cho nó rơi xuống dòng dưới ở màn rất hẹp thay vì đè lên nhãn. */
+.phai { margin-left: auto; display: inline-flex; align-items: center; }
+.cham { display: inline-block; width: 7px; height: 7px; }
+.so { color: var(--text-bright); font-variant-numeric: tabular-nums; }
+
+/* Lịch vòng: mỗi vòng một ô nhỏ; vòng NÀY nở ra mang nhãn chữ. */
+/*
+ * ⚠ THU CÒN MỘT DẢI VẠCH (founder 23/08 khoanh đỏ cụm đầu bàn đấu).
+ *
+ * Bản cũ vẽ N ô CÓ CHỮ: mỗi vòng một ký tự C/L/K, vòng hiện tại nở ra thành
+ * "4 LÁ". Nó ăn 19px một hàng cho một thứ người chơi vẫn phải GIẢI MÃ — và ở
+ * map 12/16 thì mỗi ô rộng chưa tới 25px nên chữ càng khó đọc.
+ * Nay: vạch màu, cao 4px, không chữ — NHỊP vẫn đọc được bằng mắt (chỗ nào tím
+ * là vòng có lá, vàng là kỳ ngộ, mờ là khoá), mà tốn 4px thay vì 19.
+ * ⚠ Thứ MẤT đi khi bỏ chữ — "vòng NÀY là loại gì" — không bị vứt: nó dời lên
+ * hàng ROUND, nơi đã có sẵn chỗ trống và mắt vốn đã nhìn. Xem `LOAI_VONG`.
+ */
+.lich { display: flex; gap: 2px; width: 100%; }
+.o {
+  flex: 1;
+  min-width: 0;
+  height: 4px;
+  border: 0;
+  background: rgba(93, 114, 144, 0.35);
+  overflow: hidden;
+}
+.o_tai_san { background: rgba(34, 211, 238, 0.45); }
+.o_chien_thuat { background: rgba(139, 92, 246, 0.75); }
+.o_ky { background: rgba(251, 191, 36, 0.8); }
+.o_khong { opacity: 0.6; }
+.oQua { opacity: 0.35; }
+/* Vòng ĐANG chơi: cao gấp đôi + sáng hẳn — mốc "tôi đang ở đâu" phải bắt mắt
+   ngay cả khi cả dải chỉ cao 4px. */
+.oNay {
+  height: 8px;
+  margin-top: -2px;
+  background: var(--accent);
+}

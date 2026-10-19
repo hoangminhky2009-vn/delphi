@@ -1,0 +1,73 @@
+/*
+ * §XI PIXEL BUTTON — nút dùng chung của 17 màn.
+ *
+ * Hình khối (góc khấc, bóng cứng, bấm lún theo `steps()`) đến từ `.nut` trong
+ * `@/styles/pixel.module.css`. File này CHỈ còn màu, chữ và khoảng đệm.
+ * Sửa hình khối thì sửa bên đó — đây là lý do có `composes` thay vì chép luật.
+ */
+.cta {
+  composes: nut from '@/styles/pixel.module.css';
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+  padding: 13px;
+  border-radius: 0;
+  /*
+   * MẶT NÚT = bề mặt của vật → điểm dừng phải CỨNG (luật 4). Bốn dải phẳng thay
+   * cho `--grad-cta`, đúng hai đầu màu cũ (cyan .16 → lục .14), hai màu giữa nội
+   * suy tuyến tính. Vì cả bốn đều ~15% alpha trên nền gần đen nên mắt đọc ra một
+   * mặt nút liền — thứ mất đi chỉ là phép nội suy vô hạn cấp dưới điểm ảnh.
+   */
+  background: linear-gradient(
+    90deg,
+    rgba(34, 211, 238, 0.16) 0 25%,
+    rgba(47, 215, 202, 0.153) 25% 50%,
+    rgba(61, 218, 165, 0.147) 50% 75%,
+    rgba(74, 222, 128, 0.14) 75%
+  );
+  border: 1px solid var(--border-accent-strong);
+  color: var(--accent-soft);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 2px;
+  /* ⚠ KHÔNG khai lại `transition` ở đây. `composes: nut` đã đặt nhịp
+     `steps()`, và khai lại là ghi đè IM LẶNG — đúng lỗi đã dính ở BetBar:
+     nút nhìn thì pixel mà nhịp vẫn cubic-bezier, build xanh, không cảnh báo.
+     Muốn thêm thuộc tính chuyển động thì sửa `.nut` trong pixel.module.css. */
+}
+.cta:hover:not(:disabled) {
+  border-color: rgba(103, 232, 249, 0.9);
+  color: var(--accent-peak);
+}
+.cta:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.ghost {
+  composes: nut from '@/styles/pixel.module.css';
+  cursor: pointer;
+  user-select: none;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: 1px solid var(--border-idle-pill);
+  padding: 4px 11px;
+}
+.ghost:hover:not(:disabled) {
+  color: var(--text-title);
+  border-color: rgba(103, 232, 249, 0.8);
+}
+.ghost:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.block {
+  display: block;
+  width: 100%;
+}

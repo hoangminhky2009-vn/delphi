@@ -1,0 +1,53 @@
+/* THẺ KẾT TRẬN — §XI: khấc, không bo, bóng cứng. */
+.khoi {
+  composes: khungNoi from '@/styles/pixel.module.css';
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 1.5px solid rgba(251, 191, 36, 0.45);
+  box-shadow: var(--px-vien-trong), var(--px-bong);
+  background: rgba(0, 0, 0, 0.35);
+}
+.dau { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
+.nhan { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; color: var(--gold-amber, #fbbf24); }
+.phu { margin-left: auto; font-size: 10px; color: var(--text-muted); }
+/* Canvas nguồn nằm ngoài luồng nhìn: ảnh xem trước là <img> để zoom/giữ-lưu được. */
+.canvas { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.xem {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto 8px;
+  border: 1px solid rgba(93, 114, 144, 0.4);
+  image-rendering: pixelated;
+}
+.hang { display: flex; gap: 8px; }
+.nutChinh {
+  composes: nut from '@/styles/pixel.module.css';
+  flex: 2;
+  padding: 10px;
+  border-color: var(--gold-amber, #fbbf24);
+  background: rgba(251, 191, 36, 0.14);
+  color: var(--gold-amber, #fbbf24);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+.nutPhu {
+  composes: nut from '@/styles/pixel.module.css';
+  flex: 1;
+  padding: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.chuDan {
+  margin: 8px 0 0;
+  padding: 8px;
+  border: 1px dashed rgba(93, 114, 144, 0.4);
+  color: var(--text-dim);
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.loi { margin-top: 6px; font-size: 11px; color: var(--lose-tag); }

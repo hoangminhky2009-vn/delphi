@@ -1,0 +1,124 @@
+/*
+ * `.hieu` — CHÉP TỪ DEMO ĐÃ CHỐT (A11.25), `docs/ui-ux/demo/pfm-ngay-dau.html` khối
+ * `.hieu`/`.hieuThanh`/`.hieuMoc`/`.hieuKe`. Token màu dùng NGUYÊN `pfm_token.css`.
+ * ⚠ Bỏ `margin-inline` của demo (dành cho khung điện thoại `.dt` rời) — màn thật đã nằm
+ * trong card của `ScreenFrame`, chỉ giữ khoảng cách dọc `margin-bottom` như các khối
+ * PFM khác (`LoTrinh.module.css` `.the`).
+ */
+.hieu {
+  margin-bottom: 10px;
+  padding: 9px 10px 8px;
+  border: 1px solid var(--line-2);
+  background: var(--surface-card);
+}
+
+.dau {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.ten {
+  flex: 1;
+  font-size: 12px;
+  letter-spacing: 1.6px;
+  color: var(--chu-phu);
+}
+.so {
+  font-size: 26px;
+  line-height: 1;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+.so small { font-size: 14px; }
+
+/* NÚT (?) — cùng hình các nút (?) khác của khu PFM (`Hu.module.css`/`LoTrinh.module.css`). */
+.hoi {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--chu-phu);
+  background: none;
+  border: 1px solid var(--line-2);
+  border-radius: 0;
+  cursor: pointer;
+  padding: 0;
+}
+.hoi[aria-expanded='true'] { border-color: var(--accent); color: var(--accent); }
+
+.thanh {
+  position: relative;
+  height: 14px;
+  margin-top: 6px;
+  background: var(--long-thanh);
+  overflow: hidden;
+}
+/*
+ * ⚠ `transform` đặt qua `style` inline ở component — LUÔN đúng ngay khi vẽ, không chờ
+ * animation nào (xem chú thích `.ndThanhDay` ở `motion.module.css`). File này chỉ định
+ * vị + màu; `composes` mang cú "vượt rồi co lại" từ `motion.module.css` khi component
+ * gắn lớp đó (tắt hẳn lúc `prefers-reduced-motion`).
+ */
+.day {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--c-2), var(--c-3) 70%, var(--c-4));
+  transform-origin: left center;
+}
+/* Ô pixel phủ lên thanh — giữ chất pixel mà không chia khúc màu (D239: một dải MƯỢT). */
+.oPixel {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 13px, var(--bg-page) 13px 15px);
+}
+
+.moc {
+  position: relative;
+  height: 16px;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--chu-mo);
+}
+.moiMoc,
+.moiMocDat {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.moiMoc::before,
+.moiMocDat::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  width: 2px;
+  height: 5px;
+  background: var(--n-6);
+}
+/* Mốc ĐÃ ĐẠT chuyển vàng — thành tựu cộng dồn nhìn thấy được (cùng luật `ThanhTienDo`). */
+.moiMocDat { color: var(--gold); }
+.moiMocDat::before { background: var(--gold); }
+
+.ke {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  margin: 3px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--chu-mo);
+}
+.ke b { color: var(--accent-bright); font-weight: 600; }
+
+.giai {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--chu-than);
+}

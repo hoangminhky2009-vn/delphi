@@ -1,0 +1,58 @@
+/*
+ * BONG BÓNG ORACLE — MỘT NGUỒN cho mọi chỗ Oracle lên tiếng (D365).
+ * Chép NGUYÊN từ demo đã chốt `docs/ui-ux/demo/pfm-ngay-dau.html` §`.orc*` (A11.25: token
+ * màu và số đo chép sang nguyên vẹn, không diễn giải lại), qua đường `NgayDau.module.css`
+ * của GĐ A — tệp ấy nay `composes` về đây thay vì giữ bản thứ hai (A11.5/D61).
+ */
+
+.orc { display: flex; gap: 9px; align-items: flex-start; margin-bottom: 9px; }
+
+/*
+ * ⚠ KHÔNG NỀN, KHÔNG BÓNG (founder 21/09: *"bỏ cái phông nền tím của oracle đi và cho
+ * oracle to lên tý"*). Demo đã chốt để linh vật ngồi trên ô tím `--linh-nen` 44px; founder
+ * nhìn màn thật rồi bác — **demo đã sửa theo trong cùng commit** (A11.25: lệch thì sửa ở DEMO,
+ * không để hai bên trôi).
+ * ⚠ Ô vẫn giữ BỀ RỘNG CỐ ĐỊNH: bỏ nền không có nghĩa bỏ chỗ. Linh vật cao thấp khác nhau giữa
+ *   các biểu cảm (đợt linh vật sống của tệp 12), mà mép trái bong bóng thì phải đứng yên.
+ */
+.orcDau {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+}
+
+.orcBong {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line-2);
+  background: var(--n-2b);
+  padding: 9px 11px 10px;
+}
+
+/* Đuôi bong bóng: hai tam giác chồng nhau — viền ngoài rồi nền trong. */
+.orcBong::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 14px;
+  border: 7px solid transparent;
+  border-left: 0;
+  border-right-color: var(--line-2);
+}
+
+.orcBong::after {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 15px;
+  border: 6px solid transparent;
+  border-left: 0;
+  border-right-color: var(--n-2b);
+}
+
+.orcNhan { font-size: 12px; letter-spacing: 1.6px; color: var(--gold); margin: 0 0 3px; }
+.orcNhan em { font-style: normal; color: var(--win); }
+.orcLoi { margin: 0; font-size: 15.5px; line-height: 1.4; color: var(--text-bright); }

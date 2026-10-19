@@ -1,0 +1,109 @@
+/* Điều khoản — trang CHỮ, nên ưu tiên duy nhất là đọc được trên điện thoại.
+   Không bo góc (§XI pixel UI), không hiệu ứng, không gì tranh chú ý với chữ. */
+
+.boc {
+  padding: 16px 14px calc(24px + env(safe-area-inset-bottom));
+  max-width: 46rem;
+  margin: 0 auto;
+  color: var(--text-body);
+}
+
+.dau { margin-bottom: 20px; }
+
+.tieuDe {
+  margin: 0 0 6px;
+  font-size: 19px;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.phu {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+/* Khối tóm tắt — thứ mà người đọc lướt sẽ chỉ đọc đúng cái này. */
+.tomTat {
+  border: 1px solid var(--border-accent-soft);
+  background: var(--surface-card);
+  padding: 12px 14px;
+  margin-bottom: 24px;
+}
+
+.tomTatTieuDe {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
+.tomTatDs {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.muc {
+  border-top: 1px solid var(--border-idle-soft);
+  padding-top: 16px;
+  margin-bottom: 20px;
+}
+
+.mucTieuDe {
+  margin: 0 0 10px;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.doan {
+  margin: 0 0 11px;
+  font-size: 14px;
+  /* 1.7 chứ không 1.5: đây là trang đọc lâu, không phải nhãn nút. */
+  line-height: 1.7;
+}
+
+/* Khối nhấn — đọc lướt cũng phải đập vào mắt. */
+.nhan {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--accent);
+  background: var(--surface-idle);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-body);
+}
+
+.mail {
+  color: var(--accent);
+  word-break: break-all;
+}
+
+.chan {
+  border-top: 1px solid var(--border-idle-soft);
+  padding-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.chan p { margin: 0; }
+
+.ve {
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  /* mốc chạm được trên điện thoại */
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}

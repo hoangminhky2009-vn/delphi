@@ -1,0 +1,125 @@
+/*
+ * SỔ TAY KHÁI NIỆM — ALBUM TÁM Ô (trang Tài chính cá nhân; 16/08 tầng 3, album 13/09).
+ * §XI: viền cứng, không bo góc, không blur. Ô chưa chạm vẽ MỜ + viền đứt (thông tin thật: chưa
+ * gặp) — không ẩn: bản đồ những gì còn tồn tại, không phải danh sách việc.
+ * Màu theo vai: viền lam nhạt = ô bấm được · xanh/đỏ = cú nặng nhất lời/lỗ · còn lại xám.
+ */
+.khoi { margin-top: 18px; }
+
+.nhan {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+.dauPhai { display: flex; align-items: center; gap: 10px; }
+/* Nhấn bằng CỠ: con số đếm to, chữ "đã chạm" nhỏ. */
+.dem {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.dem b {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-bright);
+  font-variant-numeric: tabular-nums;
+}
+.giaiKhoi {
+  margin: 0 0 8px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.luoi {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.o {
+  width: 100%;
+  height: 100%;
+  min-height: 84px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  padding: 9px 3px 7px;
+  border: 1px solid var(--border-accent-soft);
+  background: rgba(15, 23, 42, 0.5);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.oMo {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, rgba(15, 23, 42, 0.5));
+}
+.oChua {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--text-dim) 40%, transparent);
+  background: transparent;
+}
+.oChua.oMo { border-color: var(--text-dim); }
+.icon { flex: none; }
+.oChua .icon { opacity: 0.28; }
+
+.ten {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--text-bright);
+}
+.oChua .ten { color: var(--text-dim); }
+
+.manhAm,
+.manhDuong,
+.trong {
+  font-size: 10.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.manhAm { color: var(--lose); }
+.manhDuong { color: var(--win); }
+.trong { color: var(--text-dim); opacity: 0.5; }
+
+/* Tấm chi tiết: trải hết bề ngang lưới, chèn ngay dưới hàng ô vừa chạm. */
+.giai {
+  grid-column: 1 / -1;
+  padding: 8px 9px;
+  border-left: 2px solid var(--accent);
+  background: var(--surface-inset);
+}
+.giaiChua { border-left-color: color-mix(in srgb, var(--text-dim) 55%, transparent); }
+.giaiTen {
+  margin: 0 0 3px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--text-bright);
+}
+.so {
+  margin: 0 0 4px;
+  font-size: 10px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.ngoaiDoi {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--text-body);
+}

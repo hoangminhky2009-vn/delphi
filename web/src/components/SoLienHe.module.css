@@ -1,0 +1,162 @@
+/*
+ * SỔ LIÊN HỆ — xem SoLienHe.tsx. Không animation (sổ là trí nhớ, không phải sân
+ * khấu); mọi chấm/ô là CSS thuần, không art mới. §XI: radius 0, chữ nhỏ có
+ * letter-spacing, màu từ token.
+ */
+.so {
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid rgba(139, 92, 246, 0.32);
+  background: rgba(13, 10, 32, 0.72);
+}
+.gon { padding: 6px; }
+
+.dau {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.nhan { color: var(--text-bright); font-size: 10px; letter-spacing: 0.16em; }
+.dem { color: var(--text-muted); font-size: 9px; letter-spacing: 0.08em; }
+.dauPhai { display: flex; align-items: center; gap: 8px; }
+/* D336 lượt 2 — nút CẤT ngay đầu sổ (trong trận). Vuông 22px: ngón tay chạm được mà không
+   chiếm thêm hàng; lam vì nó CHẠM ĐƯỢC (luật màu 13/09). */
+.dong {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--border-accent-soft);
+  background: rgba(34, 211, 238, 0.06);
+  color: var(--accent);
+  font: inherit;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+.dong:active { transform: translate(1px, 1px); }
+
+/* ── LƯỚI: [tên 1fr] [6 cột 18px] [bậc 64px] ── */
+.cotDau,
+.hang {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(6, 18px) 64px;
+  align-items: center;
+  gap: 2px;
+}
+.gon .cotDau,
+.gon .hang { grid-template-columns: minmax(0, 1fr) repeat(6, 16px) 58px; }
+
+.cotDau { margin-bottom: 2px; }
+.cotDau .oCot {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 6.5px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.danhSach {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.hang {
+  min-height: 20px;
+  border-top: 1px solid rgba(139, 92, 246, 0.14);
+}
+.hangMo { opacity: 0.45; }
+
+.oTen {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.huyHieu,
+.huyHieuTrong {
+  display: inline-flex;
+  flex: 0 0 16px;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: rgba(6, 4, 16, 0.82);
+}
+.huyHieuTrong { opacity: 0.4; }
+.ten {
+  overflow: hidden;
+  color: var(--text-body);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Chấm nghiêng — tam giác CSS, MÀU = hướng (cùng ngữ pháp bản đồ và dải sáu mã). */
+.oCot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 14px;
+}
+.chamLen,
+.chamXuong,
+.chamNgang { display: block; }
+.chamLen,
+.chamXuong {
+  width: 0;
+  height: 0;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+}
+.chamLen { border-bottom: 6px solid var(--win); }
+.chamXuong { border-top: 6px solid var(--lose); }
+.chamNgang {
+  width: 6px;
+  height: 2px;
+  background: var(--text-muted);
+}
+
+/* Bậc — ba ô, đầy theo số lần (1 · 2 · ≥3). */
+.oBac {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+.bac { display: inline-flex; gap: 2px; }
+.oBacPip {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--border-accent-soft);
+  background: transparent;
+}
+.oBacDay {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+.phu,
+.chuaGap {
+  color: var(--text-muted);
+  font-size: 7.5px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+/*
+ * 13/09 — đo ở 375px: "×2 · 12/09 · giả ×1" rộng ~84px trong cột 64px, `nowrap` + căn phải làm nó
+ * tràn SANG TRÁI đè lên chấm của mã thứ sáu. Cho xuống dòng trong cột thay vì tràn.
+ */
+.phu { white-space: normal; text-align: right; }
+
+.chuThich {
+  margin: 0 0 6px;
+  color: var(--text-muted);
+  font-size: 8px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+}
