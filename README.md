@@ -52,7 +52,7 @@ Where the three agree or disagree is the finding. The product is aimed at young 
 
 | If you care about… | Read, in this order |
 |---|---|
-| **Data and measurement** | [Measurement design](docs/measurement-design.md) → [ADR-001](docs/adr/ADR-001-measure-before-you-fix.md) · [002](docs/adr/ADR-002-flag-the-rounds-the-crowd-edited.md) · [003](docs/adr/ADR-003-exclude-the-testers-from-the-analytics.md) · [005](docs/adr/ADR-005-a-rating-ladder-must-be-climbable.md) → [`docs/api/erd.md`](docs/api/erd.md) (generated schema diagrams) |
+| **Data and measurement** | [Measurement design](docs/measurement-design.md) → [ADR-001](docs/adr/ADR-001-measure-before-you-fix.md) · [002](docs/adr/ADR-002-flag-the-rounds-the-crowd-edited.md) · [003](docs/adr/ADR-003-exclude-the-testers-from-the-analytics.md) · [005](docs/adr/ADR-005-a-rating-ladder-must-be-climbable.md) → [`docs/api/erd.md`](docs/api/erd.md) (generated schema diagrams) → [`analyses/`](analyses/) (SQL + Python on a synthetic cohort) |
 | **Product / requirements** | [`docs/spec/bao-loi-nguoi-choi.md`](docs/spec/bao-loi-nguoi-choi.md) — one complete spec: user outcome, out-of-scope, machine-checkable acceptance criteria, injected-fault plan → its tests (`tests/bao_loi_nguoi_choi.test.ts`, `web/tests/bao_loi_bang.test.tsx`) → [design documents](docs/thiet-ke-da-chot/) |
 | **Engineering** | [Architecture](docs/architecture.md) → [SECURITY.md](SECURITY.md) → [Infrastructure limits](docs/gioi-han-ha-tang.md) (measured; earlier estimates kept alongside the corrections) → [ADR-007](docs/adr/ADR-007-react-to-overload-do-not-guess-a-threshold.md) · [009](docs/adr/ADR-009-invariants-live-in-the-database.md) · [010](docs/adr/ADR-010-store-inputs-not-outcomes.md) · [011](docs/adr/ADR-011-acceptance-means-breaking-the-code-on-purpose.md) |
 
@@ -103,6 +103,7 @@ Copy `.env.example` to `.env` for anything beyond local defaults. Secrets are ne
 | `web/` | React PWA (`src/`), the Cloudflare Worker (`worker/`), and an in-browser demo mode that runs the real server inside a Web Worker (`src/demo/`) |
 | `tests/`, `web/tests/` | Integration tests (embedded PostgreSQL), golden replays of real matches, and structural guards (generated docs, version registry, pool rules) |
 | `scripts/` | Measurement harnesses (Monte Carlo balance gates, load tests), generators (routes, ERD), fault-injection runner, ops helpers |
+| `analyses/` | Re-runnable SQL and Python analyses over a **synthetic** cohort: snapshot size per action type, and small-sample estimation with a pseudo-count. See [analyses/README.md](analyses/README.md) |
 | `docs/` | Specs, design decisions, generated references, and ADRs — indexed in [docs/README.md](docs/README.md) |
 
 ## My role and how it was built
