@@ -61,7 +61,7 @@ Two rules shape most of it ([`luat/04-du-lieu.md`](luat/04-du-lieu.md)): the app
 
 ## Quality gates
 
-`typecheck` · lints (dead CSS animations, pool self-lock, session-timezone SQL, pixel-art rules) · the test suites on a real embedded PostgreSQL · `npm audit --omit=dev --audit-level=high`. Generated documents (routes, ERD) fail the build when they drift.
+`typecheck` · lints (dead CSS animations, pool self-lock, session-timezone SQL, pixel-art rules) · the test suites on an embedded PostgreSQL · `npm audit --omit=dev --audit-level=high`. Generated documents (routes, ERD) fail the build when they drift.
 
 ## Known debt
 
