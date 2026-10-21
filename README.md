@@ -4,11 +4,16 @@
 Solo project by [hoangminhky2009-vn](https://github.com/hoangminhky2009-vn) · July–October 2026 · research prototype, not publicly launched.
 
 <p align="center">
-  <img src="docs/img/hub.png" width="240" alt="Hub screen">
-  <img src="docs/img/arena.png" width="240" alt="Investing arena: a market-event card has just flipped">
-  <img src="docs/img/shop.png" width="240" alt="Shop with two separate in-game currencies">
+  <img src="docs/img/hub.png" width="240" alt="Hub screen of the demo">
+  <img src="docs/img/pfm.png" width="240" alt="Personal-finance ledger (PFM) screen, sample data">
+  <img src="docs/img/log.png" width="240" alt="The events table as the app writes it during one match">
 </p>
-<p align="center"><sub>Screens from the in-browser demo (the real server runs inside a Web Worker, so no backend or login is needed). Text is in Vietnamese, the product's language.</sub></p>
+<p align="center"><sub>1 · Hub (in-browser demo: the real server runs inside a Web Worker, no backend or login needed) · 2 · Spending ledger — approved design demo with sample data; the real vault stores ciphertext only · 3 · The append-only <code>events</code> rows one real match wrote on a throwaway database. Text is in Vietnamese, the product's language.</sub></p>
+
+<p align="center">
+  <img src="docs/img/erd.png" width="100%" alt="Data structure: 15 of the 70 tables grouped by role, with foreign-key arrows">
+</p>
+<p align="center"><sub>4 · Data structure — 15 of the 70 tables, grouped by role and generated from the migrations. Full diagram: <a href="docs/api/erd.md">docs/api/erd.md</a>.</sub></p>
 
 ## What it is
 
