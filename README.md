@@ -1,7 +1,10 @@
 # Delphi
 
 **A mobile game that measures how young people behave with money — built, tested and documented spec-first.**
-Solo project by [hoangminhky2009-vn](https://github.com/hoangminhky2009-vn) · July–October 2026 · research prototype, not publicly launched.
+Solo project by [hoangminhky2009-vn](https://github.com/hoangminhky2009-vn) · July–October 2026 · public beta since 12 Oct 2026.
+
+- **Live:** [dubao.lastkiss4diu.workers.dev](https://dubao.lastkiss4diu.workers.dev) — public beta (sign-up, 16+, Vietnamese UI)
+- **Try it without signing up:** [dubao-demo.lastkiss4diu.workers.dev](https://dubao-demo.lastkiss4diu.workers.dev) — the real server running in your browser, nothing stored (demo build 0.0.65)
 
 <p align="center">
   <img src="docs/img/hub.png" width="240" alt="Hub screen of the demo">
@@ -33,7 +36,7 @@ Where the three agree or disagree is the finding. The product is aimed at young 
 - **Integrity in the database.** Triggers (append-only, zero-sum, deferred ledger matching), `CHECK` constraints and row-level security. The ERD is generated from `pg_catalog`, and the build fails when it drifts. → [ERD](docs/api/erd.md)
 - **Load testing.** A concurrency ladder up to 800 simultaneous requests (p50 / p95 / p99, pooler connection limits, `EMAXCONN` returned as `503` with a jittered `Retry-After`). The ceiling turned out to be function memory, not database connections; the document keeps the earlier, wrong estimate next to the correction. → [Infrastructure limits](docs/gioi-han-ha-tang.md)
 
-> **Status: research prototype, not publicly launched.** No claims are made about user numbers or scale; see [ADR-004](docs/adr/ADR-004-a-mapping-the-schema-does-not-state-is-a-hypothesis.md).
+> **Status: public beta since 12 Oct 2026, still a research prototype.** No claims are made about user numbers or scale; see [ADR-004](docs/adr/ADR-004-a-mapping-the-schema-does-not-state-is-a-hypothesis.md).
 
 ## By the numbers
 

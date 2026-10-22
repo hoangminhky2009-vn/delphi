@@ -2,7 +2,7 @@
 
 ## Reporting
 
-This is a research prototype that is not publicly launched. If you find a vulnerability, please use GitHub's **private vulnerability reporting** on this repository (Security → Report a vulnerability) rather than a public issue. No bounty is offered.
+This is a research prototype in public beta (since 12 Oct 2026). If you find a vulnerability, please use GitHub's **private vulnerability reporting** on this repository (Security → Report a vulnerability) rather than a public issue. No bounty is offered.
 
 ## Security model in brief
 
