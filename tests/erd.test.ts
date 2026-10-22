@@ -32,7 +32,7 @@ describe('ERD sinh ra', () => {
 
   it('có bảng thật và sơ đồ mermaid, không phải bản rỗng đọc nhầm thành "khớp"', () => {
     // Ngưỡng cố ý thấp — chống ca "migration không chạy ⇒ 0 bảng ⇒ vẫn khớp tệp rỗng"; không khoá số bảng (D61).
-    expect(sinh).toMatch(/\*\*\d{2,}\*\* bảng/);
+    expect(sinh).toMatch(/\*\*\d{2,}\*\* tables/);
     expect(sinh).toContain('```mermaid\nerDiagram');
     expect(sinh).toMatch(/ {2}users \|\|--o\{ \w+ : "user_id"/);
   });

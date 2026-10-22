@@ -13,22 +13,22 @@ export interface Mien {
 }
 
 export const MIEN: readonly Mien[] = [
-  { ma: 'auth', ten: 'Đăng nhập (auth)', tienTo: ['auth_'] },
+  { ma: 'auth', ten: 'Sign-in (auth)', tienTo: ['auth_'] },
   {
     ma: 'nguoi_dung',
-    ten: 'Người dùng & hồ sơ',
+    ten: 'Users & profiles',
     tienTo: [
       'users', 'user_', 'ho_so_', 'tu_khai', 'avatar_', 'cosmetic_', 'kho_sticker', 'huy_hieu_', 'gacha_',
       'vat_pham_', 'dot_phat_hanh', 'lo_trinh_', 'nhiem_vu_', 'qua_beta_', 'season_',
     ],
   },
-  { ma: 'dau_truong', ten: 'Đấu trường', tienTo: ['holdem_', 'rank_', 'sandbox_', 'bxh_'] },
+  { ma: 'dau_truong', ten: 'Arena', tienTo: ['holdem_', 'rank_', 'sandbox_', 'bxh_'] },
   // Bảy sổ append-only (A3): đuôi `_ledger`; hai sổ mang tiền tố miền khác nằm ở NGOAI_LE.
-  { ma: 'kinh_te', ten: 'Kinh tế — bảy sổ', tienTo: ['wallet_', 'treasury_', 'burn_', 'quest_', 'quy_cho_'] },
-  { ma: 'cho', ten: 'Chợ dự báo (đóng băng, D86)', tienTo: ['market', 'bet', 'scores'] },
-  { ma: 'pfm', ten: 'PFM — sổ chi tiêu', tienTo: ['pfm_'] },
-  { ma: 'du_lieu', ten: 'Dữ liệu & telemetry', tienTo: ['events', 'telemetry', 'hanh_vi_', 'khach_'] },
-  { ma: 'van_hanh', ten: 'Vận hành / admin', tienTo: ['admin_', 'scheduler_', 'schema_', 'bao_loi'] },
+  { ma: 'kinh_te', ten: 'Economy — seven ledgers', tienTo: ['wallet_', 'treasury_', 'burn_', 'quest_', 'quy_cho_'] },
+  { ma: 'cho', ten: 'Prediction market (frozen)', tienTo: ['market', 'bet', 'scores'] },
+  { ma: 'pfm', ten: 'PFM — spending ledger', tienTo: ['pfm_'] },
+  { ma: 'du_lieu', ten: 'Data & telemetry', tienTo: ['events', 'telemetry', 'hanh_vi_', 'khach_'] },
+  { ma: 'van_hanh', ten: 'Operations / admin', tienTo: ['admin_', 'scheduler_', 'schema_', 'bao_loi'] },
 ];
 
 /** Bảng mà tiền tố đặt nhầm miền. */

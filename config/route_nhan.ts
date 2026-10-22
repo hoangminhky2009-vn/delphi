@@ -10,19 +10,19 @@
  */
 export const NHAN_ROUTE = {
   /** Tính năng có route, cờ đang TẮT trong `config/` — bật cờ là có client. */
-  cho_bat: 'chờ bật cờ',
+  cho_bat: 'waiting for a feature flag',
   /** Thuộc module đóng băng (chợ dự báo D86) — giữ tới khi founder chốt số phận module. */
-  dong_bang: 'đóng băng',
+  dong_bang: 'frozen module',
   /** Founder/admin gọi tay (curl, console) — không có màn. */
-  admin_tay: 'admin gọi tay',
+  admin_tay: 'called by hand (admin)',
   /** Route xong, màn chưa có (Ý chờ trong SPEC). */
-  cho_ui: 'chờ giao diện',
+  cho_ui: 'screen not built yet',
   /** Điều khoản HỨA một quyền mà nút chưa có — nợ cần trả trước beta rộng. */
-  hua_thieu_nut: 'hứa, thiếu nút',
+  hua_thieu_nut: 'promised, button missing',
   /** Máy gọi (cron-job.org · Vercel cron) — không phải giao diện. */
-  may_goi: 'máy gọi',
+  may_goi: 'called by a scheduler',
   /** Client đã gỡ nút, route giữ cho trận đang chơi dở trên `balance_version` cũ + replay. */
-  ban_cu: 'giữ cho bản cũ',
+  ban_cu: 'kept for older matches',
 } as const;
 
 export type NhanRoute = keyof typeof NHAN_ROUTE;
