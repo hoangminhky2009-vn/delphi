@@ -1,18 +1,8 @@
-# BẬC THANG GIAI ĐOẠN — khi nào thì đổi kiến trúc
+# Growth stages — when the architecture changes
 
-> Viết 03/09/2026, phương án A4-3 (founder duyệt). Đọc khi cần trả lời câu
-> *"DELPHI đang ở bậc nào, và mốc nào thì đổi cái gì ở hạ tầng/kiến trúc"* —
-> mà không phải lắp câu trả lời từ nhiều tài liệu rải rác.
+Which stage the product is at, and which measurable trigger moves it to the next stage of infrastructure. The triggers and thresholds live in `config/bac_thang.ts` and are checked by `tests/bac_thang.test.ts`; this page explains them in words and deliberately repeats no numbers, so it cannot drift from the code.
 
-⚠⚠ **ĐÂY LÀ BẢN ĐỒ, KHÔNG PHẢI NGUỒN CHÂN LÝ — VÀ NÓ TRÔI ĐƯỢC.** Nguồn chân
-lý là `config/bac_thang.ts`: một sổ đăng ký có kiểu, có `tests/bac_thang.test.ts`
-canh. Trang này chỉ KỂ LẠI BẰNG LỜI cùng một sự thật đó, cho người không muốn
-đọc TypeScript. Mâu thuẫn giữa hai bên ⇒ `config/bac_thang.ts` (và `CLAUDE.md`
-phía trên nó) THẮNG; ai thấy lệch phải sửa trang này CÙNG COMMIT — đúng nếp mọi
-tệp `docs/dac-ta/*` đã theo.
-
-⚠ **Trang này không in bất kỳ ngưỡng số nào.** Xem mục cuối "vì sao không chép
-số" nếu thấy lạ.
+*The document below is in Vietnamese, the language of the project.*
 
 ## Bảy bậc, theo thứ tự leo
 

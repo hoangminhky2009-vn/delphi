@@ -1,12 +1,8 @@
-# SPEC — Báo lỗi của người chơi: ô Báo lỗi trong Hồ sơ · lỗi client ẩn danh lên Sentry · đoạn điều khoản
+# Spec — player bug reports
 
-cỡ: THƯỜNG · miền: ha_tang (chạm du_lieu · giao_dien · pháp lý)
-hiệu lực: tới khi ship · trạng thái: THI CÔNG XONG (12/10, nhánh `claude/thi-cong-bao-loi`, D600) — chờ founder bấm · CHỐT bản 1 (11/10 — founder duyệt nguyên văn mục 7; sửa cùng ngày: chữ Báo lỗi vào DB, chuông Sentry không chữ — mục 6) · trạm 1: không dựng demo riêng — bảng chép khuôn
-panel sẵn có của Hồ sơ (`CongTacDuLieu`), chữ đã chốt ở mục 7; THI CÔNG soi trên local rồi đưa ảnh ở trạm 4
+One complete feature spec in the format used for every change in this project: the user outcome, what is out of scope, acceptance criteria checked by tests, and a plan for injecting faults to prove those tests work. The feature: a "Report a bug" box on the profile screen, anonymous client errors sent to Sentry, and the matching paragraph in the terms. The wording in section 7 was approved word for word, and tests compare the app's text against it.
 
-⚠ **Cửa một chiều** (consent · A10 — CLAUDE.md A11.17): app sẽ làm khác lời hứa hiện tại ở
-`web/src/content/dieuKhoan.ts`. Không `--bo-qua`. Thứ tự thi công bắt buộc: **chữ điều khoản + thẻ báo trước
-lên cùng bản và đi TRƯỚC đường gửi** (mục 5 có bài canh ép thứ tự này trên từng máy).
+*The document below is in Vietnamese, the language of the project.*
 
 ## 1. Người chơi làm được gì sau việc này
 "Em gặp lỗi thì vào Hồ sơ bấm BÁO LỖI, gõ vài dòng, gửi — không cần mở app mail — và nếu điền email thì

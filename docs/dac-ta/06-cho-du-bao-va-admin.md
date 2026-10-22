@@ -1,7 +1,8 @@
-# 6. CHỢ DỰ BÁO + PANEL QUẢN TRỊ
+# Part 6 — Prediction market and admin panel
 
-> Cập nhật 15/08/2026. ⚠ File này trôi được — CLAUDE.md + code thắng; sửa
-> cùng commit khi thi công. Đọc `00-ban-do.md` trước.
+Part of the [specification by part](00-ban-do.md). Corrected together with the code whenever the two disagree.
+
+*The document below is in Vietnamese, the language of the project.*
 
 ## A. VAI TRÒ & HIỆN TRẠNG
 

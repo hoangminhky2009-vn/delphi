@@ -1,11 +1,8 @@
-# GIỚI HẠN HẠ TẦNG — app chịu được bao nhiêu người, gãy ở đâu, gãy theo thứ tự nào
+# Infrastructure limits — how many users the app can take, and what breaks first
 
-> Viết 31/08/2026 (D207). Nguồn: đọc code + hạn mức công bố của nhà cung cấp.
-> ⚠ **CHƯA CÓ LOAD TEST NÀO TRONG REPO.** Mọi con số dưới đây là TÍNH TỪ HẠN
-> MỨC, không phải ĐO. Chỗ nào là ước tính đều ghi rõ. Đừng trích ra ngoài như
-> số đo — §7 ghi cách đo thật khi cần.
+First written on 31 Aug 2026 from the providers' published limits and a reading of the code, then checked with load tests on 3 Sep, 5 Sep and 11 Oct 2026 (the sections headed "Đo …"). Where a number is an estimate rather than a measurement, the text says so.
 
----
+*The document below is in Vietnamese, the language of the project.*
 
 ## 1. TRẢ LỜI NGẮN
 

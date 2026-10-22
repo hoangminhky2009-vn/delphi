@@ -1,18 +1,8 @@
-# ĐẶC TẢ KIẾN TRÚC THEO PHẦN — BẢN ĐỒ (đọc file này trước)
+# Specification by part — map
 
-> Viết 15/08/2026 theo lệnh founder: *"Chia file và viết đặc tả kiến trúc và
-> yêu cầu rõ cho từng phần của app"*. Mục đích KÉP: (a) đọc hiểu nhanh hiện
-> trạng từng phần, (b) bàn giao — mỗi phần đủ để giao một cửa sổ/agent làm
-> riêng mà không giẫm phần khác.
->
-> ⚠⚠ **LUẬT CAO NHẤT VẪN LÀ `CLAUDE.md` + `docs/luat/*` + CHÍNH CODE.**
-> (Từ 01/09 phần luật chi tiết dời sang `docs/luat/` — dời chỗ, KHÔNG hạ
-> cấp; nó vẫn thắng bộ file này khi mâu thuẫn.) Bộ file này là
-> BẢN ĐỒ, không phải luật — nó TRÔI ĐƯỢC (bài học D80: bản sao hiến pháp trôi
-> mất ba quyết định mà không dấu hiệu nào báo; bài học D86: doc chép một
-> blocker đã tan làm người sau đi giải việc không tồn tại). Mâu thuẫn giữa
-> file này và CLAUDE.md/code ⇒ CLAUDE.md + code THẮNG, và người phát hiện
-> phải sửa file này CÙNG COMMIT với việc đang làm.
+The app split into eight parts, each with its own specification: what it does now, what it must do, and enough detail to hand the part to someone else without touching the others. These files describe the system; when they disagree with the code or with the rules in `docs/luat/`, the code and the rules win and the file is corrected in the same commit.
+
+*The document below is in Vietnamese, the language of the project.*
 
 ## Tám phần
 

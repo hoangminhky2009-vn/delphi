@@ -1,31 +1,8 @@
-# ĐẤU TRƯỜNG — SỔ TOÁN & SỐ ĐO (D1 → D6)
+# Arena — balance notes and measurements (D1–D6)
 
-> ## ⚠⚠ ĐỌC TRƯỚC — TRẠNG THÁI SAU D40 (27/07/2026)
->
-> Đây là **sổ ghi chép lịch sử**: mỗi mục là một cụm cân bằng đã làm, kèm số đo tại
-> thời điểm đó. **Không xoá gì trong đây** — nó là đường truy vết vì sao từng tham số
-> mang giá trị hiện tại, và là kho **PHƯƠNG PHÁP ĐO** (bẫy lẫn biến, cặp song sinh,
-> "gate đo một chiến lược không tồn tại") vẫn còn nguyên giá trị.
->
-> **Nhưng D40 đã đổi mô hình lõi** (`docs/khao-co/design_von_mua_tai_san.md`): Vốn MUA TÀI SẢN
-> · chợ liên tục · bỏ pot/cam kết/tố/theo/bỏ-bài/side-pot · xếp hạng theo **NAV** ·
-> quỹ vòng nuôi bằng **phí + trượt giá**. Hệ quả cho toàn bộ tài liệu này:
->
-> | | |
-> |---|---|
-> | **MỌI CON SỐ** đo được trong sổ này | ⚠ **HẾT HẠN.** Chúng đo trên engine pot. D40 chốt: *"mọi số cân bằng đo hôm nay phải ĐO LẠI. Phương pháp và script giữ nguyên; số thì bỏ."* |
-> | **MỌI PHƯƠNG PHÁP** đo trong sổ này | ✅ **SỐNG NGUYÊN.** Đây là phần đắt nhất của tài liệu và D40 không đụng tới. |
-> | `pnl_bp` là **thước xếp hạng, không phải thước tài sản** | ⚠ **ĐẢO NGƯỢC.** Sau D40, PnL **chạm VỐN THẬT** ⇒ sập là cháy thật. Mọi lập luận trong sổ dựa trên *"phí viết bằng bp chỉ dịch thứ hạng"* phải đọc lại. |
-> | Bốn gate G1–G4 | Định nghĩa còn nghĩa (xem `design_gate_moi.md`), **trạng thái ✓/✗ thì không** — phải chạy lại toàn bộ. |
->
-> **Ba mốc sửa đổi phía trên D40 cũng chạm sổ này, ghi ở đúng chỗ bên dưới:**
-> D33 (thẻ = ĐẶC QUYỀN, không còn là hệ số nhân) · D37 (nới gọi ký quỹ) ·
-> D39 (ma trận tương quan một nhân tố — `dungChuoi` không còn rút nhiễu độc lập).
->
-> *Quy ước đọc:* mọi khối bắt đầu bằng `⚠ VÁ D40` là ghi chú thêm sau ngày 27/07,
-> không phải nội dung gốc của cụm.
+A historical notebook: each section is one round of balancing work, with the measurements taken at the time. On 27 Jul 2026 the core model changed (players now buy assets in a continuous market and are ranked by NAV), so **every number in this notebook is out of date**. The measurement methods — confound traps, paired twin runs, gates that end up testing a strategy nobody plays — still apply. Notes added after that date start with `⚠ VÁ D40`.
 
----
+*The document below is in Vietnamese, the language of the project.*
 
 ## D3 — Áp lực đám đông đo bằng TỶ LỆ LOBBY (25/07/2026)
 

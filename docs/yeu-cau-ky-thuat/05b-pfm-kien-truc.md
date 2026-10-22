@@ -1,29 +1,8 @@
-# 05b — PFM: KIẾN TRÚC DATA + KỸ THUẬT (D141 + D146 + D148 — CHỜ FOUNDER DUYỆT)
+# PFM — data and technical architecture
 
-> Viết theo lệnh founder 24/08: *"Xây kiến trúc data và kỹ thuật cho phần PFM đi, có
-> quyết định nào thắc mắc mà luật chưa ghi rõ thì hỏi tôi."* Hai câu hỏi đã hỏi — đã
-> chốt cùng ngày: **két sao lưu MÃ HOÁ ĐẦU-CUỐI** (K2) và **nhịp PFM vào `events` chỉ
-> ở dạng mã số** (K5). Cách viết theo chỉ thị founder cùng lượt: *"trừu tượng hóa
-> thành đặc điểm chính và cụ thể, đánh đổi, ảnh hưởng lên lâu dài, những phương án
-> tương tự, so sánh và nêu lý do chọn phương án hiện tại"* — nên **thân văn bản đọc
-> được không cần biết code**; mọi chi tiết SQL/API/test dồn vào PHỤ LỤC T cuối file,
-> dành cho agent thi công.
->
-> Trạng thái: **kiến trúc, CHƯA code.** Gate D133 đứng nguyên — phạm vi tính năng
-> M1–M4 (hàng 7 file 05) founder giữ quyền chốt sau khi đọc; kiến trúc này cố ý viết
-> để MỌI phương án phạm vi đều chạy được trên nó (xem §4).
->
-> **BẢN ĐỒ CHỨC NĂNG (D174):** danh sách 42 chức năng cho user + ánh xạ chức-năng→
-> ngăn-dữ-liệu + 5 nhãn còn thiếu ở `05c-pfm-chuc-nang-va-kien-truc-data.md`. Đọc 05c
-> TRƯỚC nếu cần biết "PFM làm được gì cho user"; file này là "dữ liệu nằm ở đâu".
->
-> **BỔ SUNG D146 (cùng ngày) theo lệnh founder** *"Xem luôn cấu hình hạ tầng hiện tại
-> để thiết kế kiến trúc vừa chịu tải tối ưu vừa dễ dàng scale sau này đi."* ⇒ thêm
-> **§1b (K10–K13)**, viết lại **§3** theo hạ tầng thật, thêm **§3b** (bảng kê chỗ bản
-> đầu SAI — đã sửa) và **T5/T6**. Ba quyết định của bản đầu bị thay: K8 (cách cất két)
-> ← K10 · một vế của K2 (két vào backup) ← K12 · cách đếm tải ở §3 ← §3.3.
+Where the personal-finance (spending ledger) data lives, and why. The backup vault is encrypted end to end, so the server stores ciphertext only, and the only trace of PFM in the behaviour log is coded values, never amounts or free text. The main text explains each choice with its trade-offs and the alternatives considered; SQL, API and test details are in appendix T at the end. Written on 24 Aug 2026, before the code.
 
----
+*The document below is in Vietnamese, the language of the project.*
 
 ## 0. BỨC TRANH MỘT PHÚT
 

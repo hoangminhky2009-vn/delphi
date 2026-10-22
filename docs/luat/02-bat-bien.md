@@ -1,22 +1,8 @@
-<!--
-  ⚠⚠ TỆP NÀY LÀ **LUẬT**, NGANG HÀNG `CLAUDE.md` — KHÔNG PHẢI BẢN ĐỒ.
-  Khác `docs/dac-ta/` (bản đồ, trôi được, thua CLAUDE.md khi mâu thuẫn): nội
-  dung ở đây được DỜI RA từ chính CLAUDE.md ngày 01/09 để hiến pháp gọn lại,
-  nên nó vẫn giữ nguyên thứ hạng. Mâu thuẫn giữa code và tệp này ⇒ **tệp này
-  thắng**, y như trước khi dời.
-  Muốn làm khác ⇒ DỪNG, hỏi founder, chờ duyệt (A8.1).
--->
+# Rules — the ten invariants of the system
 
-# LUẬT — MƯỜI BẤT BIẾN CỦA HỆ THỐNG
+Ten things no code path may break — among them: pool sizes stay hidden until a user’s first bet, the resolution source is published before a market opens, the `events` table is append-only, tokens are never minted as prizes, and the betting token and quest points can never be exchanged. When the code and these rules disagree, the code is changed.
 
-> Mười điều không được vi phạm ở bất kỳ đường code nào. Vi phạm là hỏng sản phẩm, không phải hỏng phong cách.
->
-> **Đọc khi:** động vào kèo, pool, ledger, rank, seed, hoặc chủ đề kèo
->
-> Cửa vào: [`CLAUDE.md`](../../CLAUDE.md) — luật làm việc + bản đồ.
-> Bản đồ luật: [`00-muc-luc.md`](00-muc-luc.md).
-
----
+*The document below is in Vietnamese, the language of the project.*
 
 ## A3. Mười luật bất biến của hệ thống
 

@@ -1,22 +1,8 @@
-<!--
-  ⚠⚠ TỆP NÀY LÀ **LUẬT**, NGANG HÀNG `CLAUDE.md` — KHÔNG PHẢI BẢN ĐỒ.
-  Khác `docs/dac-ta/` (bản đồ, trôi được, thua CLAUDE.md khi mâu thuẫn): nội
-  dung ở đây được DỜI RA từ chính CLAUDE.md ngày 01/09 để hiến pháp gọn lại,
-  nên nó vẫn giữ nguyên thứ hạng. Mâu thuẫn giữa code và tệp này ⇒ **tệp này
-  thắng**, y như trước khi dời.
-  Muốn làm khác ⇒ DỪNG, hỏi founder, chờ duyệt (A8.1).
--->
+# Rules — token economy: parameters and formulas
 
-# LUẬT — KINH TẾ TOKEN: THAM SỐ & CÔNG THỨC
+The economy's parameters and the parimutuel payout formula, with test vectors computed by hand. The numbers are changed only by the author, after measurement; the code reads them from `config/`.
 
-> Tham số kinh tế và công thức parimutuel, kèm test vector chép tay. Agent KHÔNG tự đổi số ở đây (A8.2).
->
-> **Đọc khi:** động vào bet · payout · rake · cap · Brier · bất kỳ phép tính tiền nào
->
-> Cửa vào: [`CLAUDE.md`](../../CLAUDE.md) — luật làm việc + bản đồ.
-> Bản đồ luật: [`00-muc-luc.md`](00-muc-luc.md).
-
----
+*The document below is in Vietnamese, the language of the project.*
 
 ## A4. Tham số kinh tế (nguồn chân lý duy nhất)
 

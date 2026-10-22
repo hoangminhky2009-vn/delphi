@@ -1,29 +1,8 @@
-# 8. MÁY TÍNH TOÁN — xác suất, tương quan, và mọi phép tính tiền của Đấu trường
+# Part 8 — Calculation engine: probability, correlation and every money calculation in the Arena
 
-> 📄 **Gửi cho người NGOÀI repo thì gửi [`docs/xac-suat-va-nguon.html`](../xac-suat-va-nguon.html)**
-> (D-số chờ cấp), không gửi tệp này. Bản HTML đứng một mình, chở đúng ba mục —
-> *cách tính xác suất · nguồn ngoài đời của từng số · chỗ KHÔNG có nguồn* — cộng bảng đo
-> sinh bằng cách CHẠY engine (`do:chu-ky-thuc-te` + đếm 20.000 bàn), không tính lại công
-> thức bằng JS (D61). Tệp này vẫn là nguồn nội dung; sửa bên đây TRƯỚC rồi mới sửa HTML.
+How each number a player sees on screen is calculated, and why it is calculated that way. No UI, infrastructure, PFM or prediction market here. When this file and the code disagree, `config/holdem.ts` and the code win.
 
-> Đọc `00-ban-do.md` trước nếu chưa quen bộ đặc tả. File này là bản đồ SỐ HỌC —
-> không nói UI, không nói hạ tầng, không nói PFM hay chợ dự báo. Nó trả lời một câu
-> duy nhất: **con số người chơi thấy trên màn được tính ra như thế nào, và vì sao
-> lại tính kiểu đó.**
->
-> ⚠ File này trôi được như mọi tệp trong `docs/dac-ta/` — code + `config/holdem.ts`
-> + `config/holdem_balance.ts` LUÔN thắng khi mâu thuẫn (D61/D80). Mọi công thức dưới
-> đây chép từ code tại thời điểm viết (09/09/2026, ngay sau khi founder duyệt lật
-> `balance-v42-taisan`, D313). Đổi cân bằng ⇒ sửa file này cùng commit, hoặc ít nhất
-> ghi một dòng "đã trôi" ở đầu mục liên quan.
->
-> **Quy ước đọc số:** mọi hằng số hậu tố `_bp` là **phần vạn** (basis point kiểu
-> nội bộ, KHÔNG phải bp tài chính chuẩn 1/100%): `10000 = 100% = hệ số ×1`. Công thức
-> chuẩn dùng khắp repo là `applyBpInt(v, bp) = floor(v × bp / 10000)` — **luôn làm
-> tròn xuống**, kể cả số âm (`server/sandbox/rng.ts:idiv`). Lãi suất nền là NGOẠI LỆ
-> duy nhất: đơn vị của nó là **điểm** (1 điểm = 0,01%/năm), không phải `_bp` — trộn
-> hai đơn vị này là lỗi có thật đã xảy ra trong lịch sử repo (xem `config/holdem.ts`
-> ngay trên định nghĩa `LAI_SUAT_NEN`).
+*The document below is in Vietnamese, the language of the project.*
 
 ## Mục lục
 

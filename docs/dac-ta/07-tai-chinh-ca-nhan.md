@@ -1,7 +1,8 @@
-# 7. TÀI CHÍNH CÁ NHÂN & INSIGHT — tính cách, radar, hướng business
+# Part 7 — Personal finance and insight: personality card, radar chart, business direction
 
-> Cập nhật 15/08/2026. ⚠ File này trôi được — CLAUDE.md + code thắng; sửa
-> cùng commit khi thi công. Đọc `00-ban-do.md` trước.
+Part of the [specification by part](00-ban-do.md). Corrected together with the code whenever the two disagree.
+
+*The document below is in Vietnamese, the language of the project.*
 
 ## A. VAI TRÒ & HIỆN TRẠNG
 

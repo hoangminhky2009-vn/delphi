@@ -1,22 +1,8 @@
-<!--
-  ⚠⚠ TỆP NÀY LÀ **LUẬT**, NGANG HÀNG `CLAUDE.md` — KHÔNG PHẢI BẢN ĐỒ.
-  Khác `docs/dac-ta/` (bản đồ, trôi được, thua CLAUDE.md khi mâu thuẫn): nội
-  dung ở đây được DỜI RA từ chính CLAUDE.md ngày 01/09 để hiến pháp gọn lại,
-  nên nó vẫn giữ nguyên thứ hạng. Mâu thuẫn giữa code và tệp này ⇒ **tệp này
-  thắng**, y như trước khi dời.
-  Muốn làm khác ⇒ DỪNG, hỏi founder, chờ duyệt (A8.1).
--->
+# Rules — data: schema, event types, and what goes in `events` vs `telemetry`
 
-# LUẬT — DỮ LIỆU: SCHEMA, EVENT, RANH GIỚI `events` ↔ `telemetry`
+The minimum tables, the catalogue of event types, and a one-line test for deciding which table a record belongs in. A row written to `events` stays there for good: the table is append-only.
 
-> Bảng tối thiểu, danh mục event, và phép thử một dòng để biết ghi vào bảng nào. Cửa MỘT CHIỀU: thứ đã vào `events` thì nằm đó mãi.
->
-> **Đọc khi:** thêm một `action_type` · thêm bảng · phân vân ghi `events` hay `telemetry` · làm insight/phân tích
->
-> Cửa vào: [`CLAUDE.md`](../../CLAUDE.md) — luật làm việc + bản đồ.
-> Bản đồ luật: [`00-muc-luc.md`](00-muc-luc.md).
-
----
+*The document below is in Vietnamese, the language of the project.*
 
 ## A6. Data model chuẩn (mở rộng từ schema gốc mục 5.4)
 

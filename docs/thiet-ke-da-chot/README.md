@@ -1,7 +1,8 @@
-# THIẾT KẾ ĐÃ CHỐT — viết TRƯỚC khi code, không viết sau
+# Approved designs — written before the code
 
-**Founder lập thư mục này 27/07:** *"thêm một thư mục để ghi rõ bản thiết kế đã chốt
-và sửa đổi trước khi làm."*
+Each file here is a design that was approved before it was built: game mechanics, the round structure, the credit cycle, the shop. The build had to match the approved design, and a change was made to the design first.
+
+*The document below is in Vietnamese, the language of the project.*
 
 ## Vì sao nó tồn tại — nguyên nhân cụ thể, không phải quy trình cho đẹp
 
