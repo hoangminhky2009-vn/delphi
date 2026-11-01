@@ -3,6 +3,9 @@
 - **Status:** accepted, 2026-08-24 · **Source:** private decision-log entry D130
 - **Lens:** product analytics · statistics
 
+> **TL;DR.** The play-style score was an average, so one lucky round already showed a top grade. The fix adds `max(0, 4 − n)` neutral pseudo-rounds that fade out by round 4; the 4 was picked by replaying 600 bot matches as the smallest value that stops every grade announcement in rounds 1–3 without changing any final grade.
+> A **seat-round**, used below, is one seat in one round of one match: a 5-seat match of 12 rounds has 60 seat-rounds.
+
 ## Context
 
 The arena shows a play-style rating from E up to SSS. An earlier note claimed *"sitting idle for the first three rounds still scores 974 = SSS"*, and proposed re-tuning the 20 thresholds. The assistant measured first.

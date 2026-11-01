@@ -12,6 +12,7 @@
     "mascot": "node scripts/paint-mascot.mjs && node scripts/gen-icons.mjs",
     "icons": "node scripts/gen-icons.mjs",
     "build": "vite build",
+    "canh:build": "node scripts/canh_build.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",

@@ -226,14 +226,15 @@ describe('§III — ⭐⭐⭐ bánh răng mở lớp CÀI ĐẶT với đúng B�
 /* ═══ §IV — không thanh cuộn: điều kiện cấu trúc ═════════════════════════════════════════════════ */
 
 describe('§IV — ⭐⭐⭐ KHÔNG THANH CUỘN: các điều kiện CẤU TRÚC (số đo thật ở pfm_bento.mjs phần `cuon`)', () => {
-  it('vỏ trừ ĐÚNG ba số của AppShell: đầu 12px + đáy 8px + vùng an toàn', () => {
+  it('vỏ trừ ĐÚNG ba số của AppShell: đầu 12px + vùng an toàn TRÊN (`--an-tren`) + đáy 8px + vùng an toàn dưới', () => {
+    // D603 đợt 2: bản cài iOS `black-translucent` ⇒ vỏ đệm thêm `--an-tren` (tai thỏ + băng trình duyệt nhúng) ⇒ khung trừ đúng phần ấy.
     const vo = boChuThich(doc('../src/components/pfm/KhungPfm.module.css'));
     const shell = boChuThich(doc('../src/app/AppShell.module.css'));
-    const cao = /\.khung\s*\{[^}]*height:\s*calc\(100dvh\s*-\s*(\d+)px\s*-\s*(\d+)px\s*-\s*env\(safe-area-inset-bottom,\s*0px\)\)/.exec(vo);
+    const cao = /\.khung\s*\{[^}]*height:\s*calc\(100dvh\s*-\s*(\d+)px\s*-\s*var\(--an-tren\)\s*-\s*(\d+)px\s*-\s*env\(safe-area-inset-bottom,\s*0px\)\)/.exec(vo);
     expect(cao, 'không thấy công thức chiều cao của `.khung`').not.toBeNull();
     const rule = /\.shell\[data-khung-pfm\]\s*\{([^}]*)\}/.exec(shell)?.[1];
     expect(rule, 'không thấy `.shell[data-khung-pfm]`').toBeTruthy();
-    const dau = /padding-top:\s*(\d+)px/.exec(rule!)?.[1];
+    const dau = /padding-top:\s*calc\((\d+)px\s*\+\s*var\(--an-tren\)\)/.exec(rule!)?.[1];
     const day = /padding-bottom:\s*calc\((\d+)px\s*\+\s*env\(safe-area-inset-bottom/.exec(rule!)?.[1];
     expect([cao![1], cao![2]], 'vỏ và AppShell lệch số ⇒ trang cuộn vài pixel, không gì đỏ').toEqual([dau, day]);
   });

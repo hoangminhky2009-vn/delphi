@@ -51,11 +51,11 @@ import { AlphaDraftMatch } from '@/screens/holdem/AlphaDraftMatch';
 import { HuongDan } from '@/screens/holdem/HuongDan';
 import {
   PREDICT_TAB_DONE, PREDICT_TAB_PARAM,
-  ROUTE_ARENA, ROUTE_ARENA_GUIDE, ROUTE_HUB, ROUTE_ARENA_MATCH_MAU, ROUTE_BACH_KHOA, ROUTE_BACH_KHOA_MUC_MAU, ROUTE_BUOI_DO, ROUTE_PREDICT,
+  ROUTE_ARENA, ROUTE_ARENA_GUIDE, ROUTE_ARENA_MATCH_MAU, ROUTE_BACH_KHOA, ROUTE_BACH_KHOA_MUC_MAU, ROUTE_BUOI_DO, ROUTE_PREDICT,
   ROUTE_CAI_DAT, ROUTE_HANH_TRINH, ROUTE_PROFILE, ROUTE_PROFILE_THE, ROUTE_SHOP, ROUTE_TAI_CHINH, ROUTE_TAI_CHINH_THE, ROUTE_TAI_CHINH_PHONG_VAN,
   ROUTE_TAI_CHINH_LO_TRINH, ROUTE_TAI_CHINH_CAM_KET, ROUTE_TAI_CHINH_NGAY_DAU,
   ROUTE_TAI_CHINH_SO, ROUTE_TAI_CHINH_HU, ROUTE_TAI_CHINH_GUONG,
-  ROUTE_TOKEN,
+  ROUTE_TOKEN, ROUTE_CAI_APP, duongCaiApp,
 } from '@/lib/vocab';
 import { Wallet } from '@/screens/Wallet';
 import { Shop } from '@/screens/Shop';
@@ -97,6 +97,11 @@ const BachKhoa = lazy(() => import('@/screens/bach-khoa/BachKhoa').then((m) => (
  * CÔNG KHAI — người ta cần đọc TRƯỚC khi tạo tài khoản, nên không bọc AuthGate.
  */
 const DieuKhoan = lazy(() => import('@/screens/DieuKhoan'));
+/*
+ * D603 đợt 2 — CỔNG CÀI APP: nạp trễ (người đã cài không bao giờ mở; ba lưới hình iOS đi theo nó), CÔNG KHAI như Điều khoản — nút
+ * "Cài app" ở màn đăng nhập dẫn tới đây trước khi có tài khoản.
+ */
+const CongCaiApp = lazy(() => import('@/screens/CongCaiApp'));
 /*
  * SỔ chi tiêu (PFM): nạp trễ vì nó kéo theo `dung_kho` + `kho_idb` + cả tầng PFM, mà phần
  * lớn phiên chơi không mở tới. ⚠ Route PHẲNG (không lồng dưới `/tai-chinh`) để tập
@@ -174,7 +179,7 @@ export interface RouteHandle {
 }
 
 import { ManLoiRoute } from '../components/ui/ManLoi';
-import { PFM_WEB_MO } from '@/lib/pfm_mo';
+import { pfmMo } from '@/lib/pfm_mo';
 
 const h = (
   label: string, toanMan?: boolean, manRong?: boolean, manNgang?: boolean,
@@ -195,11 +200,16 @@ const hPfm = (label: string): RouteHandle => h(label, false, false, false, true)
 const hPfmKhung = (label: string): RouteHandle => h(label, false, false, false, true, false, true);
 
 /**
- * KHÓA PFM TRÊN WEB (`lib/pfm_mo.ts`, SPEC chan-truoc-beta): cờ tắt ⇒ mọi màn khu Tài chính (kể cả cửa điều phối `/tai-chinh`) về Hub,
- * `replace` để Back không bật qua lại. Màn không dựng ⇒ không `KhoProvider` ⇒ driver nền PFM không chạy. THẺ đo từ trận (`/ho-so/the`)
- * KHÔNG thuộc khu này nên không bị khoá.
+ * ⭐ CỔNG PFM (`lib/pfm_mo.ts` `pfmMo`, SPEC `cai-app-pfm-trong-ban-cai` — D603 đợt 2): khu Tài chính (kể cả cửa điều phối `/tai-chinh`)
+ * chỉ dựng trong BẢN CÀI; tab trình duyệt ⇒ về CỔNG CÀI (`/cai-app?noi=cong_pfm`), `replace` để Back không bật qua lại. Cổng đứng TRƯỚC
+ * phỏng vấn (phỏng vấn cũng lưu trên máy). Màn không dựng ⇒ không `KhoProvider` ⇒ driver nền PFM không chạy. THẺ đo từ trận
+ * (`/ho-so/the`) KHÔNG thuộc khu này nên không bị khoá.
+ * ⚠ COMPONENT, không phải biểu thức lúc nạp module: `routes` dựng MỘT lần khi nạp, còn "đang chạy bản cài" phải hỏi lúc DỰNG màn.
  */
-const pfm = (el: React.ReactElement): React.ReactElement => (PFM_WEB_MO ? el : <Navigate to={ROUTE_HUB} replace />);
+export function CongPfm({ children }: { children: React.ReactElement }): React.ReactElement {
+  return pfmMo() ? children : <Navigate to={duongCaiApp('cong_pfm')} replace />;
+}
+const pfm = (el: React.ReactElement): React.ReactElement => <CongPfm>{el}</CongPfm>;
 
 /** HUB: tự vẽ đầu sảnh ⇒ tắt header chung (xem `RouteHandle.dauSanh`). */
 const hHub = (label: string): RouteHandle => h(label, false, false, false, false, true);
@@ -330,6 +340,15 @@ export const routes: RouteObject[] = [
       { path: ROUTE_TAI_CHINH_HU, element: pfm(<KhungPfm tab="hu"><TaiChinhHu /></KhungPfm>), handle: hPfmKhung('HŨ') },
       { path: ROUTE_TAI_CHINH_GUONG, element: pfm(<KhungPfm tab="guong"><TaiChinhGuong /></KhungPfm>), handle: hPfmKhung('GƯƠNG') },
       { path: ROUTE_CAI_DAT, element: <CaiDat />, handle: h('CÀI-ĐẶT') },
+      {
+        path: ROUTE_CAI_APP,
+        element: (
+          <Suspense fallback={null}>
+            <CongCaiApp />
+          </Suspense>
+        ),
+        handle: h('CÀI-APP'),
+      },
 
       // ── QUẢN TRỊ: KHÔNG CÒN Ở ĐÂY (D335) — `/quan-tri` là app riêng (`web/quan-tri.html`), người chơi không tải.
 

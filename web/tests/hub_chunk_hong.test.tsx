@@ -18,7 +18,7 @@ import { ME_ONBOARDED, stubFetch } from './helpers';
  * SPEC chan-truoc-beta — khu Tài chính đang KHOÁ trên web (`lib/pfm_mo.ts`). Tệp này đo khu ấy ở trạng thái MỞ — mã của trạng thái
  * mở vẫn còn nguyên cho ngày mở lại (điều kiện ở `pfm_mo.ts`), nên GHIM cờ bật thay vì bỏ bài. Trạng thái KHOÁ: `pfm_khoa_web.test.tsx`.
  */
-vi.mock('@/lib/pfm_mo', () => ({ PFM_WEB_MO: true }));
+vi.mock('@/lib/pfm_mo', () => ({ PFM_WEB_MO: true, pfmMo: () => true }));
 
 // Hai chunk "không về được".
 vi.mock('@/screens/hub/HubBanner', () => { throw new Error('Failed to fetch dynamically imported module'); });

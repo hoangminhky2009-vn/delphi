@@ -22,7 +22,7 @@
   max-width: var(--shell-width);
   margin: 0 auto;
   justify-self: center;
-  height: calc(100dvh - 12px - env(safe-area-inset-top, 0px) - 74px - env(safe-area-inset-bottom, 0px));
+  height: calc(100dvh - 12px - var(--an-tren) - 74px - env(safe-area-inset-bottom, 0px));
   min-height: 456px;
   display: flex;
   flex-direction: column;

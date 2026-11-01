@@ -21,6 +21,7 @@ import { AuthHero } from '@/components/AuthHero';
 import { NeonButton } from '@/components/ui';
 import { useVaoKhach } from '@/api/khach';
 import { docDiemQuayVe } from '@/lib/diem_quay_ve';
+import { NutCaiDangNhap } from '@/components/MoiCai';
 import { BoardAuth } from './BoardAuth';
 import s from './auth.module.css';
 
@@ -62,6 +63,8 @@ export function Login() {
         <p className={s.cuaVaoChu}>
           Giữ thành tích, lên bảng xếp hạng, mở khu Personal Finance.
         </p>
+        {/* D603 đợt 2 — nút CÀI APP cố định ở cửa vào (SPEC mục 4.2): Android/máy tính một chạm, iPhone ra cổng ba bước; ẩn trong bản cài. */}
+        <NutCaiDangNhap />
         {/*
           Điều khoản đứng NGAY ĐÂY, cạnh nút chính — không giấu ở chân trang.
           Tạo tài khoản là đã dùng dịch vụ, nên đường đọc điều khoản phải ở cùng

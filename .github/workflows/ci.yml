@@ -68,6 +68,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm audit --omit=dev --audit-level=high
-      - run: npm audit --omit=dev --audit-level=high
+      # scripts/audit_prod.mjs = npm audit --omit=dev, blocks on high, except time-limited exceptions listed in that file
+      - run: node scripts/audit_prod.mjs
+      - run: node ../scripts/audit_prod.mjs
         working-directory: web

@@ -20,8 +20,10 @@ import {
   ROUTE_PROFILE_THE,
 } from '@/lib/vocab';
 import s from './CaiDat.module.css';
-import { PFM_WEB_MO } from '@/lib/pfm_mo';
+import { pfmMo } from '@/lib/pfm_mo';
 import { CHU_HUB } from '@/lib/hub_chu';
+import { CHU_CAI_APP } from '@/lib/cai_app_chu';
+import { duongCaiApp } from '@/lib/vocab';
 
 export function CaiDat() {
   const navigate = useNavigate();
@@ -40,9 +42,14 @@ export function CaiDat() {
         `KhoProvider` vì khối này đọc/ghi kho trên máy (chìa, cài đặt cục bộ) và là chỗ
         driver đồng bộ được kích như mọi màn PFM khác. Ruột theo demo đã chốt.
       */}
-      {/* SPEC chan-truoc-beta — khu Tài chính KHOÁ trên web (`lib/pfm_mo.ts`): không dựng khối ⇒ không `KhoProvider` ⇒ driver nền
-          PFM không chạy. Xoá sạch sổ cũ vẫn ở Hồ sơ → Dữ liệu của tôi. */}
-      {!PFM_WEB_MO ? <p className={s.chuThich}>{CHU_HUB.taiChinhKhoaMo}</p> : (
+      {/* Khu Tài chính chỉ mở trong BẢN CÀI (`lib/pfm_mo.ts` `pfmMo` — D603 đợt 2): tab trình duyệt không dựng khối ⇒ không `KhoProvider`
+          ⇒ driver nền PFM không chạy. Xoá sạch sổ cũ vẫn ở Hồ sơ → Dữ liệu của tôi. */}
+      {!pfmMo() ? (
+        <p className={s.chuThich}>
+          {CHU_HUB.taiChinhKhoaMo}{' '}
+          <Link className={s.lienKet} to={duongCaiApp('cong_pfm')}>{CHU_CAI_APP.caiNgay}</Link>
+        </p>
+      ) : (
       <div className={`${s.khoi} ${s.khoiPfm}`}>
         <KhoProvider>
           {/* Cùng một hàng "SỬA SÁU CÂU" như board ⚙ — hai cửa, một khối (A11.5). */}

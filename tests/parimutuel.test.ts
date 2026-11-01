@@ -1,7 +1,7 @@
 /**
- * GĐ3 VIỆC 1 — TDD: test vectors A5.2 (payout), A5.3 (cap), A5.4 (Brier)
- * trên HÀM THUẦN (không I/O). Số trong file này chép đúng CLAUDE.md —
- * code phải pass đúng TỪNG CON SỐ, không được sửa test cho khớp code (A8.2/A8.3).
+ * Test vector A5.2 (payout), A5.3 (cap), A5.4 (Brier) trên hàm thuần.
+ * Số chép tay từ `docs/luat/03-kinh-te.md` — code phải khớp từng con số;
+ * không sửa test cho khớp code.
  */
 import { describe, it, expect } from 'vitest';
 import {
@@ -11,15 +11,19 @@ import {
   computeBrier,
   buildDistribution,
   type BetLike,
+  type PayoutResult,
 } from '../server/parimutuel.js';
 
-// Helper dựng bet gọn
-const bet = (optionId: string, amount: number, userId: string | null = null): BetLike => ({
-  optionId,
-  userId,
-  amount: BigInt(amount),
-  isSeed: userId === null,
-});
+/** Không truyền userId = bet seed. */
+const bet = (optionId: string, amount: number, userId: string | null = null): BetLike =>
+  userId === null
+    ? { optionId, amount: BigInt(amount), isSeed: true, userId: null }
+    : { optionId, amount: BigInt(amount), isSeed: false, userId };
+
+/** Tổng mọi phần đã chia ra — phải bằng pool P. */
+const distributed = (r: PayoutResult): bigint =>
+  [...r.playerPayouts.values()].reduce((a, b) => a + b, 0n)
+  + r.seedToTreasury + r.burnTotal + r.treasuryRake + r.unclaimedToTreasury;
 
 describe('A5.1/A5.2 — computePayout (integer, tất định)', () => {
   it('Vector 1 — không seed, 3 cửa: A 200@X; B 300@Y; C 500@Y. Y thắng.', () => {
@@ -36,8 +40,8 @@ describe('A5.1/A5.2 — computePayout (integer, tất định)', () => {
     expect(r.seedToTreasury).toBe(0n);
     expect(r.residual).toBe(1n); // 950 − 949 → đốt
     expect(r.burnTotal).toBe(31n); // 30 + residual 1
-    // Kiểm bất biến: 1.000 = 949 + (30+1) + 20
-    expect(949n + 31n + 20n).toBe(1000n);
+    // 1.000 = 949 trả người chơi + (30+1) đốt + 20 Kho bạc
+    expect(distributed(r)).toBe(1000n);
   });
 
   it('Vector 2 — seed 100/cửa, 4 cửa: A 300@c1; B 100@c2; C 200@c3. Cửa 1 thắng.', () => {
@@ -56,8 +60,8 @@ describe('A5.1/A5.2 — computePayout (integer, tất định)', () => {
     expect(r.seedToTreasury).toBe(237n);
     expect(r.residual).toBe(1n);
     expect(r.burnTotal).toBe(31n);
-    // Kiểm: 1.000 = 712 + 237 + 31 + 20
-    expect(712n + 237n + 31n + 20n).toBe(1000n);
+    // 1.000 = 712 + 237 + 31 + 20
+    expect(distributed(r)).toBe(1000n);
   });
 
   it('Vector 3 — 100% token NGƯỜI CHƠI ở cửa thắng → hoàn nguyên, không rake', () => {
@@ -85,8 +89,8 @@ describe('A5.1/A5.2 — computePayout (integer, tất định)', () => {
     expect(r.seedToTreasury).toBe(400n); // TOÀN BỘ seed (mọi cửa) về Kho bạc
     expect(r.burnTotal).toBe(0n);
     expect(r.treasuryRake).toBe(0n);
-    // Bất biến: 900 = 500 hoàn + 400 seed
-    expect(500n + 400n).toBe(900n);
+    // 900 = 500 hoàn + 400 seed
+    expect(distributed(r)).toBe(900n);
   });
 
   it('PHẢN VÍ DỤ Ngoại lệ 1 — đo trên U_lose==0, KHÔNG đo trên tổng pool', () => {
@@ -146,16 +150,13 @@ describe('A5.1/A5.2 — computePayout (integer, tất định)', () => {
   });
 
   it('bất biến bảo toàn: P == Σpayout + seed_về_kho + burn + residual + trea (mọi mode)', () => {
-    // Hàm tự assert bên trong — gọi với case lộn xộn để chắc không ném
+    // Số lẻ để floor để lại residual ở nhiều bet
     const bets = [
       bet('c1', 7), bet('c2', 7), bet('c3', 7),
       bet('c1', 137, 'A'), bet('c2', 251, 'B'), bet('c3', 89, 'C'), bet('c1', 53, 'B'),
     ];
-    expect(() => computePayout(bets, 'c1', false)).not.toThrow();
     const r = computePayout(bets, 'c1', false);
-    const sumPlayers = [...r.playerPayouts.values()].reduce((a, b) => a + b, 0n);
-    const P = 7n * 3n + 137n + 251n + 89n + 53n;
-    expect(sumPlayers + r.seedToTreasury + r.burnTotal + r.treasuryRake + r.unclaimedToTreasury).toBe(P);
+    expect(distributed(r)).toBe(7n * 3n + 137n + 251n + 89n + 53n);
   });
 });
 
@@ -191,7 +192,10 @@ describe('A5.3 — computeCap + validateAllocations (chống lách cap)', () => 
       bankroll: 1000n,
     });
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.code).toBe('cap_exceeded');
+    if (!r.ok) {
+      expect(r.code).toBe('cap_exceeded');
+      expect(r.message).toMatch(/trần 20%\/kèo: tối đa 200 T/);
+    }
   });
 
   it('no-withdraw: tổng mới < tổng cũ → từ chối', () => {
@@ -214,7 +218,7 @@ describe('A5.3 — computeCap + validateAllocations (chống lách cap)', () => 
     if (r.ok) expect(r.netDelta).toBe(0n);
   });
 
-  it('min bet: cửa có amount 0 < x < MIN_BET → từ chối (MIN_BET=1 nên chỉ chặn phân bổ trống)', () => {
+  it('mọi cửa amount 0 → empty_allocation', () => {
     const r = validateAllocations({
       newAllocations: new Map([['o1', 0n]]),
       oldAllocations: new Map(),
@@ -224,15 +228,7 @@ describe('A5.3 — computeCap + validateAllocations (chống lách cap)', () => 
     if (!r.ok) expect(r.code).toBe('empty_allocation');
   });
 
-  it('không đủ số dư: netDelta > bankroll → insufficient_bankroll', () => {
-    // bankroll 100, đã đặt 400 (quy chiếu 500, cap 100): tổng mới 500 → delta 100 ok;
-    // tổng mới 501 vượt cap. Dựng case delta vượt balance mà KHÔNG vượt cap:
-    // bankroll 50, đã đặt 400 → quy chiếu 450, cap 90?? 450*0.2=90 < 400 cũ →
-    // mọi tổng mới ≥ 400 đều vượt cap... Case thuần balance: bankroll 1000,
-    // cũ 0, mới 150 (cap 200 OK) nhưng bankroll thật chỉ 100 → dùng bankroll=100:
-    // quy chiếu 100, cap 20 → cap chặn trước. Kết luận: với cap 20%, netDelta
-    // vượt balance LUÔN bị cap chặn trước (cap ≤ 20% quy chiếu < balance khả dụng
-    // + đã đặt). Balance check vẫn giữ làm lưới sau cùng — test trực tiếp hàm:
+  it('lệnh trong trần và trong số dư → hợp lệ, netDelta = phần thêm mới', () => {
     const r = validateAllocations({
       newAllocations: new Map([['o1', 100n]]),
       oldAllocations: new Map(),
@@ -241,13 +237,13 @@ describe('A5.3 — computeCap + validateAllocations (chống lách cap)', () => 
     expect(r.ok).toBe(true);
     if (r.ok) {
       expect(r.netDelta).toBe(100n);
-      expect(r.netDelta <= 1000n).toBe(true);
+      expect(r.cap).toBe(200n);
     }
   });
 });
 
 describe('A5.4 — computeBrier', () => {
-  it('ví dụ CLAUDE.md: 60@cửa1, 40@cửa3, kèo 4 cửa, cửa 1 thắng → 0,32', () => {
+  it('ví dụ A5.4: 60@cửa1, 40@cửa3, kèo 4 cửa, cửa 1 thắng → 0,32', () => {
     const brier = computeBrier(
       new Map([['c1', 60n], ['c3', 40n]]),
       'c1',
@@ -265,8 +261,8 @@ describe('A5.4 — computeBrier', () => {
   });
 });
 
-describe('buildDistribution — phân bố + tỷ lệ ăn ngụ ý (server tính, C4)', () => {
-  it('trả SỐ TIỀN mỗi cửa + pct; TUYỆT ĐỐI không có tỷ lệ ăn (founder 19/07)', () => {
+describe('buildDistribution — phân bố pool theo tiền (server tính)', () => {
+  it('trả SỐ TIỀN mỗi cửa + pct; không có tỷ lệ ăn ngụ ý', () => {
     // Pool 1.000: c1=400, c2=600
     const d = buildDistribution(new Map([['c1', 400n], ['c2', 600n]]));
     const c1 = d.find((x) => x.option_id === 'c1')!;
@@ -275,7 +271,7 @@ describe('buildDistribution — phân bố + tỷ lệ ăn ngụ ý (server tín
     expect(c2.volume).toBe(600);
     expect(c1.pct).toBeCloseTo(40, 5);
     expect(c2.pct).toBeCloseTo(60, 5);
-    // Ẩn ở tầng API: không có key nào để F12 moi ra "tôi được bao nhiêu"
+    // Ẩn ở tầng API: không có key nào để devtools moi ra "tôi được bao nhiêu"
     expect('implied_payout_ratio' in c1).toBe(false);
     expect(JSON.stringify(d)).not.toContain('implied');
   });

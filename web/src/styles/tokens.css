@@ -332,6 +332,18 @@
   --shell-width: 390px;
   --tam-width: 390px;
 
+  /*
+   * VÙNG AN TOÀN TRÊN (D603 đợt 2 — SPEC `cai-app-pfm-trong-ban-cai`). Bản cài iOS chạy `black-translucent` (`index.html`): nền tràn dưới
+   * giờ/pin, nên MỌI màn phải tự chừa phần trên — đọc `--an-tren`, đừng gọi `env(safe-area-inset-top)` rời.
+   *   · `--tai-tho`  = phần máy báo (tai thỏ / Dynamic Island / thanh trạng thái). 0 ở tab trình duyệt thường.
+   *   · `--cao-bang` = băng "mở bằng Chrome/Safari" của trình duyệt nhúng (`components/MoiCai.tsx` đặt lên <html> khi băng mở, gỡ khi thu).
+   *   · `--an-tren`  = tổng hai cái trên — thứ khung màn chừa ra.
+   * ⚠ Một biến cho cả hai lý do: băng và tai thỏ cùng chiếm mép trên, màn chỉ cần biết TỔNG. Soi ảnh có tai thỏ giả: đặt `--tai-tho`.
+   */
+  --tai-tho: env(safe-area-inset-top, 0px);
+  --cao-bang: 0px;
+  --an-tren: calc(var(--tai-tho) + var(--cao-bang));
+
   /* D532 — MÀU TIN TRONG MÀN (demo `minigame-bat-day.html`, founder 03/10): HƯỚNG câu chữ = màu (tốt xanh · xấu đỏ · úp mở xám); UY TÍN nguồn = sắc
      độ, NHẠT (1) → ĐẬM (5). Tương phản trên nền đồ thị #050b12 — xấu 14,5→4,8 · tốt 16,0→7,6 · úp mở 15,2→5,1 (nấc đậm nhất vẫn đọc được).
      Chép NGUYÊN mã + tên của demo (A11.25). */

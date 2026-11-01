@@ -9,7 +9,7 @@
   margin: 0 auto;
   /* Màn rộng / Discord: AppShell có thể biến con duy nhất thành lưới — cột điện thoại vẫn đứng GIỮA. */
   justify-self: center;
-  height: calc(100dvh - 12px - 8px - env(safe-area-inset-bottom, 0px));
+  height: calc(100dvh - 12px - var(--an-tren) - 8px - env(safe-area-inset-bottom, 0px));
   min-height: 456px;
   display: flex;
   flex-direction: column;

@@ -81,6 +81,8 @@ import {
 import { CoachTap } from '@/components/holdem/CoachTap';
 import s from './AlphaDraftMatch.module.css';
 import { ManMinigame } from '@/components/holdem/ManMinigame';
+import { ChonLoiMan } from '@/components/holdem/ChonLoiMan';
+import { canHoiLoiCuaMan, laLuotLoiBatBuoc, loiMoiChuaCam } from '@/lib/loi_bat_buoc';
 import { moMan } from '@/api/minigame';
 import { KhungMinigameCtx, LOI_MINIGAME_CHU } from '@/lib/khung_minigame';
 import { HO_MAU, matLa } from '@/lib/la_bai';
@@ -581,6 +583,8 @@ function MatchInner() {
   const [moSo, setMoSo] = useState(false);
   /** D561 — khoá v65: lõi cho màn của vòng, chọn LÚC CHỐT (trước khi lá lật). null = mặc định (Bắt Đáy nếu cầm, không thì lõi đầu). */
   const [loiManChon, setLoiManChon] = useState<string | null>(null);
+  /** D609 — hộp LÕI CHO MÀN đang mở (bấm CHỐT VÒNG khi cầm ≥ 2 lõi ở vòng có màn, hoặc tự nổi ở 8 giây cuối). */
+  const [moChonLoiMan, setMoChonLoiMan] = useState(false);
   /** 12/09 — ĐÃ TỪNG mở tờ (!) trong trận (mốc cho bước coach `doc-loi`). */
   const [daDocTo, setDaDocTo] = useState(false);
   const [toMo, setToMo] = useState(false);
@@ -851,6 +855,46 @@ function MatchInner() {
    */
   const nhip = st?.ban.nhip_chon_bai ?? c?.nhip_chon_bai ?? [];
   const loaiVongNay = (st ? nhip[st.vong - 1] : undefined) ?? 'khong';
+  /*
+   * D609 (founder 13/10: "chọn lõi là bắt buộc … màn hình tự hiện chứ để user bấm chốt vòng sang vòng sau là móm không có lõi chơi cả trận").
+   *  · LƯỢT LÕI BẮT BUỘC: vòng có quầy lõi mà quầy còn lá CHƯA cầm và người chơi chưa chọn ⇒ shop TỰ MỞ một lần mỗi vòng, CHỐT VÒNG bị chặn tới khi
+   *    chọn một lõi. Hết giờ mà vẫn chưa chọn ⇒ SERVER chọn hộ (`loiChonHo`, D609) — client không tự nộp thay người chơi (A1: cờ do server quyết).
+   *  · LÕI CHO MÀN: vòng có màn + cầm ≥ 2 lõi + chưa nói rõ ⇒ hộp `ChonLoiMan` hiện khi CHỐT và tự nổi ở 8 giây cuối. Bàn tập có Oracle dẫn riêng ⇒ không.
+   */
+  const loiMoi = st ? loiMoiChuaCam(st.shop?.chien_thuat, st.ban.danh_muc.chien_thuat) : undefined;
+  const loiBatBuoc = !!st && laLuotLoiBatBuoc({ tap: laManTap, loiChonTruoc: st.loi_chon_truoc === true, loaiVong: loaiVongNay, daChonVongNay: chonCT !== null, loiMoi });
+  const canChonLoiMan = !!st && canHoiLoiCuaMan({
+    tap: laManTap, loiChonTruoc: st.loi_chon_truoc === true, lichMan: st.lich_man ?? [], vong: st.vong, soLoiCoThe: loiManDs.length, daNoiRo: loiManChon !== null,
+  });
+  const daTuMoLoi = useRef<number | null>(null);
+  useEffect(() => {
+    if (!st || !loiBatBuoc || daTuMoLoi.current === st.vong) return;
+    if (choDienXong || dangDienKq || xong || dangChoMan || moLyDo) return;
+    daTuMoLoi.current = st.vong;
+    setDaQuaChon(null);   // vào THẲNG màn chọn lõi, không phải trang tài sản
+    setShopMo(true);
+    setDaXemShop(true);
+  }, [st, loiBatBuoc, choDienXong, dangDienKq, xong, dangChoMan, moLyDo]);
+  const daNoiLoiMan = useRef<number | null>(null);
+  useEffect(() => {
+    if (!st || !canChonLoiMan || phaDongHo !== 'quyet' || conNguoc > 8 || daNoiLoiMan.current === st.vong) return;
+    if (choDienXong || dangDienKq || xong || dangChoMan || nop.isPending) return;
+    daNoiLoiMan.current = st.vong;
+    setMoChonLoiMan(true);
+  }, [st, canChonLoiMan, phaDongHo, conNguoc, choDienXong, dangDienKq, xong, dangChoMan, nop.isPending]);
+  /** D609 — chặn CHỐT khi lõi chưa rõ (mọi đường chốt: nút ở bàn lẫn nút trong shop). Trả true = đã chặn, không nộp. */
+  const chanChotLoi = (): boolean => {
+    if (loiBatBuoc) {
+      setKhopLoi('Chọn một lõi trước khi chốt — không có lõi thì cả trận chỉ đứng xem.');
+      setDaQuaChon(null);   // về THẲNG màn chọn lõi
+      setShopMo(true);
+      return true;
+    }
+    if (canChonLoiMan) { setMoChonLoiMan(true); return true; }
+    return false;
+  };
+  // Sang vòng khác (hoặc đã chọn) ⇒ hộp đóng.
+  useEffect(() => { setMoChonLoiMan(false); }, [st?.vong]);
   const vongMoTiepTheo = {
     tai_san: st
       ? (nhip.findIndex((x, i) => i >= st.vong - 1 && x === 'tai_san') + 1) || null
@@ -991,7 +1035,7 @@ function MatchInner() {
      */
     lenhThem?: { ma: string; chieu: 'mua' | 'ban' | 'khong' | 'dong_khong'; moc_bp: number }[],
     /** 22/08 — cú TỰ NỘP lúc đồng hồ chạm 0 (xem effect D38 bên dưới). */
-    opts?: { tuDong?: boolean },
+    opts?: { tuDong?: boolean; /** D609 — lõi cho màn vừa chọn trong hộp `ChonLoiMan` (state chưa kịp cập nhật). */ loiMan?: string },
   ) {
     if (!st) return;
     /*
@@ -1018,7 +1062,7 @@ function MatchInner() {
       {
         vong: st.vong, khao_sat_lai: khaoSat,
         // D561 — khoá v65: lõi cho màn chọn ngay lúc chốt (server xét lõi có đang cầm không).
-        ...(st.loi_chon_truoc && loiManVong ? { loi_man: loiManVong } : {}),
+        ...(st.loi_chon_truoc && (opts?.loiMan ?? loiManVong) ? { loi_man: (opts?.loiMan ?? loiManVong)! } : {}),
         /*
          * v10 NAV — tài sản đi bằng LỆNH MỐC, không bằng lá: lọc mã tài sản
          * khỏi `mua` (server cũng lọc — đây chỉ là không gửi thứ sẽ bị vứt).
@@ -3183,6 +3227,7 @@ function MatchInner() {
           onChotVong={b.nav !== undefined ? () => {
             // D430 — trait lệch cân: KHÔNG đóng shop (chợ nằm ngay trong đó); trả false để shop nhả khoá chốt.
             if (traitLechCan()) { chanTraitLech(); return false; }
+            if (chanChotLoi()) return false;   // D609 — lõi chưa chọn / chưa nói lõi cho màn: nhả khoá chốt, không nộp
             shopMoLucLat.current = true;
             setShopMo(false);
             void nopVong([], 'giu_vi_the');
@@ -3765,7 +3810,11 @@ function MatchInner() {
           chamMoi={!daXemShop && ((soTheChon === 0 && loaiVongNay === 'chien_thuat')
             || (choTrait?.vong === st.vong && chonTrait.length === 0))}
           {...(choTrait?.vong === st.vong ? { chamMoiNhan: 'Có chợ trait chờ chọn' } : {})}
-          onChotVong={() => { void nopVong([], 'giu_vi_the'); }}
+          onChotVong={() => {
+            // D609 — lõi là BẮT BUỘC: chưa chọn ở lượt lõi thì mở shop thay vì chốt; vòng có màn + ≥ 2 lõi thì hỏi lõi cho màn.
+            if (chanChotLoi()) return;
+            void nopVong([], 'giu_vi_the');
+          }}
           onBo={() => setHoiBo(true)}
           // v54 (D403) — trận không còn nước BỎ ⇒ gỡ nút (về tiền mặt: BÁN SẠCH trong shop; đầu hàng: nút thoát).
           coBo={st.bo_bai_tat !== true}
@@ -3777,6 +3826,14 @@ function MatchInner() {
       </div>
 
       {/* D585 — màn mở SAU bước lật lá của bàn (lá vừa chốt lật trên bàn trước — một cú lật). */}
+      {moChonLoiMan && canChonLoiMan && manVong === null && (
+        <ChonLoiMan
+          ds={loiManDs} macDinh={loiManVong} art={art} ten={(id) => c?.chien_thuat.find((x) => x.id === id)?.label ?? id}
+          conGiay={conNguoc} dangGui={nop.isPending}
+          onChon={(id) => { setLoiManChon(id); setMoChonLoiMan(false); void nopVong([], 'giu_vi_the', undefined, { loiMan: id }); }}
+          onDong={() => setMoChonLoiMan(false)}
+        />
+      )}
       {manVong !== null && matchId && !(st.cho_man?.vong === manVong && dangDienKq && !daToiBuoc(buocKq, 'tin')) && (() => {
         // D476 — hai ô thẻ trên mặt nỉ của màn: ô vòng trước + ô vòng vừa chốt (ô cuối của `lich_su_o`), nhãn + icon từ catalog.
         // Art CÓ SẴN của lá (cùng `art[khoá]` + `matLa` + `HO_MAU` bản đồ dùng); lá bị che (MÙ TIN / SƯƠNG MÙ) ⇒ mặt trống.

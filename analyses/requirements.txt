@@ -1,0 +1,4 @@
+# Python side of analyses/ (analyze.py). Versions are the ones the committed results were produced with.
+pandas==2.3.3
+numpy==2.2.6
+matplotlib==3.11.0

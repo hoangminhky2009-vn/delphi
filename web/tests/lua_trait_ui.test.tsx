@@ -542,6 +542,7 @@ describe('§VII chữ lỗi lệnh + công của lá', () => {
     // Quét mã nguồn: đóng shop rồi mới chặn là cú chặn mở lại shop trong CÙNG nhịp ⇒ shop không gỡ, khoá chốt kẹt.
     const src = readFileSync(resolve(process.cwd(), 'src/screens/holdem/AlphaDraftMatch.tsx'), 'utf8')
       .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
-    expect(src).toMatch(/if \(traitLechCan\(\)\) \{ chanTraitLech\(\); return false; \}\s*shopMoLucLat\.current = true;\s*setShopMo\(false\);/);
+    // D609 — thêm cổng lõi bắt buộc cùng chỗ: CẢ HAI cú chặn đứng TRƯỚC khi đóng shop (chặn xong mới đóng ⇒ shop không kẹt khoá chốt).
+    expect(src).toMatch(/if \(traitLechCan\(\)\) \{ chanTraitLech\(\); return false; \}\s*if \(chanChotLoi\(\)\) return false;\s*shopMoLucLat\.current = true;\s*setShopMo\(false\);/);
   });
 });

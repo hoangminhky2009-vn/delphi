@@ -1,8 +1,10 @@
 /**
  * KHÓA PFM TRÊN WEB (SPEC chan-truoc-beta mục 6 — founder 11/10; cờ `web/src/lib/pfm_mo.ts`).
  *
- *   · Hub: ô Tài chính xám + câu "Admin cần donate…", KHÔNG số liệu sổ, KHÔNG nút nhận tiền; link nhỏ "Bạn có nhu cầu…?" mở lớp trượt.
- *   · Gõ thẳng mọi `/tai-chinh/*` ⇒ về Hub. THẺ đo từ trận (`/ho-so/the`) KHÔNG bị khoá (không thuộc khu Tài chính).
+ *   · Hub: ô Tài chính xám; chạm ⇒ lớp nói "Cài app để mở" (D603 đợt 2, E1 — thay câu "Admin cần donate…"), KHÔNG số liệu sổ, KHÔNG nút
+ *     nhận tiền; link nhỏ "Bạn có nhu cầu…?" mở lớp trượt.
+ *   · TAB TRÌNH DUYỆT gõ thẳng mọi `/tai-chinh/*` ⇒ về CỔNG CÀI `/cai-app` (D603 đợt 2 — trước đó về Hub). Bản cài mở khu: bài ở
+ *     `cai_app_cong.test.tsx`. THẺ đo từ trận (`/ho-so/the`) KHÔNG bị khoá (không thuộc khu Tài chính).
  *   · Không màn nào mở kho sổ trên máy (không `moKhoChung`/`KhoProvider` ⇒ driver đồng bộ · két không chạy).
  *   · Canh điều kiện mở lại (A11.15): cờ bật mà kho IndexedDB còn tên CHUNG `delphi_pfm` ⇒ đỏ (SPEC mục 3: tách kho theo tài khoản trước).
  */
@@ -47,7 +49,8 @@ describe('PFM web khoá', () => {
     renderApp('/');
     await waitFor(() => expect(o('tai-chinh')?.querySelector('svg, img, [data-icon], span')).toBeTruthy());
     expect(o('tai-chinh')!.textContent).not.toContain(CHU_HUB.ghiChiTieu);
-    expect(o('tai-chinh')!.textContent, 'câu khoá chỉ hiện khi CHẠM, không nằm trên mặt ô').not.toContain(CHU_HUB.taiChinhKhoa);
+    // Founder 12/10 (D603 đợt 2, chọn B): MẶT ô nói luôn cách mở — "Cài app để mở" (trước đó 11/10: mặt ô không chữ khoá).
+    expect(o('tai-chinh')!.textContent, 'mặt ô nói cách mở').toContain(CHU_HUB.taiChinhKhoa);
     expect(document.querySelector('[data-nut="nhu-cau-pfm"]'), 'link ở trong lớp trượt, không chen dưới ô').toBeNull();
     fireEvent.click(o('tai-chinh')!);
     const tam = await screen.findByRole('dialog');
@@ -74,10 +77,11 @@ describe('PFM web khoá', () => {
     expect(xt.textContent, 'xem trước không được in số tiền / số liệu sổ').not.toMatch(/\d/);
   });
 
-  it.each(['/tai-chinh', '/tai-chinh/so', '/tai-chinh/hu', '/tai-chinh/guong', '/tai-chinh/the'])('⭐ gõ thẳng %s ⇒ về Hub', async (duong) => {
+  it.each(['/tai-chinh', '/tai-chinh/so', '/tai-chinh/hu', '/tai-chinh/guong', '/tai-chinh/the', '/tai-chinh/phong-van'])('⭐ tab trình duyệt gõ thẳng %s ⇒ về CỔNG CÀI', async (duong) => {
     stubFetch(BANG);
     const r = renderApp(duong);
-    await waitFor(() => expect(r.state.location.pathname).toBe('/'));
+    await waitFor(() => expect(r.state.location.pathname).toBe('/cai-app'));
+    expect(r.state.location.search).toBe('?noi=cong_pfm');
   });
 
   it('THẺ đo từ trận (/ho-so/the) KHÔNG bị khoá — nó thuộc Đấu trường', async () => {

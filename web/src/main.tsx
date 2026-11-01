@@ -2,6 +2,7 @@ import { registerSW } from 'virtual:pwa-register';
 import { batTayDiscord, trongDiscord } from './lib/discord';
 import { datTokenDiscord, layTokenDiscord } from './lib/discord_phien';
 import { api } from './api/client';
+import { khoiDongMoiCai } from './lib/moi_cai';
 
 import { veApp } from './app/ve_app';
 
@@ -38,6 +39,12 @@ import { veApp } from './app/ve_app';
  * vốn vô nghĩa trong một iframe, và đăng ký thêm chỉ đẻ ra một bản cache thứ hai
  * để có ngày lệch với bản chính.
  */
+/*
+ * D603 đợt 2 — bắt lời mời cài (`beforeinstallprompt`) TRƯỚC khi dựng React: trình duyệt bắn nó rất sớm, màn nào chưa dựng là lỡ.
+ * Không trong Discord: iframe Activity không cài được, và cổng ở đó chỉ nói "mở ngoài Discord".
+ */
+if (!trongDiscord()) khoiDongMoiCai();
+
 if (!trongDiscord()) {
   const capNhatSW = registerSW({
     immediate: true,

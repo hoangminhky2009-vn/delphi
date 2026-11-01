@@ -1,20 +1,16 @@
 /**
- * Lõi parimutuel — HÀM THUẦN, không I/O (GĐ3 VIỆC 1; GĐ4 dùng lại cho resolve).
+ * Lõi parimutuel — hàm thuần, không I/O. Luật: `docs/luat/03-kinh-te.md`
+ * (A5.1 chia pool · A5.3 trần cược · A5.4 Brier).
  *
- * Luật nguồn: CLAUDE.md A5.1 (payout), A5.3 (cap), A5.4 (Brier), A3.4/A3.6 (seed).
- * C5: mọi tính toán tiền tệ bằng BigInt — nhân trước, chia sau, floor MỘT lần
- * (BigInt chia số không âm = floor). CẤM float chạm vào tiền; float chỉ xuất
- * hiện ở giá trị HIỂN THỊ (pct, implied ratio, Brier — không phải tiền).
+ * Tiền là BigInt: nhân trước, chia sau, floor đúng một lần (BigInt chia số
+ * không âm = floor). Float chỉ xuất hiện ở giá trị hiển thị (pct, Brier).
  */
-import { ECONOMY, applyBp } from '../config/economy.js';
+import { BP_DENOMINATOR, ECONOMY, applyBp } from '../config/economy.js';
 
-export interface BetLike {
-  optionId: string;
-  /** null nếu là seed (A3.6). */
-  userId: string | null;
-  amount: bigint;
-  isSeed: boolean;
-}
+/** Seed (tiền Kho bạc phủ mọi cửa) không thuộc user nào; bet người chơi luôn có user. */
+export type BetLike =
+  | { optionId: string; amount: bigint; isSeed: true; userId: null }
+  | { optionId: string; amount: bigint; isSeed: false; userId: string };
 
 export type PayoutMode =
   | 'normal'               // công thức A5.1 đầy đủ
@@ -28,30 +24,39 @@ export interface PayoutResult {
   playerPayouts: Map<string, bigint>;
   /** Phần của seed → Kho bạc (seed_win khi normal; seed_return khi hoàn/hủy). */
   seedToTreasury: bigint;
-  /** Rake đốt 3% (chưa gồm residual). */
+  /** Rake đốt `ECONOMY.RAKE_BURN_BP` (chưa gồm residual). */
   rakeBurn: bigint;
   /** Phần dư floor → đốt (cộng vào burn). */
   residual: bigint;
   /** rakeBurn + residual — tổng ghi burn_ledger. */
   burnTotal: bigint;
-  /** Rake Kho bạc 2%. */
+  /** Rake Kho bạc `ECONOMY.RAKE_TREASURY_BP`. */
   treasuryRake: bigint;
   /** Nhánh S_w=0 không seed: toàn bộ D → Kho bạc (unclaimed_pool_in). */
   unclaimedToTreasury: bigint;
 }
 
+const sumBig = (values: Iterable<bigint>): bigint => {
+  let s = 0n;
+  for (const v of values) s += v;
+  return s;
+};
+
+const sumAmounts = (bets: readonly BetLike[]): bigint => sumBig(bets.map((b) => b.amount));
+
+const addTo = (m: Map<string, bigint>, userId: string, amount: bigint): void => {
+  m.set(userId, (m.get(userId) ?? 0n) + amount);
+};
+
 /**
  * A5.1 — chia pool khi kèo resolve (winningOptionId) hoặc hủy (cancelled=true).
  *
- * QUAN TRỌNG (bẫy đã kiểm chứng bằng phản ví dụ): Ngoại lệ 1 đo trên
- * U_lose == 0 (tổng token NGƯỜI CHƠI ở các cửa THUA), TUYỆT ĐỐI không đo
- * "toàn pool ở cửa thắng" — vì seed phủ mọi cửa (A3.6) nên đo trên pool thì
- * ngoại lệ không bao giờ kích hoạt với kèo có seed → user được chia lãi sai
- * từ seed cửa thua. Trường hợp 0 bet người chơi cũng rơi vào nhánh này
- * (chân không đúng): seed về Kho bạc nguyên vẹn, không rake — tránh đốt 5%
- * tiền Kho bạc một cách vô nghĩa.
+ * Bẫy: Ngoại lệ 1 đo trên U_lose == 0 (token NGƯỜI CHƠI ở các cửa thua), không
+ * đo "toàn pool ở cửa thắng". Seed phủ mọi cửa nên đo trên pool thì ngoại lệ
+ * không bao giờ kích hoạt ở kèo có seed, và user được chia lãi từ seed cửa thua.
+ * 0 bet người chơi cũng rơi vào nhánh này: seed về Kho bạc nguyên vẹn, không rake.
  *
- * Tự kiểm bất biến trước khi trả kết quả:
+ * Trước khi trả, tự kiểm
  *   P == Σ playerPayouts + seedToTreasury + burnTotal + treasuryRake + unclaimed
  * Lệch → throw (caller phải rollback transaction).
  */
@@ -62,16 +67,16 @@ export function computePayout(
 ): PayoutResult {
   for (const b of bets) {
     if (b.amount < 1n) throw new Error(`Bet amount < 1: ${b.amount}`);
+    // Dòng đọc từ DB không mang kiểu — hợp đồng của union phải kiểm lúc chạy.
     if (b.isSeed !== (b.userId === null)) throw new Error('Bet seed/user mâu thuẫn');
   }
-  const P = bets.reduce((s, b) => s + b.amount, 0n);
-  const seedTotal = bets.filter((b) => b.isSeed).reduce((s, b) => s + b.amount, 0n);
+  const P = sumAmounts(bets);
+  const seedTotal = sumAmounts(bets.filter((b) => b.isSeed));
 
   const refundAllPlayers = (mode: 'refund_players' | 'cancelled'): PayoutResult => {
     const playerPayouts = new Map<string, bigint>();
     for (const b of bets) {
-      if (b.isSeed) continue;
-      playerPayouts.set(b.userId!, (playerPayouts.get(b.userId!) ?? 0n) + b.amount);
+      if (!b.isSeed) addTo(playerPayouts, b.userId, b.amount);
     }
     return finalize(P, {
       mode,
@@ -85,33 +90,26 @@ export function computePayout(
     });
   };
 
-  // Ngoại lệ 2 — hủy kèo (admin hủy / quá 7 ngày không nguồn)
   if (cancelled) return refundAllPlayers('cancelled');
   if (winningOptionId === null) throw new Error('Kèo resolve phải có cửa thắng');
 
-  // Ngoại lệ 1 — U_lose == 0 (đo trên token NGƯỜI CHƠI, không đo trên pool)
-  const uLose = bets
-    .filter((b) => !b.isSeed && b.optionId !== winningOptionId)
-    .reduce((s, b) => s + b.amount, 0n);
+  const uLose = sumAmounts(bets.filter((b) => !b.isSeed && b.optionId !== winningOptionId));
   if (uLose === 0n) return refundAllPlayers('refund_players');
 
-  // Công thức thường A5.1
   const burn = applyBp(P, ECONOMY.RAKE_BURN_BP);
   const trea = applyBp(P, ECONOMY.RAKE_TREASURY_BP);
   const D = P - burn - trea;
   const winners = bets.filter((b) => b.optionId === winningOptionId);
-  const sW = winners.reduce((s, b) => s + b.amount, 0n);
+  const sW = sumAmounts(winners);
 
   if (sW === 0n) {
-    // A5.1 ghi chú: nhánh này CHỈ tồn tại cho kèo KHÔNG seed (seed phủ mọi cửa
-    // — A3.6 — nên kèo có seed luôn có S_w > 0). Kèo có seed mà rơi vào đây =
-    // dữ liệu seed hỏng → nổ ngay để caller rollback, không tịch thu im lặng.
+    // Seed phủ mọi cửa nên kèo có seed luôn có S_w > 0; tới được đây là seed
+    // hỏng → nổ để caller rollback, không tịch thu im lặng.
     if (seedTotal > 0n) {
       throw new Error(
         'BẤT BIẾN A3.6 VỠ: kèo có seed nhưng cửa thắng 0 token — seed không phủ đủ cửa, dừng resolve.',
       );
     }
-    // Không seed & không ai đặt cửa thắng → toàn bộ D vào Kho bạc, không chia
     return finalize(P, {
       mode: 'unclaimed_to_treasury',
       playerPayouts: new Map(),
@@ -124,20 +122,7 @@ export function computePayout(
     });
   }
 
-  const playerPayouts = new Map<string, bigint>();
-  let seedToTreasury = 0n;
-  let paid = 0n;
-  for (const b of winners) {
-    const payout = (b.amount * D) / sW; // nhân trước, chia sau, floor một lần
-    paid += payout;
-    if (b.isSeed) {
-      seedToTreasury += payout; // seed thắng → Kho bạc (seed_win), không user nào nhận
-    } else {
-      playerPayouts.set(b.userId!, (playerPayouts.get(b.userId!) ?? 0n) + payout);
-    }
-  }
-  const residual = D - paid; // phần dư floor → ĐỐT (A5.1)
-
+  const { playerPayouts, seedToTreasury, residual } = splitAmongWinners(winners, D, sW);
   return finalize(P, {
     mode: 'normal',
     playerPayouts,
@@ -150,9 +135,30 @@ export function computePayout(
   });
 }
 
-/** Assertion bất biến bảo toàn cung — lệch là bug nghiêm trọng, phải nổ ngay. */
+/**
+ * Chia D cho các bet cửa thắng theo tỷ lệ amount / S_w. Phần của seed về Kho
+ * bạc (seed_win); phần dư do floor (D − tổng đã chia) trả về để đốt.
+ */
+function splitAmongWinners(
+  winners: readonly BetLike[],
+  D: bigint,
+  sW: bigint,
+): { playerPayouts: Map<string, bigint>; seedToTreasury: bigint; residual: bigint } {
+  const playerPayouts = new Map<string, bigint>();
+  let seedToTreasury = 0n;
+  let paid = 0n;
+  for (const b of winners) {
+    const payout = (b.amount * D) / sW;
+    paid += payout;
+    if (b.isSeed) seedToTreasury += payout;
+    else addTo(playerPayouts, b.userId, payout);
+  }
+  return { playerPayouts, seedToTreasury, residual: D - paid };
+}
+
+/** Bất biến bảo toàn cung — lệch là bug nghiêm trọng, phải nổ ngay. */
 function finalize(P: bigint, r: PayoutResult): PayoutResult {
-  const sumPlayers = [...r.playerPayouts.values()].reduce((s, v) => s + v, 0n);
+  const sumPlayers = sumBig(r.playerPayouts.values());
   const total = sumPlayers + r.seedToTreasury + r.burnTotal + r.treasuryRake + r.unclaimedToTreasury;
   if (total !== P) {
     throw new Error(
@@ -165,7 +171,7 @@ function finalize(P: bigint, r: PayoutResult): PayoutResult {
   return r;
 }
 
-/** A5.3 — cap = floor(20% × (bankroll khả dụng + tổng đang đặt ở kèo)). */
+/** A5.3 — cap = floor(BET_CAP_BP × (bankroll khả dụng + tổng đang đặt ở kèo)). */
 export function computeCap(bankrollAvailable: bigint, totalCurrentInMarket: bigint): bigint {
   return applyBp(bankrollAvailable + totalCurrentInMarket, ECONOMY.BET_CAP_BP);
 }
@@ -181,9 +187,11 @@ export type AllocationVerdict =
   | { ok: true; netDelta: bigint; totalNew: bigint; totalOld: bigint; cap: bigint }
   | { ok: false; code: AllocationError; message: string };
 
+const BET_CAP_PERCENT = (ECONOMY.BET_CAP_BP * 100) / BP_DENOMINATOR;
+
 /**
- * Kiểm phân bổ DECLARATIVE mới toàn kèo (A5.3 + no-withdraw [MẶC ĐỊNH P3]).
- * Amount 0 = xóa cửa đó (hợp lệ miễn tổng không giảm).
+ * Kiểm phân bổ mới cho TOÀN kèo (khai báo cả bộ, không phải lệnh cộng thêm):
+ * trần A5.3 + không rút. Amount 0 = xóa cửa đó (hợp lệ miễn tổng không giảm).
  */
 export function validateAllocations(input: {
   newAllocations: Map<string, bigint>;
@@ -192,22 +200,19 @@ export function validateAllocations(input: {
 }): AllocationVerdict {
   const { newAllocations, oldAllocations, bankroll } = input;
 
-  let totalNew = 0n;
-  for (const [, amount] of newAllocations) {
+  for (const amount of newAllocations.values()) {
     if (amount < 0n) return { ok: false, code: 'below_min_bet', message: 'Mức phân bổ không được âm.' };
     if (amount > 0n && amount < BigInt(ECONOMY.MIN_BET)) {
       return { ok: false, code: 'below_min_bet', message: `Mỗi cửa đặt tối thiểu ${ECONOMY.MIN_BET} T.` };
     }
-    totalNew += amount;
   }
+  const totalNew = sumBig(newAllocations.values());
   if (totalNew === 0n) {
     return { ok: false, code: 'empty_allocation', message: 'Phân bổ trống — cần đặt ít nhất 1 cửa.' };
   }
 
-  let totalOld = 0n;
-  for (const [, amount] of oldAllocations) totalOld += amount;
+  const totalOld = sumBig(oldAllocations.values());
 
-  // No-withdraw: không rút token về ví trước giờ khóa
   if (totalNew < totalOld) {
     return {
       ok: false,
@@ -216,17 +221,18 @@ export function validateAllocations(input: {
     };
   }
 
-  // Cap A5.3: quy chiếu gồm cả phần ĐANG đặt (chống lách bằng nhiều lệnh nhỏ)
+  // Quy chiếu gồm cả phần ĐANG đặt — chặn lách trần bằng nhiều lệnh nhỏ.
   const cap = computeCap(bankroll, totalOld);
   if (totalNew > cap) {
     return {
       ok: false,
       code: 'cap_exceeded',
-      message: `Vượt trần 20%/kèo: tối đa ${cap} T cho kèo này (bạn đang đặt ${totalOld} T).`,
+      message: `Vượt trần ${BET_CAP_PERCENT}%/kèo: tối đa ${cap} T cho kèo này (bạn đang đặt ${totalOld} T).`,
     };
   }
 
   const netDelta = totalNew - totalOld; // ≥ 0 nhờ no-withdraw
+  // Với trần ≤ 100 % quy chiếu, cap luôn chặn trước nhánh này; giữ làm lưới cuối.
   if (netDelta > bankroll) {
     return { ok: false, code: 'insufficient_bankroll', message: 'Số dư không đủ.' };
   }
@@ -243,8 +249,7 @@ export function computeBrier(
   winningOptionId: string,
   allOptionIds: readonly string[],
 ): number {
-  let total = 0n;
-  for (const [, v] of userAmounts) total += v;
+  const total = sumBig(userAmounts.values());
   if (total <= 0n) throw new Error('computeBrier: user không có token đặt ở kèo này');
 
   let brier = 0;
@@ -256,31 +261,25 @@ export function computeBrier(
   return brier;
 }
 
+/**
+ * Một cửa như người chơi thấy: tiền đang ở đâu, không hơn.
+ *
+ * Cố ý KHÔNG có tỷ lệ ăn ngụ ý và KHÔNG có số người đã đặt. Tỷ lệ ăn khiến người
+ * chơi tối ưu theo phần thưởng thay vì theo niềm tin; số người tạo áp lực đám
+ * đông — cả hai làm bẩn tín hiệu "% ví đặt vào = độ tự tin". Ẩn ở tầng API chứ
+ * không ở UI: không có trong response thì devtools cũng không moi ra được.
+ */
 export interface DistributionEntry {
   option_id: string;
-  /** Tổng token đang ở cửa (gồm seed) — thứ DUY NHẤT user thấy về từng cửa. */
+  /** Tổng token đang ở cửa (gồm seed). */
   volume: number;
-  /** % pool, 1 chữ số thập phân — chỉ để vẽ thanh tỷ lệ (suy được từ volume). */
+  /** % pool, 1 chữ số thập phân — chỉ để vẽ thanh tỷ lệ. */
   pct: number;
-  /**
-   * KHÔNG có `implied_payout_ratio` và KHÔNG có số người — quyết định founder
-   * 19/07/2026 (sửa A3.1): người chơi thấy TIỀN đang ở đâu, KHÔNG thấy "tôi sẽ
-   * nhận bao nhiêu" và KHÔNG thấy bao nhiêu người đã đặt. Lý do: hiện tỷ lệ ăn
-   * → người chơi tối ưu hoá theo phần thưởng thay vì theo niềm tin thật; hiện
-   * số người → áp lực đám đông. Cả hai làm bẩn tín hiệu "% ví đặt vào = độ tự
-   * tin", vốn là tài sản dữ liệu cốt lõi (A1).
-   * Ẩn ở TẦNG API, không phải tầng UI — không có trong response thì F12 cũng
-   * không moi ra được.
-   */
 }
 
-/**
- * Phân bố pool theo TIỀN — server tính (C4), client CHỈ hiển thị.
- * Cố ý KHÔNG trả tỷ lệ ăn ngụ ý (xem ghi chú ở DistributionEntry).
- */
+/** Phân bố pool theo tiền — server tính, client chỉ hiển thị. */
 export function buildDistribution(volumes: Map<string, bigint>): DistributionEntry[] {
-  let P = 0n;
-  for (const [, v] of volumes) P += v;
+  const P = sumBig(volumes.values());
 
   const out: DistributionEntry[] = [];
   for (const [optionId, v] of volumes) {
@@ -290,13 +289,11 @@ export function buildDistribution(volumes: Map<string, bigint>): DistributionEnt
   return out;
 }
 
-/** Snapshot GỌN cho events (A7): mảng [option_id, pct] + tổng volume, ≤ ~300 byte. */
+/** Snapshot gọn cho bảng `events`: mảng [option_id, pct] + tổng volume, ≤ ~300 byte. */
 export function compactSnapshot(volumes: Map<string, bigint>): {
   total_volume: number;
   d: [string, number][];
 } {
   const dist = buildDistribution(volumes);
-  let total = 0n;
-  for (const [, v] of volumes) total += v;
-  return { total_volume: Number(total), d: dist.map((e) => [e.option_id, e.pct]) };
+  return { total_volume: Number(sumBig(volumes.values())), d: dist.map((e) => [e.option_id, e.pct]) };
 }

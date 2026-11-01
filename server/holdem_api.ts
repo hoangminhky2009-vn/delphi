@@ -437,6 +437,8 @@ interface HanhDongLog {
   chot_loi?: { ma: string; nguong_bp: number; phan_bp: number }[];
   /** D561 — lõi cho màn của vòng này, chọn lúc CHỐT (khoá v65 `loiChonTruoc`). Lõi không đang cầm ⇒ bỏ qua (màn rơi về mặc định). */
   loi_man?: string;
+  /** D609 — lõi của dòng này do SERVER chọn hộ (hết giờ ở lượt lõi, ghế chưa đủ lõi) — không phải lựa chọn của người chơi. */
+  loi_tu_chon?: true;
   /**
    * D33 — lần mở bảng của vòng này có mua kèm DỰ BÁO (+30) hay không.
    *
@@ -3809,6 +3811,26 @@ function locTheChet(
   };
 }
 
+/**
+ * D609 (founder 13/10: *"chọn lõi là bắt buộc, không pick thì server pick hộ"*) — HẾT GIỜ ở LƯỢT LÕI mà ghế người chưa đủ lõi ⇒ server chọn hộ lá đầu quầy
+ * chưa cầm (quầy lượt 0, đúng cái người chơi đang thấy). Trước đây hết giờ = body rỗng = không lõi nào, có người chơi cả trận "móm" không lõi.
+ * Chỉ trận khung minigame có cờ `loi_chon_truoc` (lõi chọn lúc chốt); khoá cũ ⇒ null, byte-hệt. Dòng log + event mang `loi_tu_chon: true` để
+ * KHÔNG lẫn với lõi người chơi tự chọn (A1/A3.3: `events` append-only). Null = không chọn hộ (không phải lượt lõi · đã đủ lõi · quầy hết lá mới).
+ */
+function loiChonHo(
+  st: Parameters<typeof maxLoiCua>[0], ghe: Parameters<typeof maxLoiCua>[1], seed: number, vong: number,
+): string | null {
+  if (st.loi_chon_truoc !== true || st.dong_ho_minigame !== true) return null;
+  const md = mandateCua(st, ghe);
+  const quay = locTheChet(
+    bayShop(seed, vong, 'ban', 0, ghe.danh_muc, tuyChonShop(st)), ghe.danh_muc, md?.camKhong === true,
+    { max: maxLoiCua(st, ghe), coLuot: coLuotLoi(st, ghe, vong) }, md?.camDonBay === true,
+  );
+  const dangCam = new Set<string>(ghe.danh_muc.chien_thuat);
+  if (dangCam.size >= maxLoiCua(st, ghe)) return null;
+  return quay.chien_thuat.find((id) => !dangCam.has(id)) ?? null;
+}
+
 export function registerHoldemRoutes(
   app: Hono<Env>, pool: pg.Pool,
   mw: {
@@ -6330,19 +6352,22 @@ export function registerHoldemRoutes(
         ...(truoc.st.trait_bat === true ? {} : { trait: undefined }),
         ...(truoc.st.luot_song_moi === true ? {} : { chot_loi: undefined }),
       };
+      // D609 — hết giờ ở lượt lõi mà chưa đủ lõi ⇒ server chọn hộ (null = không).
+      const loiHo = hetGio ? loiChonHo(truoc.st, banTruoc, t.seed, vong) : null;
       const log: HanhDongLog[] = [
         ...t.log,
         {
           // Hết giờ ⇒ dựng dòng từ BODY RỖNG, không phải từ body client: mua thẻ,
           // gắn thẻ, đảo, khoá, short và chuỗi cược đều là quyết định của vòng đã
           // đóng. Lọc từng trường một thì lần thêm trường thứ tám sẽ quên một cái.
-          ...dongVongTuBody(vong, hetGio ? {} : bodyV55,
+          ...dongVongTuBody(vong, hetGio ? (loiHo ? { mua: [loiHo], loi_man: loiHo } : {}) : bodyV55,
             { soLan: t.moBangCho, duBao: t.duBaoCho, khop: t.khopCho }, hdApDung, themApDung,
             // v32 — lọc theo ĐÚNG bộ đã MỜI (D88: sinh theo hồi, suy từ replay).
             {
               soO: truoc.st.map.o.length, bat: truoc.st.ky_ngo === true,
               moi: truoc.kyNgo.lan.find((l) => l.vong === vong)?.moi,
             }),
+          ...(loiHo ? { loi_tu_chon: true as const } : {}),
           ...(hetGio ? { tu_dong: NUOC_HET_GIO.tu_dong } : {}),
           // D93 — nhãn "mất lượt vì hệ thống" đi CÙNG `tu_dong`, không bao giờ một mình.
           ...(hetGio && suCoKhai ? { su_co_khai: suCoKhai } : {}),
@@ -6542,7 +6567,8 @@ export function registerHoldemRoutes(
              * và `events` append-only nên KHÔNG tách lại được về sau (A3.3).
              */
             vong, hanh_dong: hdApDung, them: themApDung,
-            mua: hetGio ? [] : muaThe,
+            mua: hetGio ? (loiHo ? [loiHo] : []) : muaThe,
+            ...(loiHo ? { loi_tu_chon: true } : {}),   // D609 — lõi do server chọn hộ, không phải người chơi chọn
             khao_sat_lai: hetGio ? 0 : khaoSatLai,
             // `dongMoi` dựng từ body RỖNG khi hết giờ nên lenh ở đây luôn là
             // lệnh ĐÃ ÁP — cùng kỷ luật "ghi nước đã áp" của cả event này.

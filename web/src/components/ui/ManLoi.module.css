@@ -5,7 +5,7 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 32px 20px calc(32px + env(safe-area-inset-bottom));
+  padding: calc(32px + var(--an-tren)) 20px calc(32px + env(safe-area-inset-bottom));
   min-height: 100dvh;
   text-align: center;
   background: var(--nen, #05070d);

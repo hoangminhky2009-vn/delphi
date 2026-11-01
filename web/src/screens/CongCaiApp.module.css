@@ -1,0 +1,106 @@
+/*
+ * CỔNG CÀI APP — §XI pixel: viền 1 px, không bo góc, không blur. Không hoạt ảnh riêng: cú lún + hạt là của `NutChinh` (OBento.module.css).
+ * Chữ ≥ 12 px (sàn `04-mau-va-tuong-phan.md`); màu chỉ từ token.
+ */
+.cong {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.moDau {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+.chinh {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-body);
+}
+
+.ghiChu {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+/* ── ba bước iOS ── */
+.dsBuoc {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.buoc {
+  display: grid;
+  grid-template-columns: 22px 40px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: var(--surface-idle);
+  border: 1px solid var(--border-idle);
+}
+
+.buocSo {
+  font-family: var(--font-mono);
+  font-size: 19px;
+  color: var(--accent-bright);
+  text-align: center;
+}
+
+.buocHinh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--bg-page);
+  border: 1px solid var(--border-idle);
+}
+
+.buocChu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.buocTen {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-title);
+}
+
+.buocMo {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+
+/* ── link để mở bằng trình duyệt khác: CHỮ chọn được (nhấn giữ chép tay khi clipboard bị chặn) ── */
+.link {
+  margin: 0;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--accent-bright);
+  background: var(--bg-page);
+  border: 1px dashed var(--border-idle);
+  user-select: all;
+  -webkit-user-select: all;
+  overflow-wrap: anywhere;
+}
+
+.ve {
+  align-self: flex-start;
+  font-size: 13px;
+  color: var(--accent);
+}

@@ -357,14 +357,15 @@ describe('V. KHÔNG CUỘN — cấu trúc (số đo thật: kịch bản trình
   });
 
   it('⭐ phép trừ chiều cao khung sảnh = của Hub = của vỏ (12 px đầu + vùng an toàn TRÊN + 74 px thanh đáy + vùng an toàn DƯỚI) — đổi một nơi là đỏ', () => {
-    // 11/10 (chặn trước beta, Hub v2): vỏ đệm thêm `safe-area-inset-top` (tai thỏ khi cài PWA) ⇒ khung trừ đúng phần ấy.
-    const CT = 'height: calc(100dvh - 12px - env(safe-area-inset-top, 0px) - 74px - env(safe-area-inset-bottom, 0px));';
+    // 11/10 (chặn trước beta, Hub v2): vỏ đệm thêm vùng an toàn trên ⇒ khung trừ đúng phần ấy. D603 đợt 2: phần ấy là `--an-tren`
+    // (tai thỏ + băng trình duyệt nhúng, `styles/tokens.css`) — một biến cho cả vỏ lẫn khung.
+    const CT = 'height: calc(100dvh - 12px - var(--an-tren) - 74px - env(safe-area-inset-bottom, 0px));';
     expect(doc('src/screens/Hub.module.css')).toContain(CT);
     expect(doc('src/screens/holdem/AlphaDraftLobby.module.css')).toContain(CT);
     const vo = doc('src/app/AppShell.module.css').replace(/\/\*[\s\S]*?\*\//g, '');
     const kh = /\.shell\[data-dau-sanh\]\s*\{([^}]*)\}/.exec(vo)?.[1] ?? '';
     expect(kh).toContain('min-height: 100dvh');
-    expect(kh).toContain('padding-top: calc(12px + env(safe-area-inset-top, 0px))');
+    expect(kh).toContain('padding-top: calc(12px + var(--an-tren))');
     expect(kh).toContain('padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px))');
   });
 

@@ -30,7 +30,7 @@
   box-shadow: 0 0 24px rgba(34, 211, 238, 0.12);
   /* Màn ngang thấp (Discord ~550px) vẫn phải đọc hết — cuộn trong hộp, không
      để nút XONG rơi khỏi khung hình. */
-  max-height: calc(100vh - 32px);
+  max-height: calc(100vh - 32px - var(--an-tren));
   overflow-y: auto;
 }
 

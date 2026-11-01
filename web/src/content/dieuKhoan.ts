@@ -51,7 +51,7 @@ export const CAP_NHAT_LUC = '12/10/2026';
 
 export const TOM_TAT: readonly string[] = [
   'Đây là **trò chơi**. Token trong này là tiền đồ chơi, không đổi ra tiền thật, không đổi ra trà sữa.',
-  'App có chỗ để bạn **ghi chi tiêu thật** của mình — phần này **đang tạm khoá trên web**, mở lại khi app có bản cài trên điện thoại. Sổ nằm **trên máy bạn**; gửi gì ra ngoài thì có **bốn công tắc riêng, mặc định tắt hết**.',
+  'App có chỗ để bạn **ghi chi tiêu thật** của mình — phần này **chỉ có trong bản cài app** (cài Dự báo lên màn hình chính), không mở trên tab trình duyệt. Sổ nằm **trên máy bạn**; gửi gì ra ngoài thì có **bốn công tắc riêng, mặc định tắt hết**.',
   'Tụi mình **có** ghi lại cách bạn dùng app, để biết chỗ nào khó hiểu mà sửa. **Tắt được** — chơi một mình thì vẫn chơi đủ.',
   'Khi app **vỡ** trên máy bạn, máy gửi về **một mã lỗi không gắn với bạn**: mã lỗi, tên màn, số bản. Cái này không tắt, vì nó chỉ nói app hỏng ở đâu, không nói gì về bạn.',
   'Tụi mình **không** hỏi tên thật, ngày sinh đầy đủ, số điện thoại, địa chỉ hay bạn đang ở đâu. **Không nối với ngân hàng** của bạn.',
@@ -156,7 +156,7 @@ export const MUC: readonly MucDieuKhoan[] = [
     tieuDe: 'SỔ CHI TIÊU — SỔ CỦA BẠN, TRÊN MÁY BẠN',
     doan: [
       'App có một cuốn sổ để bạn ghi tiền thật: tiêu gì, bao nhiêu, bỏ ống được bao nhiêu. **Không bắt buộc.** Không ghi thì phần còn lại của app vẫn chạy đủ.',
-      '**Hiện đang tạm khoá trên web** — sẽ mở lại khi app có bản cài trên điện thoại. Lúc khoá, app không mở sổ và không gửi gì của sổ đi đâu. Sổ cũ bạn đã ghi vẫn nằm yên trên máy; muốn xoá thì vào **Hồ sơ → Dữ liệu của tôi**.',
+      '**Sổ chỉ có trong bản cài app** — cài Dự báo lên màn hình chính (màn **Cài app** chỉ từng bước). Trên tab trình duyệt, app không mở sổ và không gửi gì của sổ đi đâu. Mỗi tài khoản một sổ riêng trên máy: dùng chung máy thì người này không mở được sổ người kia. Sổ cũ bạn ghi trước đây vẫn nằm yên trên máy; muốn xoá thì vào **Hồ sơ → Dữ liệu của tôi**.',
       '**Sổ nằm trên máy bạn.** Mặc định nó không đi đâu cả. Muốn gửi thứ gì ra ngoài thì có **bốn công tắc riêng, mặc định tắt hết**, và ngay cạnh mỗi công tắc luôn có một dòng nói **chính xác cái gì rời máy** — không giấu sau nút bấm nào.',
       '**Sao lưu két** — giữ một bản sao sổ ngoài máy để đổi máy hay mất máy vẫn còn sổ. Bản sao đó **đã khoá bằng mã khôi phục mà chỉ máy bạn giữ**: máy chủ cất được mà không mở được. Mất mã là mất bản sao, không ai khôi phục hộ được.',
       '**Đặc trưng nghiên cứu** — gửi vài con số đã gộp của cả tháng (kiểu tỷ lệ ngày có ghi) và dấu vết thao tác dạng mã. **Không một số tiền, tên hũ hay ghi chú nào.**',

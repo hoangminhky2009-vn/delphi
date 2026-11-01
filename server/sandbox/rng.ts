@@ -1,27 +1,30 @@
 /**
- * Sandbox — PRNG TẤT ĐỊNH, HÀM THUẦN (GĐ4.5).
+ * PRNG tất định, hàm thuần — nguồn ngẫu nhiên duy nhất của engine trận.
  *
- * Vì sao tự cài chứ không dùng Math.random: bất biến cốt lõi của Đấu trường là
- * "cùng (mapId, seed, actionLog) → cùng dãy giá và NAV TỪNG ĐIỂM NGUYÊN, chạy
- * ở server, ở client, hay lúc replay" (D16 mục 7.2). Math.random không có seed
- * và khác nhau giữa các engine → replay vô nghĩa → không chống được gian lận.
+ * Vì sao tự cài chứ không dùng Math.random: cùng (map, seed, actionLog) phải ra
+ * cùng dãy giá và NAV từng điểm nguyên, dù chạy ở server, ở client hay lúc
+ * replay. Math.random không có seed và khác nhau giữa các engine JS → replay
+ * vô nghĩa → không chống được gian lận.
  *
- * ─── HAI QUYẾT ĐỊNH KỸ THUẬT ĐÁNG GHI LẠI ──────────────────────────────────
+ * Hai quyết định kỹ thuật:
  *
- * (1) SỐ HỌC 32-BIT NGUYÊN, KHÔNG FLOAT. Dùng Math.imul + `>>> 0` — cả hai
- *     được ECMAScript định nghĩa chính xác từng bit, nên V8/JSC/SpiderMonkey
- *     cho cùng kết quả. Nếu dùng float (vd trả về 0..1 rồi nhân) thì sai số
- *     làm tròn khác nhau giữa nền tảng sẽ làm lệch giá sau vài nghìn tick.
+ * (1) Số học 32-bit nguyên, không float. Math.imul và `>>> 0` được ECMAScript
+ *     định nghĩa chính xác từng bit, nên V8/JSC/SpiderMonkey cho cùng kết quả.
+ *     Float (trả 0..1 rồi nhân) làm tròn khác nhau giữa nền tảng và lệch giá
+ *     sau vài nghìn tick.
  *
- * (2) DÒNG ĐỊA CHỈ HÓA THEO TỌA ĐỘ, KHÔNG PHẢI DÒNG TUẦN TỰ. Thay vì một
- *     generator chạy dài rồi ai gọi trước lấy trước, mỗi lần rút số được định
- *     danh bằng (seed, tên miền, tọa độ...) rồi băm ra hạt riêng.
- *     Vì sao quan trọng: với dòng tuần tự, chỉ cần THÊM một người chơi vào
- *     lobby — hoặc đổi thứ tự duyệt tài sản — là toàn bộ nhiễu của mọi tài sản
- *     sau đó xê dịch, và trận replay ra khác trận gốc. Với địa chỉ hóa,
- *     nhiễu của (tick 7, tài sản 'vang') luôn là một số cố định bất kể xung
- *     quanh có gì. Đây là lớp phòng thủ chính chống bug replay.
+ * (2) Dòng địa chỉ hóa theo tọa độ, không phải dòng tuần tự. Mỗi lần rút số
+ *     được định danh bằng (seed, miền, tọa độ…) rồi băm ra hạt riêng. Với dòng
+ *     tuần tự, thêm một người chơi hoặc đổi thứ tự duyệt tài sản là toàn bộ
+ *     nhiễu phía sau xê dịch và replay ra trận khác. Với địa chỉ hóa, nhiễu của
+ *     (tick 7, tài sản 'vang') luôn là một số cố định bất kể xung quanh có gì.
  */
+
+/** 2^32 — số giá trị của một số nguyên không dấu 32-bit. */
+const U32_RANGE = 0x1_0000_0000;
+
+/** 100 % tính bằng basis point. */
+const BP_DENOMINATOR = 10_000;
 
 /** Băm FNV-1a 32-bit trên chuỗi — ổn định, không phụ thuộc nền tảng. */
 export function hashString(input: string): number {
@@ -60,14 +63,14 @@ export interface Rng {
   below(n: number): number;
   /** Số nguyên trong [lo, hi] (bao gồm hai đầu). */
   range(lo: number, hi: number): number;
-  /** true với xác suất bp/10.000. */
+  /** true với xác suất bp/10.000; bp là số nguyên trong [0, 10.000]. */
   chanceBp(bp: number): boolean;
 }
 
 /**
- * splitmix32 — băm bộ đếm, không phải LCG chuỗi. Chất lượng đủ tốt cho mô
- * phỏng game (qua được các test thống kê cơ bản), rẻ, và quan trọng nhất:
- * chỉ dùng phép nguyên 32-bit đã được chuẩn hóa chính xác.
+ * splitmix32 — băm bộ đếm, không phải LCG chuỗi. Đủ tốt cho mô phỏng game
+ * (qua các test thống kê cơ bản), rẻ, và chỉ dùng phép nguyên 32-bit đã được
+ * chuẩn hóa chính xác.
  */
 export function makeRng(seed: number): Rng {
   let state = seed >>> 0;
@@ -84,17 +87,16 @@ export function makeRng(seed: number): Rng {
   };
 
   /**
-   * Loại bỏ lệch modulo bằng phương pháp bác bỏ (rejection sampling).
-   * Lấy thẳng `nextU32() % n` sẽ khiến các giá trị nhỏ hơi nhiều hơn khi n
-   * không chia hết 2^32 — nhỏ, nhưng qua 10.000 trận Monte Carlo thì đủ để
-   * bẻ cong kết luận cân bằng. Vòng lặp này tất định (cùng hạt → cùng số lần
-   * bác bỏ) nên không phá tính tái lập.
+   * Bác bỏ (rejection sampling) để không lệch modulo: `nextU32() % n` làm các
+   * giá trị nhỏ hơi nhiều hơn khi n không chia hết 2^32 — nhỏ, nhưng qua
+   * 10.000 trận Monte Carlo đủ bẻ cong kết luận cân bằng. Cùng hạt → cùng số
+   * lần bác bỏ, nên vẫn tái lập.
    */
   const below = (n: number): number => {
     if (!Number.isInteger(n) || n <= 0) {
       throw new Error(`Rng.below: n phải là số nguyên dương, nhận ${n}`);
     }
-    const limit = 0x1_0000_0000 - (0x1_0000_0000 % n);
+    const limit = U32_RANGE - (U32_RANGE % n);
     let v = nextU32();
     while (v >= limit) v = nextU32();
     return v % n;
@@ -107,11 +109,16 @@ export function makeRng(seed: number): Rng {
       if (hi < lo) throw new Error(`Rng.range: hi(${hi}) < lo(${lo})`);
       return lo + below(hi - lo + 1);
     },
-    chanceBp: (bp) => below(10_000) < bp,
+    chanceBp: (bp) => {
+      if (!Number.isInteger(bp) || bp < 0 || bp > BP_DENOMINATOR) {
+        throw new Error(`Rng.chanceBp: bp phải là số nguyên trong [0, ${BP_DENOMINATOR}], nhận ${bp}`);
+      }
+      return below(BP_DENOMINATOR) < bp;
+    },
   };
 }
 
-/** Tiện ích: dòng riêng cho một tọa độ, dùng một lần rồi bỏ. */
+/** Dòng riêng cho một tọa độ, dùng một lần rồi bỏ. */
 export function rngAt(
   seed: number,
   domain: string,
@@ -121,12 +128,10 @@ export function rngAt(
 }
 
 /**
- * Nhiễu đối xứng trong [-amp, +amp], TRUNG BÌNH 0 chính xác.
+ * Nhiễu đối xứng trong [-amp, +amp], trung bình 0 chính xác.
  *
- * Cẩn thận cái bẫy: `below(2*amp+1) - amp` cho khoảng đúng nhưng nếu ai đó
- * đổi thành `below(2*amp) - amp` thì kỳ vọng lệch −0,5 mỗi tick — qua
- * 12 vòng × 22 tick = 264 tick, giá trôi xuống có hệ thống mà nhìn biểu đồ
- * không phát hiện được. Viết ra đây để lần sau không ai "tối ưu" nhầm.
+ * Bẫy: `below(2*amp) - amp` trông gần giống nhưng kỳ vọng lệch −0,5 mỗi tick —
+ * qua 264 tick một trận, giá trôi xuống có hệ thống mà biểu đồ không lộ ra.
  */
 export function symmetricNoise(rng: Rng, amp: number): number {
   if (amp <= 0) return 0;
@@ -134,20 +139,23 @@ export function symmetricNoise(rng: Rng, amp: number): number {
 }
 
 /**
- * Chia số nguyên LÀM TRÒN XUỐNG kể cả với số âm.
+ * Chia số nguyên làm tròn XUỐNG kể cả với số âm: idiv(-7, 2) = -4.
  *
- * Bẫy: toán tử `/` của JS trả về float, và `(a/b)|0` cắt về phía 0 — nên
- * −7/2 ra −3 thay vì −4. Trong engine giá, chia là chỗ xuất hiện dày đặc
- * (tác động giá, chiết khấu, phân bổ) và một nửa số lần là số âm. Cắt về 0
- * tạo thiên lệch có lợi cho phe bán — đúng loại lỗi chạy 6 tháng không ai
- * thấy. Dùng hàm này ở MỌI phép chia trong engine.
+ * Bẫy: `/` của JS trả float, và `(a/b)|0` cắt về phía 0 nên −7/2 ra −3. Engine
+ * giá chia dày đặc (tác động giá, chiết khấu, phân bổ) và một nửa số lần là số
+ * âm; cắt về 0 thiên lệch có lợi cho phe bán. Dùng hàm này ở MỌI phép chia
+ * trong engine. Ngoài vùng số nguyên an toàn (2^53) float không còn biểu diễn
+ * đúng a và b, nên nổ thay vì trả một số sai lặng lẽ.
  */
 export function idiv(a: number, b: number): number {
+  if (!Number.isSafeInteger(a) || !Number.isSafeInteger(b)) {
+    throw new Error(`idiv: cần số nguyên an toàn, nhận ${a} / ${b}`);
+  }
   if (b === 0) throw new Error('idiv: chia cho 0');
   return Math.floor(a / b);
 }
 
 /** floor(value × bp / 10.000) — an toàn với số âm nhờ idiv. */
 export function applyBpInt(value: number, bp: number): number {
-  return idiv(value * bp, 10_000);
+  return idiv(value * bp, BP_DENOMINATOR);
 }

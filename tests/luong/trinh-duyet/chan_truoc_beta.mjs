@@ -2,8 +2,9 @@
  * KỊCH BẢN LUỒNG TRÌNH DUYỆT — CHẶN TRƯỚC BETA (SPEC `docs/spec/chan-truoc-beta.md` mục 5): ba luồng bấm thật trên Chrome, ENGINE THẬT +
  * Postgres nhúng (`_may_chu_that.mts`), web dev (vite) proxy về máy chủ ấy. In BẢNG PASS/FAIL; thoát 1 nếu có dòng đỏ.
  *
- *   1. HUB · Ô TÀI CHÍNH KHOÁ — ô xám có câu "Admin cần donate…", link nhỏ "Bạn có nhu cầu…?" mở lớp trượt; gõ thẳng `/tai-chinh/so`
- *      ⇒ về Hub; không mở kho IndexedDB `delphi_pfm` nào (driver PFM không chạy).
+ *   1. HUB · Ô TÀI CHÍNH KHOÁ (tab trình duyệt) — chạm ô ⇒ lớp "Cài app để mở" (D603 đợt 2 thay câu "Admin cần donate…"), link nhỏ
+ *      "Bạn có nhu cầu…?" mở lớp trượt; gõ thẳng `/tai-chinh/so` ⇒ CỔNG CÀI `/cai-app` (D603 đợt 2 — trước đó về Hub); không mở kho
+ *      IndexedDB `delphi_pfm*` nào (driver PFM không chạy). Luồng bản cài: `cai_app.mjs`.
  *   2. BÁO LỖI — Hồ sơ → BÁO LỖI → gõ hai dòng → GỬI ⇒ "Đã gửi"; máy chủ có đúng 1 báo; chuông Sentry kêu 1 lần và KHÔNG chở chữ đã gõ.
  *      Rồi Hồ sơ → DỮ LIỆU CỦA TÔI ⇒ lớp trượt đếm đúng 1 báo lỗi.
  *   3. NỘP VÒNG MẤT MẠNG — bấm CHỐT VÒNG; phản hồi ĐẦU TIÊN bị cắt sau khi máy chủ đã ghi (Fetch domain) + mạng tắt 1,5 s rồi bật ⇒
@@ -86,16 +87,16 @@ async function main() {
     // Banner (cửa sổ Hub) cần rAF; Chrome headless có lượt đóng băng vẽ (đo: 4 khung/0,5 s) ⇒ chỉ ghi, không khẳng định ở đây.
     console.log('   (đo) banner:', JSON.stringify(bn));
     await c.chup(path.join(GOC, '.local/luong/chan-truoc-beta-hub.png'));
-    ghi('Hub · ô Tài chính giữ icon cũ, mặt ô không chữ khoá', await cho("!!document.querySelector('[data-o=tai-chinh] span[aria-hidden=true]') && !(document.querySelector('[data-o=tai-chinh]')?.textContent??'').includes('donate')"));
+    ghi('Hub · ô Tài chính giữ icon cũ, mặt ô ghi "Cài app để mở" (founder 12/10, B)', await cho("!!document.querySelector('[data-o=tai-chinh] span[aria-hidden=true]') && (document.querySelector('[data-o=tai-chinh]')?.textContent??'').includes('Cài app để mở')"));
     await bam('[data-o=tai-chinh]');
-    ghi('Hub · chạm ô ⇒ lớp nói "Admin cần donate…"', await cho("[...document.querySelectorAll('[role=dialog]')].some(d=>d.textContent.includes('Admin cần donate'))"));
+    ghi('Hub · chạm ô ⇒ lớp nói "Cài app để mở"', await cho("[...document.querySelectorAll('[role=dialog]')].some(d=>d.textContent.includes('Cài app để mở'))"));
     await c.chup(path.join(GOC, '.local/luong/chan-truoc-beta-hub-tam.png'));
     await bam('[data-nut=nhu-cau-pfm]');
     ghi('Hub · link "Bạn có nhu cầu…?" trong lớp ⇒ lớp nhu cầu', await cho("[...document.querySelectorAll('[role=dialog]')].some(d=>d.textContent.includes('Phần hỏi nhanh này chưa mở'))"));
     await c.go(`${APP}tai-chinh/so`);
-    ghi('gõ thẳng /tai-chinh/so ⇒ về Hub', await cho("location.pathname==='/'", 40_000), await c.js('location.pathname'));
+    ghi('gõ thẳng /tai-chinh/so ⇒ cổng cài', await cho("location.pathname==='/cai-app'", 40_000), await c.js('location.pathname'));
     const idb = await c.js("indexedDB.databases ? indexedDB.databases().then(d=>d.map(x=>x.name)) : []");
-    ghi('không mở kho PFM trên máy (driver không chạy)', !idb.includes('delphi_pfm'), JSON.stringify(idb));
+    ghi('không mở kho PFM trên máy (driver không chạy)', !idb.some((n) => n.startsWith('delphi_pfm')), JSON.stringify(idb));
 
     // ── 2. BÁO LỖI ──
     await c.go(`${APP}ho-so`);

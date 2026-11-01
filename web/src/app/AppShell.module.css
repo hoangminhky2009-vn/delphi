@@ -7,8 +7,9 @@
    * Đáy chừa chỗ cho BottomNav (position:fixed nên không chiếm luồng).
    * 74px = 4 tab phẳng. Trước 25/07 là 96px vì tab giữa nổi lên -22px; bỏ tab
    * hero mà để nguyên 96 thì thành dải trắng chết dưới mọi màn.
+   * Đầu chừa `--an-tren` (tai thỏ của bản cài iOS `black-translucent` + băng trình duyệt nhúng — tokens.css) — D603 đợt 2.
    */
-  padding: 20px 16px 74px;
+  padding: calc(20px + var(--an-tren)) 16px 74px;
 }
 /*
  * D541 — màn TOÀN MÀN (bàn đấu) không có BottomNav ⇒ không chừa 74 px đáy cho nó. Đo 06/10 ở 375 × 690: bàn 663 px + 20 đầu = 683, vừa khung —
@@ -22,8 +23,8 @@
  */
 .shell[data-dau-sanh] {
   min-height: 100dvh;
-  /* Tai thỏ / Dynamic Island khi cài PWA ra màn hình chính (viewport-fit=cover): đệm đúng phần máy báo, máy thường vẫn 12 px. */
-  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  /* Tai thỏ / Dynamic Island khi cài PWA ra màn hình chính (viewport-fit=cover) + băng trình duyệt nhúng: `--an-tren` (tokens.css). */
+  padding-top: calc(12px + var(--an-tren));
   padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
 }
 
@@ -33,7 +34,7 @@
  */
 .shell[data-khung-pfm] {
   min-height: 100dvh;
-  padding-top: 12px;
+  padding-top: calc(12px + var(--an-tren));
   padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
 }
 

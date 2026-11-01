@@ -23,7 +23,7 @@
   justify-self: center;
   /* Vỏ toàn tâm: padding đầu 20 px, đáy chỉ vùng an toàn. `min-height` chống khung lùn đến mức ô chồng nhau trên máy cực thấp.
      Trừ thêm 8 px đáy: chân nút VỀ SẢNH dày 4 px + bóng cứng — không có khoảng thở thì chân nút dính mép màn. */
-  height: calc(100dvh - 20px - 8px - env(safe-area-inset-bottom, 0px));
+  height: calc(100dvh - 20px - var(--an-tren) - 8px - env(safe-area-inset-bottom, 0px));
   min-height: 456px;
   display: flex;
   flex-direction: column;

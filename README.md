@@ -1,10 +1,28 @@
 # Delphi
 
+[![CI](https://github.com/hoangminhky2009-vn/delphi/actions/workflows/ci.yml/badge.svg)](https://github.com/hoangminhky2009-vn/delphi/actions/workflows/ci.yml)
+
 **A mobile game that measures how young people behave with money — built, tested and documented spec-first.**
 Solo project by [hoangminhky2009-vn](https://github.com/hoangminhky2009-vn) · July–October 2026 · public beta since 12 Oct 2026.
 
 - **Live:** [dubao.lastkiss4diu.workers.dev](https://dubao.lastkiss4diu.workers.dev) — public beta (sign-up, 16+, Vietnamese UI)
 - **Try it without signing up:** [dubao-demo.lastkiss4diu.workers.dev](https://dubao-demo.lastkiss4diu.workers.dev) — the real server running in your browser, nothing stored (demo build 0.0.65)
+
+## Start here
+
+About three minutes, in this order. The data and analysis work comes first because it is what the project is for; the code comes last.
+
+| | read | what you will find |
+|---|---|---|
+| **1 · Data and analytics** | [Case study](docs/case-study.md) | how a request to tidy a dashboard ended in "n real users = 0": problem, data, decision, result |
+| | [Metrics dictionary](docs/metrics.md) with [`04_funnel.sql`](analyses/sql/04_funnel.sql) and [`05_week2_return.sql`](analyses/sql/05_week2_return.sql) | new-account funnel and week-2 return defined precisely, with SQL that runs on a synthetic cohort ([results](analyses/results/summary.md)) |
+| | [Admin dashboard](docs/metrics.md#where-each-metric-is-shown) ([screenshot](docs/img/admin-dashboard.png)) | the page where these metrics are read every day, each one mapped to its screen and API route; the screenshot runs on synthetic data |
+| | [Measurement design](docs/measurement-design.md) · [ADR-005](docs/adr/ADR-005-a-rating-ladder-must-be-climbable.md) | what a number is allowed to claim; a constant chosen by replaying 600 matches |
+| **2 · Business analysis** | [Traceability](docs/traceability.md) | one feature traced from 24 requirements to their tests and injected faults, with a data-flow diagram |
+| | [The spec it traces](docs/spec/bao-loi-nguoi-choi.md) | user outcome, out of scope, acceptance criteria, fault-injection plan |
+| **3 · Code** | [`server/sandbox/rng.ts`](server/sandbox/rng.ts) | seeded 32-bit random generator: the same seed gives the same match on the server, in the browser and on replay |
+| | [`server/parimutuel.ts`](server/parimutuel.ts) with [`tests/parimutuel.test.ts`](tests/parimutuel.test.ts) | integer payout formula, checked against hand-computed vectors |
+| | [`server/treasury.ts`](server/treasury.ts) with [`migrations/0002_append_only_protection.sql`](migrations/0002_append_only_protection.sql) | the only write path to the treasury ledger (advisory lock, balance checked by the database) and the triggers that make the ledgers append-only |
 
 <p align="center">
   <img src="docs/img/hub.png" width="240" alt="Hub screen of the demo">
@@ -31,7 +49,7 @@ Where the three agree or disagree is the finding. The product is aimed at young 
 ## What's in it
 
 - **Measurement design.** Behaviour goes into an append-only `events` table (PostgreSQL triggers reject `UPDATE` and `DELETE`), separate from a `telemetry` table that expires after 90 days and keeps daily roll-ups. A one-line rule decides which table a record belongs in. Values that were not measured are stored as `NULL`, not `0`, and small samples are shown with a flag. → [Measurement design](docs/measurement-design.md)
-- **Analysis and simulation.** SQL concentration analysis on the production tables (8 % of accounts produced 84 % of the matches and events); a Monte Carlo bench of 300 matches × 5 seats (22.5 % of rounds were edited by a mechanic nobody had recorded); a 600-match sweep that set the smoothing pseudo-count for small samples (K0 = 4). Twelve decision records give the numbers and the mistakes along the way, among them a "bug" that was a mis-measured note. → [ADRs](docs/adr/)
+- **Analysis and simulation.** A Monte Carlo bench of 300 matches × 5 seats (22.5 % of rounds were edited by a mechanic nobody had recorded); a 600-match sweep that set the smoothing pseudo-count for small samples (K0 = 4); funnel and week-2 return queries that hide groups under 5 people, run on a synthetic cohort because there are no real users yet. Twelve decision records give the numbers and the mistakes along the way, among them a "bug" that was a mis-measured note. → [ADRs](docs/adr/) · [Metrics](docs/metrics.md)
 - **Security review.** One high and several medium findings. Fixes: an origin-bypass shared-secret gate, AES-256-GCM encrypted backups, pinned-CA TLS, `Origin` / `Sec-Fetch-Site` checks on cross-site writes, an age gate on every sign-up route. Each fix was checked by fault injection (`scripts/tiem.ts` re-injects the bug, runs the tests and restores the files byte for byte): 41 of 41 injected faults made a test fail. Authentication uses argon2id, hashed sessions and a TOTP implementation checked against the RFC 6238 vectors. → [SECURITY.md](SECURITY.md)
 - **Integrity in the database.** Triggers (append-only, zero-sum, deferred ledger matching), `CHECK` constraints and row-level security. The ERD is generated from `pg_catalog`, and the build fails when it drifts. → [ERD](docs/api/erd.md)
 - **Load testing.** A concurrency ladder up to 800 simultaneous requests (p50 / p95 / p99, pooler connection limits, `EMAXCONN` returned as `503` with a jittered `Retry-After`). The ceiling turned out to be function memory, not database connections; the document keeps the earlier, wrong estimate next to the correction. → [Infrastructure limits](docs/gioi-han-ha-tang.md)
@@ -51,12 +69,12 @@ Where the three agree or disagree is the finding. The product is aimed at young 
 
 ---
 
-## Read it by role
+## Going deeper, by role
 
 | If you care about… | Read, in this order |
 |---|---|
-| **Data and measurement** | [Measurement design](docs/measurement-design.md) → [ADR-001](docs/adr/ADR-001-measure-before-you-fix.md) · [002](docs/adr/ADR-002-flag-the-rounds-the-crowd-edited.md) · [003](docs/adr/ADR-003-exclude-the-testers-from-the-analytics.md) · [005](docs/adr/ADR-005-a-rating-ladder-must-be-climbable.md) → [`docs/api/erd.md`](docs/api/erd.md) (generated schema diagrams) → [`analyses/`](analyses/) (SQL + Python on a synthetic cohort) |
-| **Product / requirements** | [`docs/spec/bao-loi-nguoi-choi.md`](docs/spec/bao-loi-nguoi-choi.md) — one complete spec: user outcome, out-of-scope, machine-checkable acceptance criteria, injected-fault plan → its tests (`tests/bao_loi_nguoi_choi.test.ts`, `web/tests/bao_loi_bang.test.tsx`) → [design documents](docs/thiet-ke-da-chot/) |
+| **Data and measurement** | [Case study](docs/case-study.md) → [Metrics dictionary](docs/metrics.md) → [Measurement design](docs/measurement-design.md) → [ADR-001](docs/adr/ADR-001-measure-before-you-fix.md) · [002](docs/adr/ADR-002-flag-the-rounds-the-crowd-edited.md) · [003](docs/adr/ADR-003-exclude-the-testers-from-the-analytics.md) · [005](docs/adr/ADR-005-a-rating-ladder-must-be-climbable.md) → [`docs/api/erd.md`](docs/api/erd.md) (generated schema diagrams) → [`analyses/`](analyses/) (SQL + Python on a synthetic cohort) |
+| **Product / requirements** | [`docs/spec/bao-loi-nguoi-choi.md`](docs/spec/bao-loi-nguoi-choi.md) — one complete spec: user outcome, out-of-scope, machine-checkable acceptance criteria, injected-fault plan → [traceability](docs/traceability.md) from each criterion to its test → [design documents](docs/thiet-ke-da-chot/) |
 | **Engineering** | [Architecture](docs/architecture.md) → [SECURITY.md](SECURITY.md) → [Infrastructure limits](docs/gioi-han-ha-tang.md) (measured; earlier estimates kept alongside the corrections) → [ADR-007](docs/adr/ADR-007-react-to-overload-do-not-guess-a-threshold.md) · [009](docs/adr/ADR-009-invariants-live-in-the-database.md) · [010](docs/adr/ADR-010-store-inputs-not-outcomes.md) · [011](docs/adr/ADR-011-acceptance-means-breaking-the-code-on-purpose.md) |
 
 Most prose in `docs/` outside the files above is Vietnamese (the language of the product's domain and of its test users). [`docs/README.md`](docs/README.md) gives an English line for every document.
@@ -100,13 +118,13 @@ Copy `.env.example` to `.env` for anything beyond local defaults. Secrets are ne
 
 | path | what is there |
 |---|---|
-| `server/` | Hono API. `app.ts` wires middleware and routes; `holdem/` is the deterministic arena engine; `pfm/` the encrypted-vault endpoints; `auth/` hashing, sessions, rate limits |
+| `server/` | Hono API. `app.ts` wires middleware and routes; `holdem/` is the deterministic arena engine; `pfm/` the encrypted-vault endpoints; `auth/` hashing, sessions, rate limits. `sandbox/` is a leftover name, not a sandbox: it holds live code (the seeded random generator and the shop's box-opening logic) |
 | `config/` | Single source of truth for every number the economy and the engine use. Code reads from here; documents point here instead of copying values |
 | `migrations/` | Numbered SQL migrations (80+), one transaction each, shipped in the same commit as the code that needs them |
 | `web/` | React PWA (`src/`), the Cloudflare Worker (`worker/`), and an in-browser demo mode that runs the real server inside a Web Worker (`src/demo/`) |
 | `tests/`, `web/tests/` | Integration tests (embedded PostgreSQL), golden replays of real matches, and structural guards (generated docs, version registry, pool rules) |
 | `scripts/` | Measurement harnesses (Monte Carlo balance gates, load tests), generators (routes, ERD), fault-injection runner, ops helpers |
-| `analyses/` | Re-runnable SQL and Python analyses over a **synthetic** cohort: snapshot size per action type, and small-sample estimation with a pseudo-count. See [analyses/README.md](analyses/README.md) |
+| `analyses/` | Re-runnable SQL and Python analyses over a **synthetic** cohort: snapshot size per action type, small-sample estimation with a pseudo-count, the new-account funnel and week-2 return. See [analyses/README.md](analyses/README.md) |
 | `docs/` | Specs, design decisions, generated references, and ADRs — indexed in [docs/README.md](docs/README.md) |
 
 ## My role and how it was built

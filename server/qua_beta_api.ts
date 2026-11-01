@@ -12,6 +12,7 @@
 import { Hono } from 'hono';
 import type pg from 'pg';
 import { capQuaBeta, QuaBetaError, tienDoQuaBeta } from './qua_beta.js';
+import { TreasuryInsufficientError } from './treasury.js';
 
 import type { Env, Mw as Middleware } from './http/types.js';
 
@@ -54,12 +55,11 @@ export function registerQuaBetaRoutes(
         return c.json({ error: err.code, message: err.message }, err.httpCode as 409);
       }
       /*
-       * Kho bạc cạn ném `Error` thường từ `treasuryAppend` (nó không có lớp lỗi
-       * riêng). Bắt riêng để người chơi nhận một câu tử tế thay vì 500 — đây là
-       * tình huống ĐƯỢC BIẾT TRƯỚC (D68 tính tay: 30 người × 500 T = 15.000 /
-       * 20.135 T kho), không phải sự cố.
+       * Kho bạc cạn là tình huống ĐƯỢC BIẾT TRƯỚC (D68 tính tay: 30 người × 500 T
+       * = 15.000 / 20.135 T kho), không phải sự cố — người chơi nhận một câu tử tế
+       * thay vì 500.
        */
-      if (err instanceof Error && err.message.includes('Kho bạc không đủ')) {
+      if (err instanceof TreasuryInsufficientError) {
         return c.json({
           error: 'kho_bac_can',
           message: 'Quỹ tri ân mùa beta đã dùng hết. Không phát thêm được.',

@@ -95,12 +95,12 @@
 .theDuoi { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
 /* 15/09 — 40px chứ không 14px: Oracle nhô 30px khỏi mép trên của thẻ, đặt 14px là
    linh vật bị cắt đầu ở mép màn (đo trên pane 375×812). */
-.theTren { top: calc(40px + env(safe-area-inset-top, 0px)); }
+.theTren { top: calc(40px + var(--an-tren)); }
 /*
  * D540 (founder 06/10: "Delphi luôn neo phía trên khung") — shop mở ⇒ DẢI GỌN sát mép trên: Oracle đứng trong khung bên trái (không nhô lên),
  * chữ một khối thấp. Đáy là chỗ của tay (lệnh đã xếp · CHỐT), giữa là lưới + phiếu lệnh; thẻ cao 190 px ở trên từng đè đúng tên mã hàng đầu.
  */
-.theShop { top: calc(4px + env(safe-area-inset-top, 0px)); padding: 4px 10px 4px 50px; }
+.theShop { top: calc(4px + var(--an-tren)); padding: 4px 10px 4px 50px; }
 .theShop .linhVat { top: 6px; left: 6px; }
 .theShop .dauThe { padding-left: 0; margin-bottom: 0; }
 .theShop .loiChu { margin: 0 0 2px; line-height: 1.3; }

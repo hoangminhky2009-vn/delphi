@@ -97,6 +97,7 @@ export function nhanDien(ua: string, co: CoNhanDien = {}): MoiTruong {
 export function daCai(): boolean {
   try {
     if (typeof window === 'undefined') return false;
+    if (giaLapBanCai()) return true;
     const mm = typeof window.matchMedia === 'function'
       ? (q: string) => window.matchMedia(q).matches
       : () => false;
@@ -105,6 +106,28 @@ export function daCai(): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * E10 — BẢN CÀI GIẢ LẬP, CHỈ Ở DEV/TEST: mở `?ban_cai=1` thì tab này cư xử như bản đã cài tới hết phiên tab (sessionStorage);
+ * `?ban_cai=0` gỡ. Để soi luồng "bản cài ⇒ Tài chính mở" trên máy dev mà không phải cài thật.
+ *
+ * ⚠ TOÀN BỘ thân nằm TRONG `if (import.meta.env.DEV)`: Vite thay biểu thức ấy bằng `false` lúc build prod ⇒ nhánh bị cắt cả khối, chuỗi
+ * `ban_cai` không có mặt trong gói người chơi. Bài canh: `web/scripts/canh_build.mjs` (chạy sau `vite build` ở CI) đỏ nếu gói prod
+ * còn chứa nó. Đừng kéo khoá/chuỗi ra ngoài khối `if` — đó chính là cách làm rò đường giả lập lên prod.
+ */
+function giaLapBanCai(): boolean {
+  if (import.meta.env.DEV) {
+    try {
+      const q = new URLSearchParams(window.location.search).get('ban_cai');
+      if (q === '1') window.sessionStorage.setItem('delphi:ban_cai_gia', '1');
+      if (q === '0') window.sessionStorage.removeItem('delphi:ban_cai_gia');
+      return window.sessionStorage.getItem('delphi:ban_cai_gia') === '1';
+    } catch {
+      return false;
+    }
+  }
+  return false;
 }
 
 export function moiTruongHienTai(): MoiTruong {

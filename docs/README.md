@@ -7,6 +7,9 @@ English first. Anything not in English says so; every Vietnamese document has a 
 | document | what it is |
 |---|---|
 | [../README.md](../README.md) | project overview and reading paths |
+| [case-study.md](case-study.md) | one analytics decision end to end: problem, data, decision, result (n real users = 0) |
+| [metrics.md](metrics.md) | metrics dictionary: new-account funnel, week-2 return, small-group hiding, thin-sample flag, with their SQL |
+| [traceability.md](traceability.md) | one feature traced from requirements to tests and injected faults, with a data-flow diagram |
 | [architecture.md](architecture.md) | system, request path, trust boundaries, known debt |
 | [measurement-design.md](measurement-design.md) | what is recorded, what a number may claim, what is refused |
 | [adr/](adr/) | twelve decision records (data, reliability, testing, naming) |

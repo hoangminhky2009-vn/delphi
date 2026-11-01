@@ -1,0 +1,8 @@
+step_order,step,n,base,pct_of_base
+1,account created,94,account created,100.0
+2,email verified,84,account created,89.4
+3,profile created,76,account created,80.9
+4,research consent on,63,account created,67.0
+5,tutorial finished,43,research consent on,68.3
+6,entered a match,63,research consent on,100.0
+7,finished 3 matches,0,research consent on,0.0

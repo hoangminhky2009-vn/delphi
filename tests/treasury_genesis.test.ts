@@ -10,7 +10,7 @@ import { startTestDb, type TestDb } from './helpers/testdb.js';
 import { bootstrapGenesis } from '../scripts/bootstrap_genesis.js';
 import { seedDev } from '../scripts/seed_dev.js';
 import { auditSupply } from '../scripts/audit_supply.js';
-import { treasuryAppend } from '../server/treasury.js';
+import { TreasuryInsufficientError, treasuryAppend } from '../server/treasury.js';
 import { ECONOMY } from '../config/economy.js';
 
 let db: TestDb;
@@ -78,9 +78,10 @@ describe('D10 — Kho bạc genesis', () => {
         [admin.rows[0].user_id],
       );
       // rút 1.000.000 T khi Kho bạc chỉ có 20.000 → phải ném lỗi
-      await expect(
-        treasuryAppend(client, -1_000_000n, 'seed_out', m.rows[0].market_id),
-      ).rejects.toThrow(/Kho bạc không đủ/);
+      const chi = treasuryAppend(client, -1_000_000n, 'seed_out', m.rows[0].market_id);
+      await expect(chi).rejects.toThrow(/Kho bạc không đủ/);
+      await expect(chi).rejects.toBeInstanceOf(TreasuryInsufficientError);
+      await expect(chi).rejects.toMatchObject({ code: 'treasury_insufficient', delta: -1_000_000n });
       await client.query('ROLLBACK');
     } finally {
       client.release();

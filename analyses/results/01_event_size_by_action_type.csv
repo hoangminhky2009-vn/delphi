@@ -1,5 +1,5 @@
 action_type,n_events,n_no_snapshot,p50_bytes,p95_bytes,max_bytes
-hd_cam_ket,7735,0,1167,1621,1635
-hd_chot_phien,7735,0,314,372,378
-hd_chon_trait,2940,2940,,,
-hd_match_start,679,679,,,
+hd_cam_ket,9113,0,1156,1622.3999999999996,1635
+hd_chot_phien,9113,0,314,372,379
+hd_chon_trait,3505,3505,,,
+hd_match_start,701,701,,,

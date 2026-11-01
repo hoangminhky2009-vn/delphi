@@ -77,10 +77,14 @@ export const CHU_HUB = {
   muaMoTa: 'Việc tuần trả theo tuần: làm đủ là hết việc tuần này, cày thêm không có thêm.',
   muaTag: 'VIỆC TUẦN · MỐC · ĐIỂM DANH',
   labCho: 'Admin đang chạy thận, hãy quay lại sau.',
-  /** Ô Tài chính KHOÁ trên web (SPEC chan-truoc-beta, `lib/pfm_mo.ts`) — câu đùa của founder, KHÔNG kèm nút nhận tiền nào. */
-  taiChinhKhoa: 'Admin cần donate để mua database 😓',
-  taiChinhKhoaNhan: 'Tài chính đang khoá',
-  taiChinhKhoaMo: 'Sổ chi tiêu sẽ mở lại khi app có bản cài trên điện thoại. Dữ liệu cũ của bạn vẫn nằm yên — muốn xoá thì vào Hồ sơ → Dữ liệu của tôi.',
+  /**
+   * Ô Tài chính trên TAB TRÌNH DUYỆT (`lib/pfm_mo.ts` `pfmMo`) — D603 đợt 2, E1: câu đùa "Admin cần donate…" của chan-truoc-beta hết lý do
+   * tồn tại khi cổng có việc để làm ⇒ "Cài app để mở", nút chính ra CỔNG CÀI. Discord (E5): mở ngoài Discord.
+   */
+  taiChinhKhoa: 'Cài app để mở',
+  taiChinhKhoaDiscord: 'Mở Dự báo ngoài Discord để cài app',
+  taiChinhKhoaNhan: 'Tài chính — cài app để mở',
+  taiChinhKhoaMo: 'Sổ chi tiêu chỉ có trong bản cài app: sổ nằm trên máy bạn, và bản cài không bị trình duyệt tự dọn. Dữ liệu cũ vẫn nằm yên — muốn xoá thì vào Hồ sơ → Dữ liệu của tôi.',
   /** Link nhỏ dưới ô Tài chính khoá ⇒ lớp trượt `RuotNhuCauPfm` (chỗ của SPEC khao-sat-nhu-cau-pfm). */
   nhuCauPfm: 'Bạn có nhu cầu quản lý tài chính cá nhân?',
   /** Bản xem trước PFM xoay vòng trên ô Tài chính khoá (founder 11/10) — tả tính năng ĐANG CÓ trong mã, không hứa ngày mở. */

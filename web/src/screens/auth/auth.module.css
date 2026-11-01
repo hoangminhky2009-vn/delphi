@@ -253,7 +253,7 @@
 .board {
   width: 100%;
   max-width: 360px;
-  max-height: calc(100dvh - 32px);
+  max-height: calc(100dvh - 32px - var(--an-tren));
   display: flex;
   flex-direction: column;
   background: var(--bg-deep);

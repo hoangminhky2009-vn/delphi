@@ -1,0 +1,34 @@
+/* D609 — hộp LÕI CHO MÀN (xem ChonLoiMan.tsx). Nền phủ dưới màn minigame (z 100), trên shop (85–95). Cột 390 px như app. */
+.nen {
+  position: fixed; inset: 0; z-index: 99; display: flex; align-items: flex-end; justify-content: center;
+  background: rgba(2, 6, 12, 0.78); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+}
+.khung {
+  width: min(390px, 100%); display: flex; flex-direction: column; gap: 10px; padding: 12px;
+  background: var(--bg-page); border: 2px solid var(--gold-amber, #fbbf24); font-family: var(--font-mono);
+  box-shadow: inset 1px 1px 0 rgba(248, 250, 252, 0.22), inset -1px -1px 0 rgba(10, 6, 24, 0.55);
+}
+.dau { display: flex; align-items: baseline; justify-content: space-between; }
+.tieuDe { font-size: 20px; font-weight: 800; letter-spacing: 0.1em; color: var(--gold-amber, #fbbf24); }
+.giay { font-size: 17px; font-weight: 700; color: var(--text-bright); font-variant-numeric: tabular-nums; }
+.phu { margin: 0; font-size: 14px; color: var(--text-muted); }
+.luoi { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 8px; }
+.la {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; min-height: 44px; padding: 14px 6px 8px;
+  font: inherit; color: var(--text-bright); background: var(--surface-panel); border: 2px solid var(--border-idle); cursor: pointer;
+}
+.la:disabled { opacity: 0.5; cursor: default; }
+.la:active:not(:disabled) { transform: translateY(2px); }
+.macDinh { border-color: var(--accent); }
+.nhan {
+  position: absolute; top: 0; left: 0; padding: 0 5px; font-size: 11px; letter-spacing: 0.08em; background: var(--accent); color: #0a0618;
+}
+.icon { width: 56px; height: 56px; display: block; }
+.icon svg { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+.ten { font-size: 16px; font-weight: 700; letter-spacing: 0.04em; }
+.mt { font-size: 12px; line-height: 1.3; color: var(--text-muted); text-align: center; }
+.dong {
+  min-height: 44px; font: inherit; font-size: 14px; letter-spacing: 0.08em; color: var(--text-muted); background: transparent;
+  border: 1px solid var(--border-idle); cursor: pointer;
+}
+.dong:disabled { opacity: 0.5; cursor: default; }

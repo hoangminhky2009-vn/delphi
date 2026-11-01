@@ -6,6 +6,7 @@
  * In MỘT dòng JSON `{"san_sang":true,"cookie":"…","port":…}` lên stdout khi sẵn sàng. Thêm hai cửa điều khiển (không qua app):
  *   GET /__luong/dem?match=<id>  — đếm thứ cần đối chiếu: dòng vòng (`action_log`) · `hd_cam_ket` theo vòng · báo lỗi · chuông Sentry.
  *   GET /__luong/hang?diem=&so_tran= — đặt điểm hạng mùa này (soi huy hiệu đầu sảnh).
+ *   GET /__luong/nguoi-moi       — dựng thêm MỘT người chơi, trả cookie của họ (bài "hai tài khoản một máy" — `cai_app.mjs`).
  *   GET /__luong/tat             — dừng (xoá DB tạm).
  * Chạy: `npx tsx tests/luong/trinh-duyet/_may_chu_that.mts` (biến LUONG_API_PORT, mặc định 8798). Thường do `chan_truoc_beta.mjs` gọi.
  */
@@ -59,6 +60,10 @@ const may = serve({
          ON CONFLICT (user_id, season_id) DO UPDATE SET diem = $3, diem_dinh = $3, so_tran = $4`,
         [u.userId, currentSeasonId(), diem, soTran]);
       return Response.json({ ok: true });
+    }
+    if (url.pathname === '/__luong/nguoi-moi') {
+      const v = await createTestUser(db.pool, { tienTo: 'luongb' });
+      return Response.json({ cookie: v.cookie, handle: v.handle });
     }
     if (url.pathname === '/__luong/tat') {
       setTimeout(() => { may.close(); void db.stop().then(() => process.exit(0)); }, 50);

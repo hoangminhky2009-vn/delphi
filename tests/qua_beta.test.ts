@@ -21,6 +21,7 @@ import { MUA_0_0, VIEC_LOI } from '../config/progression.js';
 import { auditSupply } from '../server/audit.js';
 import { createApp } from '../server/app.js';
 import { CapturingMailer } from '../server/email.js';
+import { treasuryAppend } from '../server/treasury.js';
 import { createTestUser, ensureGenesis } from './helpers/fixtures.js';
 import { startTestDb, type TestDb } from './helpers/testdb.js';
 
@@ -315,5 +316,27 @@ describe('Quà tri ân mùa beta', () => {
     const r = await goi('/api/v1/me/qua-beta/nhan', u.cookie, {});
     expect(r.status).toBe(409);
     expect((await r.json() as { error: string }).error).toBe('het_suat');
+  });
+
+  it('Kho bạc cạn giữa mùa → 409 kho_bac_can, không phải 500, ví không đổi', async () => {
+    // Bài CUỐI file: rút kho làm lệch cung tiền, không bài nào sau đo audit.
+    await donSoNhan();
+    const u = await createTestUser(pool);
+    await choDuDieuKien(u.userId);
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      await treasuryAppend(client, -(await khoBac() - BigInt(QUA_BETA.T) + 1n), 'subsidy_out');
+      await client.query('COMMIT');
+    } finally {
+      client.release();
+    }
+    const viTruoc = await viCua(u.userId);
+
+    const r = await goi('/api/v1/me/qua-beta/nhan', u.cookie, {});
+    expect(r.status).toBe(409);
+    expect((await r.json() as { error: string }).error).toBe('kho_bac_can');
+    expect(await viCua(u.userId)).toBe(viTruoc);
+    expect(await khoBac()).toBe(BigInt(QUA_BETA.T) - 1n);
   });
 });

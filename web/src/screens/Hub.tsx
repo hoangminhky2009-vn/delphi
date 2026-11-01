@@ -33,7 +33,7 @@ import {
   DESC_ARENA, DESC_FINANCE, DESC_PREDICT,
   NAME_ARENA_UPPER, NAME_FINANCE_UPPER, NAME_LAB_UPPER, NAME_PREDICT_UPPER,
   ROUTE_ARENA, ROUTE_HANH_TRINH, ROUTE_PREDICT, ROUTE_TAI_CHINH, ROUTE_TOKEN,
-  TAGLINE_ARENA, TAGLINE_FINANCE, TAGLINE_LAB, TAGLINE_PREDICT, duongBachKhoa,
+  TAGLINE_ARENA, TAGLINE_FINANCE, TAGLINE_LAB, TAGLINE_PREDICT, duongBachKhoa, duongCaiApp,
 } from '@/lib/vocab';
 import { ChunkBoundary } from './hub/ChunkBoundary';
 import { Nac } from './hub/Nac';
@@ -43,7 +43,10 @@ import bn from './hub/HubBanner.module.css';
 import o from './hub/HubO.module.css';
 import t from './hub/HubTam.module.css';
 import s from './Hub.module.css';
-import { PFM_WEB_MO } from '@/lib/pfm_mo';
+import { pfmMo } from '@/lib/pfm_mo';
+import { moiTruongHienTai } from '@/lib/cai_app';
+import { CHU_CAI_APP } from '@/lib/cai_app_chu';
+import { TheMoiCaiHub } from '@/components/MoiCai';
 import { RuotNhuCauPfm } from './hub/NhuCauPfm';
 import { HuyHieuHang } from '@/components/ui/HuyHieuHang';
 import { nhanHuyHieu, type BacId } from '@config/rank';
@@ -216,6 +219,8 @@ export function Hub(): React.ReactElement {
   const khach = user?.la_khach === true;
   const coTaiKhoan = user !== null && !khach;
   const meXong = !me.isPending && !me.isError;
+  // D603 đợt 2 — khu Tài chính chỉ mở trong BẢN CÀI (`lib/pfm_mo.ts`); hỏi lúc dựng, không lúc nạp module.
+  const moPfm = pfmMo();
 
   const [tam, datTam] = useState<Tam>({ k: 'arena' });
   const [mo, datMo] = useState(false);
@@ -255,12 +260,14 @@ export function Hub(): React.ReactElement {
           <RuotNhuCauPfm />
         </>
       );
-    } else if (tam.k === 'finance' && !PFM_WEB_MO) {
-      // SPEC chan-truoc-beta — khu Tài chính KHOÁ trên web: nói thẳng vì sao, không nút vào khu, không nút nhận tiền.
+    } else if (tam.k === 'finance' && !moPfm) {
+      // D603 đợt 2 (E1) — tab trình duyệt: khu Tài chính chỉ có trong BẢN CÀI ⇒ lớp nói "Cài app để mở", nút chính ra CỔNG CÀI (cổng có
+      // hướng dẫn đủ cho từng nền). Discord (E5): mở ngoài Discord. Không nút vào khu, không nút nhận tiền.
+      const trongDiscord = moiTruongHienTai().cachCai === 'mo_ngoai_discord';
       ruot = (
         <>
           <TamDau icon={<PixelIcon name="vault" size={32} />} ten={NAME_FINANCE_UPPER} tag={CHU_HUB.taiChinhKhoaNhan.toUpperCase()} />
-          <p className={t.tamMo}>{CHU_HUB.taiChinhKhoa}</p>
+          <p className={t.tamMo}>{trongDiscord ? CHU_HUB.taiChinhKhoaDiscord : CHU_HUB.taiChinhKhoa}</p>
           <p className={t.ghiChu}>{CHU_HUB.taiChinhKhoaMo}</p>
           {/* Link nhu cầu PFM (SPEC khao-sat-nhu-cau-pfm) ở TRONG lớp, không chen dưới ô — ô giữ đúng bố cục demo (founder 11/10). */}
           <button type="button" className={s.linkNho} data-nut="nhu-cau-pfm" onClick={() => datTam({ k: 'nhu_cau' })}>
@@ -268,6 +275,7 @@ export function Hub(): React.ReactElement {
           </button>
         </>
       );
+      chan = <NutChinh dau="cai-app" onChon={() => navigate(duongCaiApp('cong_pfm'))}>{CHU_CAI_APP.caiNgay}</NutChinh>;
     } else if (tam.k === 'finance') {
       if (coTaiKhoan) {
         ruot = (
@@ -376,9 +384,9 @@ export function Hub(): React.ReactElement {
           </OBento>
 
           <div className={s.cotPhai}>
-            {!PFM_WEB_MO ? (
+            {!moPfm ? (
               /*
-               * SPEC chan-truoc-beta — khu Tài chính KHOÁ (`lib/pfm_mo.ts`). Founder 11/10: GIỮ icon cũ (két 48 px) và khoá ĐÚNG CƠ CHẾ ô
+               * Khu Tài chính KHOÁ trên tab trình duyệt (`lib/pfm_mo.ts` — chan-truoc-beta, nay mở trong bản cài: D603 đợt 2). Founder 11/10: GIỮ icon cũ (két 48 px) và khoá ĐÚNG CƠ CHẾ ô
                * Lab — mờ + ổ khoá góc, chạm = lắc rồi bung lớp nói lý do + link nhu cầu PFM. Không nạp ruột sổ ⇒ không mở kho, không driver.
                */
               <OBento mo khoa nhan={CHU_HUB.taiChinhKhoaNhan} dau="tai-chinh" onChon={() => moTam({ k: 'finance' })}>
@@ -391,6 +399,11 @@ export function Hub(): React.ReactElement {
                   </Suspense>
                 </ChunkBoundary>
                 <span className={s.khoaGoc}><PixelIcon name="lock" size={16} /></span>
+                {/* Founder 12/10 (B, lật luật mặt-ô-không-chữ 11/10 cho riêng câu này): MẶT ô nói luôn cách mở — "Cài app để mở"; Discord (E5)
+                    thì "mở ngoài Discord". Chạm vẫn bung lớp có nút CÀI APP. */}
+                <span className={s.khoaChu} data-o="tai-chinh-cai-de-mo">
+                  {moiTruongHienTai().cachCai === 'mo_ngoai_discord' ? CHU_HUB.taiChinhKhoaDiscord : CHU_HUB.taiChinhKhoa}
+                </span>
               </OBento>
             ) : (
             <OBento nhan="Chi tiết Tài chính" dau="tai-chinh" onChon={() => moTam({ k: 'finance' })}>
@@ -446,6 +459,8 @@ export function Hub(): React.ReactElement {
           `/auth/me`; vắng ⇒ coi như KHÔNG phải khách, không mọc lời mời thừa cho người đã có tài khoản.
           Nút nằm TRONG khung (không đẩy khung dài ra); dòng "chỉ lưu trên máy này" nay ở ĐẦU SẢNH.
         */}
+        {/* D603 đợt 2 (E7) — thẻ nhắc cài app: chưa cài thì hiện, ✕ ẩn 7 ngày; trong bản cài / Discord / trình duyệt nhúng (đã có băng) thì không. */}
+        <TheMoiCaiHub />
         {meXong && (user === null || khach) && (
           <OBento className={s.dangKy} dau="dang-ky" onChon={() => navigate('/onboard')}>
             {khach ? CHU_HUB.dangKyGiu : CHU_HUB.dangNhap}

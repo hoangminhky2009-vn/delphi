@@ -109,6 +109,12 @@ export const LOAI = [
    */
   'pfm_kho_ben',
   /**
+   * D603 đợt 2 — PHỄU CÀI APP: lời mời cài hiện ở đâu, người ta bấm cài không, cài xong không, hay bỏ / mở lại bằng trình duyệt khác.
+   * ⚠ Câu hỏi nó trả lời: *"cổng bắt buộc cài trước khi vào sổ có đẩy người ta CÀI không, hay đẩy họ ĐI"* — SPEC
+   *   `cai-app-pfm-trong-ban-cai` mục 2: cổng là giả thuyết, số này xác nhận hoặc lật nó. Chỗ phát: `web/src/lib/moi_cai.ts`.
+   */
+  'cai_app',
+  /**
    * D429 — KHỐI ĐỊNH HƯỚNG đầu GƯƠNG (bản tin phân tích + khung app gợi ý): lượt HIỂN THỊ. Cùng lý do `oracle_hien`
    * (P10 🔒 — "gương/boost/lời-mời hiển thị → telemetry"): gợi ý khung là BOOST bậc 2, không nhãn thì câu "người ta
    * có đổi khung vì gợi ý không" vĩnh viễn không trả lời được. Không tiền, không chữ — chỉ mã khung + đếm dòng.
@@ -206,6 +212,12 @@ export const CHI_TIET_CHO_PHEP: Readonly<
   pfm_ghi: { cach: 'ma' },
   // `ket_qua` ∈ `da_ben` · `duoc` · `khong` · `khong_ho_tro` · `loi` (`giu_ben.ts`). Không mang gì khác.
   pfm_kho_ben: { ket_qua: 'ma' },
+  /*
+   * D603 đợt 2 — `buoc` ∈ `hien` (lời mời hiện) · `bam_cai` (bấm cài / mở hộp cài) · `da_cai` (trình duyệt báo cài xong) · `bo` (đóng
+   * thẻ/băng · từ chối hộp cài) · `mo_trinh_duyet` (chép link để mở bằng trình duyệt khác); `noi` ∈ `cong_pfm` · `dang_nhap` · `hub` ·
+   * `bang_nhung`; `nen` ∈ `android` · `ios` · `desktop` · `nhung`. Toàn MÃ — không UA thô (UA là dấu vân tay máy, C7).
+   */
+  cai_app: { buoc: 'ma', noi: 'ma', nen: 'ma' },
   /*
    * D429 — `khung` = mã khung đang xem (`hu` · `50_30_20` · `kakeibo`) hoặc `khong` (chưa đủ dấu hiệu để xếp);
    * `dau_hieu` = số dấu hiệu của khung ấy · `so_bo` = 1 khi gợi ý còn sơ bộ · `chu_y`/`du_phong` = số dòng bản tin.
@@ -435,6 +447,8 @@ export const MAN_HOP_LE = [
   '/tai-chinh/hu',
   '/tai-chinh/guong',
   '/cai-dat',
+  // D603 đợt 2 — màn CỔNG CÀI APP: công khai (nút ở màn đăng nhập dẫn tới), là đích của mọi `/tai-chinh/*` trên tab trình duyệt.
+  '/cai-app',
   // Auth + đích link email
   '/onboard',
   '/onboard/dang-ky',

@@ -322,6 +322,12 @@ export const ROUTE_TAI_CHINH_CAM_KET = '/tai-chinh/cam-ket';
 export const ROUTE_TAI_CHINH_NGAY_DAU = '/tai-chinh/ngay-dau';
 
 export const ROUTE_CAI_DAT = '/cai-dat';
+/**
+ * D603 đợt 2 — CỔNG CÀI APP (`screens/CongCaiApp.tsx`): công khai (nút ở màn đăng nhập dẫn tới), là đích của mọi `/tai-chinh/*` khi
+ * đang ở tab trình duyệt. `?noi=` mang NƠI lời mời được bấm (telemetry `cai_app`) — xem `duongCaiApp`.
+ */
+export const ROUTE_CAI_APP = '/cai-app';
+export const duongCaiApp = (noi: 'cong_pfm' | 'dang_nhap' | 'hub' | 'bang_nhung'): string => `${ROUTE_CAI_APP}?noi=${noi}`;
 export const ROUTE_HUB = '/';
 
 /**

@@ -17,7 +17,7 @@ import type { LoTrinhDTO } from '../src/api/nhiem_vu';
  * SPEC chan-truoc-beta — khu Tài chính đang KHOÁ trên web (`lib/pfm_mo.ts`). Tệp này đo khu ấy ở trạng thái MỞ — mã của trạng thái
  * mở vẫn còn nguyên cho ngày mở lại (điều kiện ở `pfm_mo.ts`), nên GHIM cờ bật thay vì bỏ bài. Trạng thái KHOÁ: `pfm_khoa_web.test.tsx`.
  */
-vi.mock('@/lib/pfm_mo', () => ({ PFM_WEB_MO: true }));
+vi.mock('@/lib/pfm_mo', () => ({ PFM_WEB_MO: true, pfmMo: () => true }));
 
 const HS_CHUA_GOI = {
   tinh_cach: 'dang_dinh_hinh', khau_vi: null, net: null, bac_doc: 'chua',

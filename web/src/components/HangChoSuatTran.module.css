@@ -6,7 +6,7 @@
  */
 .dai {
   position: fixed;
-  top: calc(env(safe-area-inset-top) + 30px);
+  top: calc(var(--an-tren) + 30px);
   right: 0;
   left: 0;
   z-index: 70;
@@ -43,7 +43,7 @@
 /* VIÊN THU NHỎ — chỉ còn thứ người chờ cần: còn chờ hay hết suất · số thứ tự · giờ. Chạm là mở lại. */
 .vien {
   position: fixed;
-  top: calc(env(safe-area-inset-top) + 30px);
+  top: calc(var(--an-tren) + 30px);
   right: 0;
   left: 0;
   z-index: 70;

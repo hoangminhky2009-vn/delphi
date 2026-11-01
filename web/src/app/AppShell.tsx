@@ -3,13 +3,13 @@
  * nội dung màn (Outlet), menu chính BottomNav (Sảnh · Ví · Hồ sơ).
  */
 import { useEffect, useState } from 'react';
-import { Link, Navigate, Outlet, useLocation, useMatches } from 'react-router-dom';
+import { Link, Navigate, Outlet, matchPath, useLocation, useMatches } from 'react-router-dom';
 import { useMe } from '@/api/queries';
 import { khoiDongDo, useDoMan } from '@/lib/telemetry';
 import { khoiDongCamBienMang } from '@/api/mang';
 import { trongDiscord } from '@/lib/discord';
 import { formatT } from '@/lib/money';
-import { ROUTE_HUB, ROUTE_TOKEN } from '@/lib/vocab';
+import { ROUTE_ARENA_MATCH_MAU, ROUTE_HUB, ROUTE_TOKEN } from '@/lib/vocab';
 import { BottomNav } from '@/components/BottomNav';
 import { CheDoTester } from '@/components/CheDoTester';
 import { OracleChat } from '@/components/OracleChat';
@@ -21,6 +21,7 @@ import { TamHoiTuoi } from '@/components/TamHoiTuoi';
 import { TheDieuKhoanDoi } from '@/components/TheDieuKhoanDoi';
 import { HoiLaiNghienCuu } from '@/components/HoiLaiNghienCuu';
 import { Mascot } from '@/components/Mascot';
+import { BangNhung } from '@/components/MoiCai';
 import { PixelIcon } from '@/components/ui/PixelIcon';
 import type { RouteHandle } from './routes';
 import s from './AppShell.module.css';
@@ -146,6 +147,11 @@ export function AppShell() {
         Ở đây (không ở màn sảnh) vì người chờ được phép rời màn; tới lượt mà màn gốc đã đóng thì chính dải này đưa vào trận.
       */}
       <HangChoSuatTran />
+      {/*
+        BĂNG TRÌNH DUYỆT NHÚNG (D603 đợt 2, E6) — Zalo/FB/Messenger/Instagram/TikTok: một dòng trên cùng MỌI màn, mọi màn chừa chỗ qua
+        `--an-tren`. Bàn đấu luôn là chấm nhỏ ở góc (HUD trận cần từng px dọc). Tự trả `null` ngoài trình duyệt nhúng / trong bản cài.
+      */}
+      <BangNhung thuGon={matchPath(ROUTE_ARENA_MATCH_MAU, pathname) !== null} />
       <div
         className={[s.frame, manRong && s.frameRong, manNgang && s.frameNgang]
           .filter(Boolean).join(' ')}

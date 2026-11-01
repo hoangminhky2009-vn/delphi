@@ -7,7 +7,8 @@
  */
 .dai {
   position: fixed;
-  top: 0;
+  /* Dưới tai thỏ (bản cài iOS) + dưới băng trình duyệt nhúng — `--an-tren` (tokens.css). */
+  top: var(--an-tren);
   right: 0;
   left: 0;
   z-index: 90;

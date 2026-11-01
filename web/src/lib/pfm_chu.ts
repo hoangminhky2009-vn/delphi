@@ -682,7 +682,8 @@ export interface VanBanConsent {
  *
  * ⚠⚠ CHƯA CÓ AI ĐỒNG Ý BẢN NÀY. `v1` vẫn còn "trắng" cho tới cú consent thật đầu tiên
  * trên prod, nên sửa chữ lúc này không cần lên `v2`. Từ giây có người bấm đồng ý thì hết.
- * ⏳ CHỜ FOUNDER DUYỆT: đây là văn bản pháp lý (PDPD/A10), agent soạn nháp chứ không chốt.
+ * ✔ FOUNDER ĐÃ DUYỆT bốn văn bản dưới đây nguyên văn ngày 12/10/2026 (D603; `pfm_ket` v1 · `pfm_dac_trung` v1 · `pfm_thuong` v1 ·
+ *   `pfm_noi_game` v2). Đây là văn bản pháp lý (PDPD/A10): sửa bất kỳ chữ nào từ đây ⇒ lên phiên bản + founder duyệt lại.
  *
  * ⚠ CÂU KHÓ NHẤT LÀ CÂU VỀ KÉT, và nó phải nói đủ hai vế: bản sao lưu **có** rời máy,
  * nhưng nó rời máy đã **khoá bằng chìa chỉ máy bạn giữ**. Nói gọn thành "sổ không rời

@@ -1,0 +1,127 @@
+/*
+ * LỜI MỜI CÀI APP — nút màn đăng nhập · thẻ nhắc Hub · băng trình duyệt nhúng (`MoiCai.tsx`). §XI pixel: viền 1 px, không bo, không blur.
+ * Không hoạt ảnh vô hạn: chấm thu gọn đứng yên (nó là lời nhắc, không phải báo động). Chữ ≥ 12 px, màu chỉ từ token.
+ */
+
+/* ── màn đăng nhập ── */
+.dangNhap { display: flex; flex-direction: column; gap: 4px; }
+.dangNhapMo {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ── thẻ nhắc ở Hub: một hàng mỏng TRONG khung không-cuộn (lưới tự co lại — không đẩy khung dài ra) ── */
+.the {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border-accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  box-shadow: var(--o-vien);
+}
+.theBam {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: none;
+  background: none;
+  color: var(--accent-bright);
+  font: inherit;
+  font-size: var(--tk-label);
+  letter-spacing: 0.06em;
+  text-align: left;
+  cursor: pointer;
+}
+.theBam:active { transform: translateY(2px); }
+.theDau { font-size: var(--tk-body); }
+.theChu { flex: 1 1 auto; min-width: 0; }
+
+.dong {
+  flex: 0 0 auto;
+  width: 40px;
+  min-height: 32px;
+  border: none;
+  border-left: 1px solid var(--border-idle);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ── băng trình duyệt nhúng: một dòng trên cùng, NGAY DƯỚI tai thỏ; mọi màn chừa đúng `--cao-bang` (tokens.css `--an-tren`) ── */
+.bang {
+  position: fixed;
+  top: var(--tai-tho);
+  left: 0;
+  right: 0;
+  z-index: 95;
+  height: 32px;
+  max-width: var(--shell-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: stretch;
+  background: var(--surface-panel);
+  border-bottom: 1px solid var(--border-accent);
+  font-family: var(--font-mono);
+}
+.bangChu {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 8px;
+  border: none;
+  background: none;
+  color: var(--text-body);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+.bangChep {
+  flex: 0 0 auto;
+  padding: 0 8px;
+  border: none;
+  border-left: 1px solid var(--border-idle);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent-bright);
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.bang .dong { width: 32px; min-height: 0; }
+
+/* Chấm thu gọn (E6): góc TRÁI trên — góc phải trên của Hub/sảnh là ô Oracle. Vùng chạm 28 px, hình thấy 10 px. */
+.cham {
+  position: fixed;
+  top: var(--tai-tho);
+  left: 0;
+  z-index: 95;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.cham::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 10px;
+  height: 10px;
+  background: var(--accent-bright);
+  box-shadow: 0 0 0 1px var(--bg-page);
+}
